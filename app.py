@@ -106,17 +106,26 @@ def set_login_session(username):
 
 def logout():
     st.session_state.current_username = None
-    cookie_manager.delete("ai_nutri_session")
+    try:
+        # Intentamos borrar la cookie
+        cookie_manager.delete("ai_nutri_session")
+    except Exception:
+        # Si la cookie no existe o da error, simplemente lo ignoramos y seguimos
+        pass 
     st.session_state.step = "input"
 
 def get_user_data(username):
+    if not username:
+        return None
+    # Aquí nos aseguramos de que busque en app_users_2
     res = supabase.table("app_users_2").select("*").eq("username", username).execute()
     if res.data:
         return res.data[0]
     return None
 
 def update_user_data(username, data_dict):
-    supabase.table("app_users_2").update(data_dict).eq("username", username).execute()
+    if username:
+        supabase.table("app_users_2").update(data_dict).eq("username", username).execute()execute()
 
 # Selector de Idioma Global
 with st.sidebar:
