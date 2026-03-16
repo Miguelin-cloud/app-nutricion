@@ -259,7 +259,7 @@ TRANSLATIONS = {
         "ingredients": "🛒 Ingredientes", "save_fav": "⭐ Guardar en Favoritos", "saved": "¡Guardado!", "instructions": "👨‍🍳 Preparación", "adjust_title": "⚖️ Ajustar Macros",
         "adjust_sub": "¿Necesitas otras cantidades?", "adjust_ph": "Ej: 'Añade 20g de proteína'", "recalc_btn": "Recalcular", "recalculating": "Ajustando receta...",
         "profile": "👤 Mi Perfil", "update_prof": "Actualizar Perfil", "prof_updated": "¡Perfil actualizado!", "favs": "⭐ Favoritos", "no_favs": "Aún no hay favoritos.",
-        "logout": "Cerrar Sesión", "news_title": "📰 Inspiración", "feed_title": "Recetas de Moda 🔥", "cook_this": "Cocinar esto 🍳", "download_btn": "⬇️ Descargar",
+        "logout": "Cerrar Sesión", "news_title": "📰 Tendencias Nutricionales", "feed_title": "Últimas Noticias 🔥", "cook_this": "Cocinar esto 🍳", "download_btn": "⬇️ Descargar",
         "keep_logged_in": "Mantener sesión iniciada", "chef_recom": "🌟 RECOMENDACIÓN ESTRELLA DEL CHEF 🌟",
         "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Tu chef y nutricionista personal impulsado por IA.", "tab_login": "🔑 Iniciar Sesión", "tab_register": "📝 Registrarse", "tab_recover": "🆘 Recuperar PIN",
         "username_label_login": "Usuario", "pin_label_login": "PIN", "login_btn": "Entrar a la Cocina 🚀", "login_error": "Usuario o PIN incorrectos.",
@@ -271,15 +271,17 @@ TRANSLATIONS = {
         "search_user_btn": "Buscar", "user_found": "Usuario encontrado.", "user_not_found": "Usuario no encontrado.", "recover_question_prefix": "Pregunta:", "your_answer_label": "Respuesta", "new_pin_label": "Nuevo PIN",
         "change_pin_btn": "Cambiar PIN", "pin_changed_success": "¡PIN cambiado!", "wrong_answer": "Incorrecta.", "current_weight_label": "Peso Actual (kg)",
         "profile_goals_label": "Objetivos", "profile_restrictions_label": "Restricciones", "macro_protein": "Proteínas", "macro_fat": "Grasas", "macro_carbs": "Carbohidratos",
-        
-        # NUEVAS CLAVES DASHBOARD
-        "dash_mod1": "🍳\nCocina Inteligente", "dash_mod2": "🛒\nLista & Búsqueda", "dash_mod3": "📅\nPlanificador", "dash_mod4": "📊\nResumen Diario", "back_home": "🏠 Volver al Menú",
+        "dash_mod1": "🍳\nCocina Inteligente", "dash_mod2": "🛒\nLista de Compras", "dash_mod3": "📅\nPlanificador", "dash_mod4": "📊\nResumen Diario", "back_home": "🏠 Volver al Menú",
         "add_to_log": "📝 Añadir al registro de hoy", "log_success": "¡Añadido al registro de hoy!",
-        "shop_title": "Lista de la Compra & Búsqueda Web", "search_web_label": "¿Qué te gustaría preparar?", "search_web_btn": "🔍 Buscar y Extraer Ingredientes",
-        "shop_list_title": "Tu Lista Actual", "add_item_btn": "Añadir Item", "clear_list": "🗑️ Vaciar Lista",
+        "shop_title": "Lista de la Compra Dinámica", "search_web_label": "¿Qué te gustaría preparar?", "search_web_btn": "🔍 Buscar y Extraer Ingredientes",
+        "shop_list_title": "Tu Inventario de Compra", "add_item_btn": "Añadir Item", "clear_list": "🗑️ Vaciar Lista",
         "plan_title": "Planificador Semanal", "save_plan": "💾 Guardar Planificación", "plan_saved": "¡Planificación guardada!",
         "nutri_title": "Resumen Nutricional Diario", "manual_log_label": "¿Qué has comido fuera de la app? (Ej: 1 Manzana)", "manual_log_btn": "➕ Añadir",
-        "eval_btn": "🩺 Evaluar mi día", "total_today": "Total de hoy", "analyzing_nutri": "Evaluando datos médicos..."
+        "eval_btn": "🩺 Evaluar mi día", "total_today": "Total de hoy", "analyzing_nutri": "Evaluando datos médicos...",
+        # Nuevas categorías y textos Módulo 2
+        "cat_produce": "🥦 Frutas y Verduras", "cat_dairy": "🥛 Lácteos y Huevos", "cat_white_meat": "🍗 Carnes Blancas", 
+        "cat_red_meat": "🥩 Carnes Rojas", "cat_seafood": "🐟 Pescados y Mariscos", "cat_pantry": "🥫 Despensa y Granos", "cat_other": "🛒 Otros",
+        "add_to_list": "Añadir a la lista", "delete_item": "Eliminar", "type_food": "Escribe un alimento suelto..."
     },
     "🇬🇧 English": {
         "lang_code": "English", "title": "Hi {name}! What are we cooking today? 🍲", "subtitle": "Your smart nutrition ecosystem.",
@@ -289,7 +291,7 @@ TRANSLATIONS = {
         "ingredients": "🛒 Ingredients", "save_fav": "⭐ Save Fav", "saved": "Saved!", "instructions": "👨‍🍳 Instructions", "adjust_title": "⚖️ Adjust Macros",
         "adjust_sub": "Need different targets?", "adjust_ph": "e.g. 'Add 20g protein'", "recalc_btn": "Recalculate", "recalculating": "Adjusting...",
         "profile": "👤 Profile", "update_prof": "Update", "prof_updated": "Updated!", "favs": "⭐ Favs", "no_favs": "No favs yet.",
-        "logout": "Logout", "news_title": "📰 News", "feed_title": "Trending 🔥", "cook_this": "Cook this 🍳", "download_btn": "⬇️ Download",
+        "logout": "Logout", "news_title": "📰 Nutrition Trends", "feed_title": "Latest News 🔥", "cook_this": "Cook this 🍳", "download_btn": "⬇️ Download",
         "keep_logged_in": "Keep logged in", "chef_recom": "🌟 CHEF'S RECOMMENDATION 🌟", "auth_app_name": "NutriAI 🌿", "auth_subtitle": "AI Personal Chef", 
         "tab_login": "🔑 Log In", "tab_register": "📝 Register", "tab_recover": "🆘 Recover", "username_label_login": "Username", "pin_label_login": "PIN", 
         "login_btn": "Enter 🚀", "login_error": "Error.", "reg_section1": "1. Access", "create_user_label": "Username", "create_pin_label": "PIN", 
@@ -300,14 +302,16 @@ TRANSLATIONS = {
         "search_user_btn": "Search", "user_found": "Found.", "user_not_found": "Not found.", "recover_question_prefix": "Q:", "your_answer_label": "Answer", 
         "new_pin_label": "New PIN", "change_pin_btn": "Change", "pin_changed_success": "Changed!", "wrong_answer": "Wrong.", "current_weight_label": "Weight",
         "profile_goals_label": "Goals", "profile_restrictions_label": "Restrictions", "macro_protein": "Protein", "macro_fat": "Fat", "macro_carbs": "Carbs",
-        
-        "dash_mod1": "🍳\nSmart Cooking", "dash_mod2": "🛒\nShopping & Web", "dash_mod3": "📅\nWeekly Planner", "dash_mod4": "📊\nDaily Summary", "back_home": "🏠 Back to Home",
+        "dash_mod1": "🍳\nSmart Cooking", "dash_mod2": "🛒\nShopping List", "dash_mod3": "📅\nWeekly Planner", "dash_mod4": "📊\nDaily Summary", "back_home": "🏠 Back to Home",
         "add_to_log": "📝 Add to today's log", "log_success": "Added to log!",
-        "shop_title": "Shopping List & Web Search", "search_web_label": "What do you want to cook?", "search_web_btn": "🔍 Search & Extract",
-        "shop_list_title": "Current List", "add_item_btn": "Add Item", "clear_list": "🗑️ Clear List",
+        "shop_title": "Dynamic Shopping List", "search_web_label": "What do you want to cook?", "search_web_btn": "🔍 Search & Extract",
+        "shop_list_title": "Your Groceries", "add_item_btn": "Add Item", "clear_list": "🗑️ Clear List",
         "plan_title": "Weekly Planner", "save_plan": "💾 Save Plan", "plan_saved": "Plan saved!",
         "nutri_title": "Daily Nutritional Summary", "manual_log_label": "Ate outside the app? (e.g., 1 Apple)", "manual_log_btn": "➕ Add",
-        "eval_btn": "🩺 Evaluate my day", "total_today": "Total today", "analyzing_nutri": "Evaluating medical data..."
+        "eval_btn": "🩺 Evaluate my day", "total_today": "Total today", "analyzing_nutri": "Evaluating medical data...",
+        "cat_produce": "🥦 Fruits & Vegetables", "cat_dairy": "🥛 Dairy & Eggs", "cat_white_meat": "🍗 White Meat", 
+        "cat_red_meat": "🥩 Red Meat", "cat_seafood": "🐟 Seafood", "cat_pantry": "🥫 Pantry & Grains", "cat_other": "🛒 Other",
+        "add_to_list": "Add to list", "delete_item": "Delete", "type_food": "Type a food item..."
     },
     "🇫🇷 Français": {
         "lang_code": "French", "title": "Bonjour {name} !", "subtitle": "Votre écosystème nutritionnel.",
@@ -317,7 +321,7 @@ TRANSLATIONS = {
         "ingredients": "🛒 Ingrédients", "save_fav": "⭐ Sauvegarder", "saved": "Sauvegardé !", "instructions": "👨‍🍳 Préparation", "adjust_title": "⚖️ Ajuster",
         "adjust_sub": "Autres quantités ?", "adjust_ph": "Ex : '20g de protéines'", "recalc_btn": "Recalculer", "recalculating": "Ajustement...",
         "profile": "👤 Profil", "update_prof": "Mettre à jour", "prof_updated": "Mis à jour !", "favs": "⭐ Favoris", "no_favs": "Pas de favoris.",
-        "logout": "Déconnexion", "news_title": "📰 News", "feed_title": "Tendance 🔥", "cook_this": "Cuisiner 🍳", "download_btn": "⬇️ Télécharger",
+        "logout": "Déconnexion", "news_title": "📰 Tendances Nutrition", "feed_title": "Dernières Nouvelles 🔥", "cook_this": "Cuisiner 🍳", "download_btn": "⬇️ Télécharger",
         "keep_logged_in": "Rester connecté", "chef_recom": "🌟 RECOMMANDATION 🌟", "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Chef personnel IA.",
         "tab_login": "🔑 Login", "tab_register": "📝 Inscription", "tab_recover": "🆘 Récupérer", "username_label_login": "Utilisateur", "pin_label_login": "PIN",
         "login_btn": "Entrer 🚀", "login_error": "Erreur.", "reg_section1": "1. Accès", "create_user_label": "Utilisateur", "create_pin_label": "PIN",
@@ -328,11 +332,13 @@ TRANSLATIONS = {
         "search_user_btn": "Chercher", "user_found": "Trouvé.", "user_not_found": "Non trouvé.", "recover_question_prefix": "Q :", "your_answer_label": "Réponse",
         "new_pin_label": "Nouveau PIN", "change_pin_btn": "Changer", "pin_changed_success": "Changé !", "wrong_answer": "Faux.", "current_weight_label": "Poids",
         "profile_goals_label": "Objectifs", "profile_restrictions_label": "Restrictions", "macro_protein": "Protéines", "macro_fat": "Graisses", "macro_carbs": "Glucides",
-        
-        "dash_mod1": "🍳\nCuisine Intelligente", "dash_mod2": "🛒\nListe & Web", "dash_mod3": "📅\nPlanificateur", "dash_mod4": "📊\nRésumé Quotidien", "back_home": "🏠 Retour à l'accueil",
-        "add_to_log": "📝 Ajouter au journal", "log_success": "Ajouté !", "shop_title": "Liste de Courses & Web", "search_web_label": "Que voulez-vous cuisiner ?", "search_web_btn": "🔍 Chercher & Extraire",
-        "shop_list_title": "Liste Actuelle", "add_item_btn": "Ajouter", "clear_list": "🗑️ Vider la liste", "plan_title": "Planificateur Hebdomadaire", "save_plan": "💾 Sauvegarder", "plan_saved": "Sauvegardé !",
-        "nutri_title": "Résumé Nutritionnel", "manual_log_label": "Mangé dehors ? (Ex: 1 Pomme)", "manual_log_btn": "➕ Ajouter", "eval_btn": "🩺 Évaluer ma journée", "total_today": "Total d'aujourd'hui", "analyzing_nutri": "Évaluation..."
+        "dash_mod1": "🍳\nCuisine Intelligente", "dash_mod2": "🛒\nListe de Courses", "dash_mod3": "📅\nPlanificateur", "dash_mod4": "📊\nRésumé Quotidien", "back_home": "🏠 Retour",
+        "add_to_log": "📝 Ajouter au journal", "log_success": "Ajouté !", "shop_title": "Liste de Courses", "search_web_label": "Que voulez-vous cuisiner ?", "search_web_btn": "🔍 Extraire",
+        "shop_list_title": "Inventaire", "add_item_btn": "Ajouter", "clear_list": "🗑️ Vider", "plan_title": "Planificateur", "save_plan": "💾 Sauvegarder", "plan_saved": "Sauvegardé !",
+        "nutri_title": "Résumé Nutritionnel", "manual_log_label": "Mangé dehors ?", "manual_log_btn": "➕ Ajouter", "eval_btn": "🩺 Évaluer", "total_today": "Total", "analyzing_nutri": "Évaluation...",
+        "cat_produce": "🥦 Fruits et Légumes", "cat_dairy": "🥛 Produits Laitiers", "cat_white_meat": "🍗 Viande Blanche", 
+        "cat_red_meat": "🥩 Viande Rouge", "cat_seafood": "🐟 Poissons et Fruits de Mer", "cat_pantry": "🥫 Garde-manger", "cat_other": "🛒 Autre",
+        "add_to_list": "Ajouter", "delete_item": "Supprimer", "type_food": "Écrivez un aliment..."
     },
     "🇮🇹 Italiano": {
         "lang_code": "Italian", "title": "Ciao {name}!", "subtitle": "Il tuo ecosistema nutrizionale.",
@@ -342,7 +348,7 @@ TRANSLATIONS = {
         "ingredients": "🛒 Ingredienti", "save_fav": "⭐ Salva", "saved": "Salvato!", "instructions": "👨‍🍳 Preparazione", "adjust_title": "⚖️ Regola",
         "adjust_sub": "Altre quantità?", "adjust_ph": "Es: '20g proteine'", "recalc_btn": "Ricalcola", "recalculating": "Regolazione...",
         "profile": "👤 Profilo", "update_prof": "Aggiorna", "prof_updated": "Aggiornato!", "favs": "⭐ Preferiti", "no_favs": "Nessun preferito.",
-        "logout": "Esci", "news_title": "📰 News", "feed_title": "Tendenze 🔥", "cook_this": "Cucina 🍳", "download_btn": "⬇️ Scarica",
+        "logout": "Esci", "news_title": "📰 Tendenze Nutrizionali", "feed_title": "Ultime Notizie 🔥", "cook_this": "Cucina 🍳", "download_btn": "⬇️ Scarica",
         "keep_logged_in": "Mantieni accesso", "chef_recom": "🌟 RACCOMANDAZIONE 🌟", "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Chef IA.",
         "tab_login": "🔑 Accedi", "tab_register": "📝 Registrati", "tab_recover": "🆘 Recupera", "username_label_login": "Utente", "pin_label_login": "PIN",
         "login_btn": "Entra 🚀", "login_error": "Errore.", "reg_section1": "1. Accesso", "create_user_label": "Utente", "create_pin_label": "PIN",
@@ -353,11 +359,13 @@ TRANSLATIONS = {
         "search_user_btn": "Cerca", "user_found": "Trovato.", "user_not_found": "Non trovato.", "recover_question_prefix": "D:", "your_answer_label": "Risposta",
         "new_pin_label": "Nuovo PIN", "change_pin_btn": "Cambia", "pin_changed_success": "Cambiato!", "wrong_answer": "Errato.", "current_weight_label": "Peso",
         "profile_goals_label": "Obiettivi", "profile_restrictions_label": "Restrizioni", "macro_protein": "Proteine", "macro_fat": "Grassi", "macro_carbs": "Carboidrati",
-        
-        "dash_mod1": "🍳\nCucina Intelligente", "dash_mod2": "🛒\nLista & Web", "dash_mod3": "📅\nPianificatore", "dash_mod4": "📊\nRiassunto Quotidiano", "back_home": "🏠 Torna alla Home",
-        "add_to_log": "📝 Aggiungi al diario", "log_success": "Aggiunto!", "shop_title": "Lista della Spesa & Web", "search_web_label": "Cosa vuoi cucinare?", "search_web_btn": "🔍 Cerca & Estrai",
-        "shop_list_title": "Lista Attuale", "add_item_btn": "Aggiungi", "clear_list": "🗑️ Svuota lista", "plan_title": "Pianificatore Settimanale", "save_plan": "💾 Salva", "plan_saved": "Salvato!",
-        "nutri_title": "Riassunto Nutrizionale", "manual_log_label": "Mangiato fuori? (Es: 1 Mela)", "manual_log_btn": "➕ Aggiungi", "eval_btn": "🩺 Valuta la mia giornata", "total_today": "Totale di oggi", "analyzing_nutri": "Valutazione..."
+        "dash_mod1": "🍳\nCucina Intelligente", "dash_mod2": "🛒\nLista della Spesa", "dash_mod3": "📅\nPianificatore", "dash_mod4": "📊\nRiassunto Quotidiano", "back_home": "🏠 Torna alla Home",
+        "add_to_log": "📝 Aggiungi al diario", "log_success": "Aggiunto!", "shop_title": "Lista della Spesa", "search_web_label": "Cosa vuoi cucinare?", "search_web_btn": "🔍 Estrai",
+        "shop_list_title": "La tua spesa", "add_item_btn": "Aggiungi", "clear_list": "🗑️ Svuota lista", "plan_title": "Pianificatore", "save_plan": "💾 Salva", "plan_saved": "Salvato!",
+        "nutri_title": "Riassunto Nutrizionale", "manual_log_label": "Mangiato fuori?", "manual_log_btn": "➕ Aggiungi", "eval_btn": "🩺 Valuta la mia giornata", "total_today": "Totale di oggi", "analyzing_nutri": "Valutazione...",
+        "cat_produce": "🥦 Frutta e Verdura", "cat_dairy": "🥛 Latticini e Uova", "cat_white_meat": "🍗 Carne Bianca", 
+        "cat_red_meat": "🥩 Carne Rossa", "cat_seafood": "🐟 Pesce e Frutti di Mare", "cat_pantry": "🥫 Dispensa e Cereali", "cat_other": "🛒 Altro",
+        "add_to_list": "Aggiungi alla lista", "delete_item": "Elimina", "type_food": "Scrivi un alimento..."
     }
 }
 
