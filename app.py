@@ -511,7 +511,25 @@ def format_recipe_for_download(recipe, t_dict):
     return text
 
 # ==========================================
-# UI: BARRA LATERAL (Perfil, Favoritos y Noticias)
+# FUNCIÓN CACHÉ PARA NOTICIAS (DuckDuckGo)
+# ==========================================
+@st.cache_data(ttl=datetime.timedelta(days=3))
+def fetch_nutrition_news(lang_code):
+    query_map = {
+        "Spanish": "últimas tendencias nutrición alimentación comida saludable",
+        "English": "latest nutrition healthy food diet trends news",
+        "French": "actualités nutrition tendances alimentation saine",
+        "Italian": "notizie nutrizione tendenze dieta sana"
+    }
+    query = query_map.get(lang_code, "healthy nutrition trends")
+    try:
+        results = list(DDGS().text(query, max_results=3))
+        return results
+    except Exception as e:
+        return[]
+
+# ==========================================
+# UI: BARRA LATERAL REDISEÑADA
 # ==========================================
 with st.sidebar:
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
@@ -535,14 +553,19 @@ with st.sidebar:
     st.divider()
     with st.expander(t["news_title"], expanded=False):
         st.subheader(t["feed_title"])
-        for i, recipe in enumerate(t_trending):
-            st.markdown(f"<div class='feed-card'><h3 style='margin:0;'>{recipe['emoji']} {recipe['name']}</h3><p style='font-size:14px; margin-top:5px; color:#cbd5e1;'>{recipe['desc']}</p></div>", unsafe_allow_html=True)
-            if st.button(t["cook_this"], key=f"feed_btn_{i}", use_container_width=True):
-                st.session_state.selected_option = {"name": recipe["name"], "hero_emoji": recipe["emoji"]}
-                st.session_state.avail_ing, st.session_state.avoid_tdy = "", ""
-                st.session_state.current_page = "mod1"
-                st.session_state.step = "recipe_loading"
-                st.rerun()
+        news_items = fetch_nutrition_news(lang_code)
+        
+        if news_items:
+            for news in news_items:
+                st.markdown(f"""
+                <div style='background: rgba(255, 255, 255, 0.4); padding: 12px; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(0,0,0,0.05);'>
+                    <h4 style='margin:0; font-size:14px; font-weight:700;'>{news.get('title', '')}</h4>
+                    <p style='font-size:12px; margin-top:6px; margin-bottom:6px; line-height:1.4;'>{news.get('body', '')[:90]}...</p>
+                    <a href='{news.get('href', '#')}' target='_blank' style='font-size:12px; color:#2563eb; font-weight:bold; text-decoration:none;'>Leer más →</a>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.write("No hay tendencias disponibles hoy.")
                 
     st.divider()
     if st.button(t["logout"], type="secondary", use_container_width=True):
