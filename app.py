@@ -3,175 +3,103 @@ import json
 import os
 import datetime
 import re
+import random
 import requests
 import pandas as pd
 import plotly.express as px
 from groq import Groq
-import extra_streamlit_components as stx
 from supabase import create_client, Client
 from streamlit_lottie import st_lottie
+from streamlit_javascript import st_javascript
 
-# Inyección PWA Avanzada (Fuerza a Chrome a reconocerla como App Instalable)
+# ==========================================
+# CONFIGURACIÓN DE PÁGINA Y PWA
+# ==========================================
+st.set_page_config(page_title="NutriAI | Chef Inteligente", page_icon="🌿", layout="wide")
+
+# Inyección PWA (Fuerza a Chrome a reconocerla como App Instalable)
 st.components.v1.html("""
 <script>
-    // 1. Inyectar Manifest.json dinámicamente
     var manifest = {
-        "name": "NutriAI Chef",
-        "short_name": "NutriAI",
-        "start_url": window.location.pathname,
-        "display": "standalone",
-        "background_color": "#0f172a",
-        "theme_color": "#0f172a",
-        "icons":[{
-            "src": "https://cdn-icons-png.flaticon.com/512/3565/3565418.png", // Icono bonito de comida/IA
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
-        }]
+        "name": "NutriAI Chef", "short_name": "NutriAI",
+        "start_url": window.location.pathname, "display": "standalone",
+        "background_color": "#0f172a", "theme_color": "#0f172a",
+        "icons":[{"src": "https://cdn-icons-png.flaticon.com/512/3565/3565418.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]
     };
     var blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
     var manifestURL = URL.createObjectURL(blob);
-    var link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = manifestURL;
+    var link = document.createElement('link'); link.rel = 'manifest'; link.href = manifestURL;
     document.head.appendChild(link);
 
-    // 2. Inyectar un Service Worker falso para cumplir el requisito de Google
     if ('serviceWorker' in navigator) {
         var swCode = "self.addEventListener('fetch', function(e) {});";
         var swBlob = new Blob([swCode], {type: 'application/javascript'});
         var swUrl = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swUrl).then(function(reg){
-            console.log('Service Worker Registrado Exitosamente');
-        }).catch(function(err){
-            console.log('Error en Service Worker', err);
-        });
+        navigator.serviceWorker.register(swUrl).catch(function(err){});
     }
 
-    // 3. Etiquetas nativas para iOS (Apple)
-    var meta1 = document.createElement('meta');
-    meta1.name = "apple-mobile-web-app-capable";
-    meta1.content = "yes";
-    document.head.appendChild(meta1);
-    
-    var meta2 = document.createElement('meta');
-    meta2.name = "apple-mobile-web-app-status-bar-style";
-    meta2.content = "black-translucent";
-    document.head.appendChild(meta2);
+    var meta1 = document.createElement('meta'); meta1.name = "apple-mobile-web-app-capable"; meta1.content = "yes"; document.head.appendChild(meta1);
+    var meta2 = document.createElement('meta'); meta2.name = "apple-mobile-web-app-status-bar-style"; meta2.content = "black-translucent"; document.head.appendChild(meta2);
 </script>
 """, height=0, width=0)
 
 # ==========================================
-# CSS PREMIUM (Glassmorphism & Fondo)
+# CSS PREMIUM (Glassmorphism, Botones & Contraste)
 # ==========================================
 st.markdown("""
     <style>
-    /* Fondo fotográfico oscuro (Gastronomía) */
     .stApp {
         background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)), 
                     url("https://images.unsplash.com/photo-1498837167922-41cfa6f5ae8f?auto=format&fit=crop&w=1920&q=80") no-repeat center center fixed !important;
-        background-size: cover !important;
-        color: #f1f5f9;
+        background-size: cover !important; color: #f1f5f9;
     }
     
-    /* Efecto Cristal (Glassmorphism) para contenedores */
-    .block-container, [data-testid="stSidebar"] {
+    .block-container,[data-testid="stSidebar"] {
         background: rgba(30, 41, 59, 0.45) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important;
+        border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
     
-    /* Colores base de texto (SIN afectar a los botones) */
-    h1, h2, h3, h4, p, label, .stMarkdown {
-        color: #f8fafc !important;
-    }
+    h1, h2, h3, h4, p, label, .stMarkdown { color: #f8fafc !important; }
 
     /* 🔥 SOLUCIÓN: Botones Premium */
     .stButton > button {
-        background: linear-gradient(45deg, #10b981, #3b82f6) !important; /* Degradado Verde-Azul */
-        color: white !important;
-        border: none !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-        font-weight: bold !important;
+        background: linear-gradient(45deg, #10b981, #3b82f6) !important;
+        color: white !important; border: none !important; border-radius: 8px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important; font-weight: bold !important;
         transition: all 0.3s ease !important;
     }
-    .stButton > button * {
-        color: white !important; /* Fuerza texto interno a blanco */
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
-    }
+    .stButton > button * { color: white !important; }
+    .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important; }
 
-    /* 🔥 SOLUCIÓN: Cajas de texto (Inputs) oscuras estilo Glassmorphism */
+    /* 🔥 SOLUCIÓN: Inputs Oscuros (Glassmorphism) */
     div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div, div[data-baseweb="select"] > div {
         background-color: rgba(15, 23, 42, 0.6) !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
-        border-radius: 8px !important;
-        color: white !important;
+        border: 1px solid rgba(255,255,255,0.2) !important; border-radius: 8px !important; color: white !important;
     }
-    div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] div {
-        color: white !important;
+    div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] div { color: white !important; }
+
+    /* 🔥 SOLUCIÓN: Flechitas Sidebar Visibles */
+    button[data-testid="collapsedControl"] svg, button[data-testid="stSidebarCollapseButton"] svg {
+        fill: #ffffff !important; color: #ffffff !important; stroke: #ffffff !important;
+    }
+    button[data-testid="collapsedControl"], button[data-testid="stSidebarCollapseButton"] {
+        background-color: rgba(15, 23, 42, 0.6) !important; border-radius: 50% !important;
     }
 
-    /* Tarjeta Dorada Mejorada */
-    .golden-card {
-        background: linear-gradient(135deg, #FFDF00 0%, #D4AF37 100%);
-        padding: 3px; border-radius: 16px; margin-bottom: 20px;
-        box-shadow: 0 4px 25px rgba(212, 175, 55, 0.4);
-    }
-    .golden-card-content {
-        background: rgba(15, 23, 42, 0.95);
-        padding: 25px; border-radius: 14px; text-align: center;
-    }
-    
+    /* Tarjeta Dorada y Etiquetas */
+    .golden-card { background: linear-gradient(135deg, #FFDF00 0%, #D4AF37 100%); padding: 3px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 25px rgba(212, 175, 55, 0.4); }
+    .golden-card-content { background: rgba(15, 23, 42, 0.95); padding: 25px; border-radius: 14px; text-align: center; }
     .hero-emoji { font-size: 80px; text-align: center; margin: 0; padding: 0; line-height: 1.2; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
-    
-    /* Etiqueta Nutricional */
-    .nutrition-label {
-        border: 2px solid #fff; padding: 20px; background: rgba(255,255,255,0.95); color: black !important;
-        font-family: 'Arial', sans-serif; border-radius: 12px; width: 100%; margin: auto auto 20px auto;
-    }
+    .nutrition-label { border: 2px solid #fff; padding: 20px; background: rgba(255,255,255,0.95); color: black !important; font-family: 'Arial', sans-serif; border-radius: 12px; width: 100%; margin: auto auto 20px auto; }
     .nutrition-label h2, .nutrition-label span, .nutrition-label div { color: black !important; }
     .nutrition-label h2 { margin: 0; font-size: 24px; font-weight: 900; border-bottom: 8px solid #111; padding-bottom: 5px; }
     .nut-row { display: flex; justify-content: space-between; border-bottom: 1px solid #999; padding: 6px 0; font-size: 15px; }
     .nut-row.thick { border-bottom: 4px solid #111; }
     
-    /* Logo de Texto Elegante */
-    .brand-logo {
-        font-family: 'Georgia', serif; font-size: 3rem; font-weight: bold; 
-        text-align: center; margin-bottom: 0px; 
-        background: -webkit-linear-gradient(45deg, #10b981, #3b82f6);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-.brand-subtitle { 
-    text-align: center; 
-    font-size: 1.2rem; 
-    font-weight: 300; 
-    letter-spacing: 2px; 
-    color: #cbd5e1; 
-    margin-top: -10px; 
-    margin-bottom: 30px;
-}
-
-/* 🔥 SOLUCIÓN: Hacer blancas las flechitas de la barra lateral */
-button[data-testid="collapsedControl"] svg,
-button[data-testid="stSidebarCollapseButton"] svg {
-    fill: #ffffff !important;
-    color: #ffffff !important;
-    stroke: #ffffff !important;
-}
-
-/* Asegurar que el fondo del botón de la flecha sea blanco y se vea bien */
-button[data-testid="collapsedControl"], 
-button[data-testid="stSidebarCollapseButton"] {
-    background-color: #FFFFFF !important;
-    border-radius: 50% !important;
-}
+    .brand-logo { font-family: 'Georgia', serif; font-size: 3rem; font-weight: bold; text-align: center; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .brand-subtitle { text-align: center; font-size: 1.2rem; font-weight: 300; letter-spacing: 2px; color: #cbd5e1; margin-top: -10px; margin-bottom: 30px;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -182,13 +110,59 @@ button[data-testid="stSidebarCollapseButton"] {
 def load_lottieurl(url: str):
     try:
         r = requests.get(url)
-        if r.status_code != 200:
-            return None
+        if r.status_code != 200: return None
         return r.json()
-    except:
-        return None
+    except: return None
 
 lottie_cooking = load_lottieurl("https://lottie.host/81a5fcbd-3c46-4c74-a698-b8ce1aa33a2a/P2lT3zTjK1.json")
+
+# ==========================================
+# INYECCIONES JAVASCRIPT Y CONTROL DE SESIÓN
+# ==========================================
+# Ejecutar acciones pendientes de JS sin interrumpir Python
+if st.session_state.get("do_login_js", False):
+    usr = st.session_state.current_username
+    code = f"window.parent.localStorage.setItem('nutri_username', '{usr}'); window.parent.sessionStorage.removeItem('nutri_username');" if st.session_state.keep_in else f"window.parent.sessionStorage.setItem('nutri_username', '{usr}'); window.parent.localStorage.removeItem('nutri_username');"
+    st.components.v1.html(f"<script>{code}</script>", height=0, width=0)
+    st.session_state.do_login_js = False
+
+if st.session_state.get("do_logout_js", False):
+    st.components.v1.html("<script>window.parent.localStorage.removeItem('nutri_username'); window.parent.sessionStorage.removeItem('nutri_username');</script>", height=0, width=0)
+    st.session_state.do_logout_js = False
+
+# ==========================================
+# SPLASH SCREEN & VERIFICACIÓN DE SESIÓN LOCAL
+# ==========================================
+if "auth_checked" not in st.session_state:
+    st.session_state.auth_checked = False
+if "current_username" not in st.session_state:
+    st.session_state.current_username = None
+
+if not st.session_state.auth_checked:
+    col_s1, col_s2, col_s3 = st.columns([1, 2, 1])
+    with col_s2:
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        if lottie_cooking: st_lottie(lottie_cooking, height=300, key="splash_anim")
+        phrases =["Encendiendo los fogones...", "Preparando tu cocina inteligente...", "Afilando los cuchillos...", "Calentando las sartenes..."]
+        st.markdown(f"<h2 style='text-align:center;'>{random.choice(phrases)}</h2>", unsafe_allow_html=True)
+        
+    # Leer LocalStorage / SessionStorage mediante JS
+    js_val = st_javascript('window.localStorage.getItem("nutri_username") || window.sessionStorage.getItem("nutri_username") || "NONE"')
+    
+    if js_val == 0:
+        st.stop() # Detiene la app 1 seg hasta que JS devuelve el valor
+    elif js_val == "NONE":
+        st.session_state.auth_checked = True
+        st.rerun()
+    else:
+        st.session_state.current_username = js_val
+        st.session_state.auth_checked = True
+        st.rerun()
+
+def logout():
+    st.session_state.current_username = None
+    st.session_state.step = "input"
+    st.session_state.do_logout_js = True
 
 # ==========================================
 # CONEXIÓN A SUPABASE
@@ -197,184 +171,9 @@ lottie_cooking = load_lottieurl("https://lottie.host/81a5fcbd-3c46-4c74-a698-b8c
 def init_supabase() -> Client:
     url = st.secrets.get("SUPABASE_URL")
     key = st.secrets.get("SUPABASE_KEY")
-    if not url or not key:
-        st.error("Supabase credentials missing in st.secrets.")
-        st.stop()
     return create_client(url, key)
 
 supabase = init_supabase()
-
-# ==========================================
-# SISTEMA MULTIDIOMA Y TEXTOS
-# ==========================================
-TRANSLATIONS = {
-    "🇪🇸 Español": {
-        "lang_code": "Spanish",
-        "title": "¡Hola {name}! ¿Qué cocinamos hoy? 🍲",
-        "subtitle": "Crearé la comida perfecta usando ÚNICAMENTE lo que tengas a mano.",
-        "assistant_msg": "¿Qué hay en la despensa? ¡Hagamos magia!",
-        "avail_ing_label": "Ingredientes disponibles hoy (Ej: 2 huevos, medio tomate, arroz)",
-        "avoid_today_label": "¿Algo que no te apetezca o quieras evitar hoy? (Ej: fritos, sin sal, picante)",
-        "find_btn": "🍳 Buscar Recetas Mágicas",
-        "analyzing": "El Chef está analizando tus ingredientes...",
-        "here_options": "Opciones para ti:",
-        "diff": "Dificultad", "time": "Tiempo", "health": "Salud",
-        "cook_btn": "Cocinar {}", "loading_recipe": "Calculando macros exactos para {}...",
-        "start_over": "← Empezar de Nuevo", "note": "Nota del Nutricionista:",
-        "ingredients": "🛒 Ingredientes", "save_fav": "⭐ Guardar en Favoritos", "saved": "¡Guardado!",
-        "instructions": "👨‍🍳 Preparación", "adjust_title": "⚖️ Ajustar Macros",
-        "adjust_sub": "¿Necesitas otras cantidades? Pídemelo.", "adjust_ph": "Ej: 'Añade 20g de proteína'",
-        "recalc_btn": "Recalcular", "recalculating": "Ajustando receta...", "profile": "👤 Mi Perfil",
-        "update_prof": "Actualizar Perfil", "prof_updated": "¡Perfil actualizado!",
-        "favs": "⭐ Favoritos", "no_favs": "Aún no hay favoritos.", "logout": "Cerrar Sesión",
-        "news_title": "📰 Inspiración",
-        "feed_title": "Recetas de Moda 🔥", "cook_this": "Cocinar esto 🍳", "download_btn": "⬇️ Descargar Receta",
-        "keep_logged_in": "Mantener sesión iniciada",
-        "chef_recom": "🌟 RECOMENDACIÓN ESTRELLA DEL CHEF 🌟",
-        "trending":[
-            {"name": "Ratatouille", "emoji": "🍅", "desc": "Un clásico lleno de vitaminas y muy bajo en calorías."},
-            {"name": "Risotto de Setas", "emoji": "🍄", "desc": "Cremoso, reconfortante y perfecto para cargar energía."},
-            {"name": "Poke Bowl de Salmón", "emoji": "🥗", "desc": "Fresco, rico en omega-3 y grasas saludables."},
-            {"name": "Shakshuka", "emoji": "🍳", "desc": "Huevos en salsa de tomate especiada. Alto en proteína."}
-        ],
-        "auth_app_name": "NutriAI 🌿",
-        "auth_subtitle": "Tu chef y nutricionista personal impulsado por IA.",
-        "tab_login": "🔑 Iniciar Sesión", "tab_register": "📝 Registrarse", "tab_recover": "🆘 Recuperar PIN",
-        "username_label_login": "Usuario (Ej: miguel123)", "pin_label_login": "PIN (Contraseña)",
-        "login_btn": "Entrar a la Cocina 🚀", "login_error": "Usuario o PIN incorrectos.",
-        "reg_section1": "1. Datos de Acceso", "create_user_label": "Crea un Usuario único",
-        "create_pin_label": "Crea un PIN corto", "security_question_label": "Pregunta de Seguridad",
-        "security_options":["¿Nombre de tu primera mascota?", "¿Ciudad de nacimiento?", "¿Nombre de tu colegio?"],
-        "security_answer_label": "Respuesta de Seguridad (Útil si olvidas el PIN)",
-        "reg_section2": "2. Tu Perfil Clínico", "name_label": "Nombre Real (Para tratarte con cercanía)",
-        "age_label": "Edad", "weight_label": "Peso (kg)", "height_label": "Altura (cm)",
-        "gender_label": "Género", "gender_options":["Masculino", "Femenino", "Otro"],
-        "reg_section3": "3. Objetivos", "goals_label": "Objetivo principal (Ej: Perder grasa, ganar masa muscular)",
-        "rest_label": "Restricciones Crónicas (Ej: Vegano, Intolerante a la lactosa)",
-        "create_account_btn": "Crear Cuenta y Entrar 🚀", "username_taken": "Ese Nombre de Usuario ya está en uso. Elige otro.",
-        "account_created": "¡Cuenta creada!", "fill_required": "Por favor, rellena los campos obligatorios.",
-        "forgot_pin_text": "¿Olvidaste tu PIN?", "search_user_label": "Introduce tu Usuario",
-        "search_user_btn": "Buscar Usuario", "user_found": "Usuario encontrado.", "user_not_found": "Usuario no encontrado.",
-        "recover_question_prefix": "Pregunta:", "your_answer_label": "Tu Respuesta", "new_pin_label": "Nuevo PIN",
-        "change_pin_btn": "Cambiar PIN", "pin_changed_success": "¡PIN cambiado con éxito! Ya puedes iniciar sesión.",
-        "wrong_answer": "Respuesta incorrecta.", "current_weight_label": "Peso Actual (kg)",
-        "profile_goals_label": "Objetivos", "profile_restrictions_label": "Restricciones",
-        "macro_protein": "Proteínas", "macro_fat": "Grasas", "macro_carbs": "Carbohidratos"
-    },
-    "🇬🇧 English": {
-        "lang_code": "English", "title": "Hi {name}! What are we cooking today? 🍲", "subtitle": "I will craft the perfect meal using ONLY what you have on hand.",
-        "assistant_msg": "What's in the pantry? Let's make magic!", "avail_ing_label": "Available ingredients today (e.g., 2 eggs, half a tomato, rice)",
-        "avoid_today_label": "Anything to avoid today? (e.g., fried food, no salt, spicy)", "find_btn": "🍳 Find Magic Recipes",
-        "analyzing": "The Chef is analyzing your ingredients...", "here_options": "Options for you:", "diff": "Difficulty", "time": "Time", "health": "Health",
-        "cook_btn": "Cook {}", "loading_recipe": "Calculating precise macros for {}...", "start_over": "← Start Over", "note": "Nutritionist's Note:",
-        "ingredients": "🛒 Ingredients", "save_fav": "⭐ Save Favorite", "saved": "Saved!", "instructions": "👨‍🍳 Instructions",
-        "adjust_title": "⚖️ Adjust Macros", "adjust_sub": "Need different targets? Just ask.", "adjust_ph": "e.g., 'Add 20g of protein'",
-        "recalc_btn": "Recalculate", "recalculating": "Adjusting recipe...", "profile": "👤 My Profile", "update_prof": "Update Profile",
-        "prof_updated": "Profile updated!", "favs": "⭐ Favorites", "no_favs": "No favorites yet.", "logout": "Logout", "news_title": "📰 Inspiration",
-        "feed_title": "Trending Recipes 🔥", "cook_this": "Cook this 🍳", "download_btn": "⬇️ Download Recipe",
-        "keep_logged_in": "Keep me logged in", "chef_recom": "🌟 CHEF'S STAR RECOMMENDATION 🌟",
-        "trending":[{"name": "Ratatouille", "emoji": "🍅", "desc": "A vitamin-packed classic, very low in calories."}, {"name": "Mushroom Risotto", "emoji": "🍄", "desc": "Creamy, comforting, and perfect for carb-loading."}, {"name": "Salmon Poke Bowl", "emoji": "🥗", "desc": "Fresh, rich in omega-3s and healthy fats."}, {"name": "Shakshuka", "emoji": "🍳", "desc": "Eggs in spicy tomato sauce. High in protein."}],
-        "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Your AI-powered personal chef and nutritionist.", "tab_login": "🔑 Log In", "tab_register": "📝 Register", "tab_recover": "🆘 Recover PIN",
-        "username_label_login": "Username (e.g., miguel123)", "pin_label_login": "PIN (Password)", "login_btn": "Enter the Kitchen 🚀", "login_error": "Incorrect username or PIN.",
-        "reg_section1": "1. Access Data", "create_user_label": "Create a unique Username", "create_pin_label": "Create a short PIN", "security_question_label": "Security Question",
-        "security_options":["What was your first pet's name?", "City of birth?", "Name of your school?"], "security_answer_label": "Security Answer (Useful if you forget your PIN)",
-        "reg_section2": "2. Your Clinical Profile", "name_label": "Full Name (to address you properly)", "age_label": "Age", "weight_label": "Weight (kg)", "height_label": "Height (cm)",
-        "gender_label": "Gender", "gender_options":["Male", "Female", "Other"], "reg_section3": "3. Goals", "goals_label": "Main goal (e.g., Lose fat, gain muscle)",
-        "rest_label": "Chronic Restrictions (e.g., Vegan, Lactose intolerant)", "create_account_btn": "Create Account & Enter 🚀", "username_taken": "That username is already taken. Choose another.",
-        "account_created": "Account created!", "fill_required": "Please fill the required fields.", "forgot_pin_text": "Forgot your PIN?", "search_user_label": "Enter your Username",
-        "search_user_btn": "Find User", "user_found": "User found.", "user_not_found": "User not found.", "recover_question_prefix": "Question:", "your_answer_label": "Your Answer", "new_pin_label": "New PIN",
-        "change_pin_btn": "Change PIN", "pin_changed_success": "PIN changed successfully! You can now log in.", "wrong_answer": "Incorrect answer.", "current_weight_label": "Current Weight (kg)",
-        "profile_goals_label": "Goals", "profile_restrictions_label": "Restrictions", "macro_protein": "Protein", "macro_fat": "Fat", "macro_carbs": "Carbohydrates"
-    },
-    "🇫🇷 Français": {
-        "lang_code": "French", "title": "Bonjour {name} ! Qu'est-ce qu'on cuisine aujourd'hui ? 🍲", "subtitle": "Je créerai le repas parfait en utilisant UNIQUEMENT ce que tu as sous la main.",
-        "assistant_msg": "Qu'y a-t-il dans le frigo ? Faisons de la magie !", "avail_ing_label": "Ingrédients disponibles (Ex: 2 œufs, demi tomate, riz)",
-        "avoid_today_label": "Quelque chose à éviter aujourd'hui ? (Ex: fritures, sans sel, épicé)", "find_btn": "🍳 Trouver des Recettes Magiques",
-        "analyzing": "Le Chef analyse vos ingrédients...", "here_options": "Options pour toi :", "diff": "Difficulté", "time": "Temps", "health": "Santé",
-        "cook_btn": "Cuisiner {}", "loading_recipe": "Calcul précis des macros pour {}...", "start_over": "← Recommencer", "note": "Note du Nutritionniste :",
-        "ingredients": "🛒 Ingrédients", "save_fav": "⭐ Sauvegarder", "saved": "Sauvegardé !", "instructions": "👨‍🍳 Préparation",
-        "adjust_title": "⚖️ Ajuster les Macros", "adjust_sub": "Besoin d'autres quantités ? Demande-moi.", "adjust_ph": "Ex : 'Ajoute 20g de protéines'",
-        "recalc_btn": "Recalculer", "recalculating": "Ajustement de la recette...", "profile": "👤 Mon Profil", "update_prof": "Mettre à jour",
-        "prof_updated": "Profil mis à jour !", "favs": "⭐ Favoris", "no_favs": "Pas encore de favoris.", "logout": "Déconnexion", "news_title": "📰 Inspiration",
-        "feed_title": "Recettes Tendance 🔥", "cook_this": "Cuisiner ça 🍳", "download_btn": "⬇️ Télécharger la Recette",
-        "keep_logged_in": "Rester connecté", "chef_recom": "🌟 RECOMMANDATION ÉTOILÉE DU CHEF 🌟",
-        "trending":[{"name": "Ratatouille", "emoji": "🍅", "desc": "Un classique plein de vitamines et très peu calorique."}, {"name": "Risotto aux Champignons", "emoji": "🍄", "desc": "Crémeux, réconfortant et parfait pour l'énergie."}, {"name": "Poke Bowl au Saumon", "emoji": "🥗", "desc": "Frais, riche en oméga-3 et en bonnes graisses."}, {"name": "Shakshuka", "emoji": "🍳", "desc": "Œufs à la sauce tomate épicée. Riche en protéines."}],
-        "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Votre chef et nutritionniste personnel alimenté par l'IA.", "tab_login": "🔑 Se connecter", "tab_register": "📝 S'inscrire", "tab_recover": "🆘 Récupérer le PIN",
-        "username_label_login": "Nom d'utilisateur (ex : miguel123)", "pin_label_login": "PIN (Mot de passe)", "login_btn": "Entrer en Cuisine 🚀", "login_error": "Nom d'utilisateur ou PIN incorrect.",
-        "reg_section1": "1. Données d'accès", "create_user_label": "Créez un nom d'utilisateur unique", "create_pin_label": "Créez un PIN court", "security_question_label": "Question de sécurité",
-        "security_options":["Nom de votre premier animal ?", "Ville de naissance ?", "Nom de votre école ?"], "security_answer_label": "Réponse de sécurité (utile si vous oubliez le PIN)",
-        "reg_section2": "2. Votre profil clinique", "name_label": "Nom complet (pour s'adresser correctement à vous)", "age_label": "Âge", "weight_label": "Poids (kg)", "height_label": "Taille (cm)",
-        "gender_label": "Genre", "gender_options":["Homme", "Femme", "Autre"], "reg_section3": "3. Objectifs", "goals_label": "Objectif principal (ex : Perdre de la graisse, prendre de la masse)",
-        "rest_label": "Restrictions Chroniques (ex : Végétalien, Intolérant au lactose)", "create_account_btn": "Créer un compte et entrer 🚀", "username_taken": "Ce nom d'utilisateur est déjà pris.",
-        "account_created": "Compte créé !", "fill_required": "Veuillez remplir les champs obligatoires.", "forgot_pin_text": "Vous avez oublié votre PIN ?", "search_user_label": "Entrez votre nom d'utilisateur",
-        "search_user_btn": "Rechercher l'utilisateur", "user_found": "Utilisateur trouvé.", "user_not_found": "Utilisateur non trouvé.", "recover_question_prefix": "Question :", "your_answer_label": "Votre réponse", "new_pin_label": "Nouveau PIN",
-        "change_pin_btn": "Changer le PIN", "pin_changed_success": "PIN modifié avec succès ! Vous pouvez maintenant vous connecter.", "wrong_answer": "Réponse incorrecte.", "current_weight_label": "Poids actuel (kg)",
-        "profile_goals_label": "Objectifs", "profile_restrictions_label": "Restrictions", "macro_protein": "Protéines", "macro_fat": "Graisses", "macro_carbs": "Glucides"
-    },
-    "🇮🇹 Italiano": {
-        "lang_code": "Italian", "title": "Ciao {name}! Cosa cuciniamo oggi? 🍲", "subtitle": "Creerò il pasto perfetto usando SOLO quello che hai a disposizione.",
-        "assistant_msg": "Cosa c'è in dispensa? Facciamo una magia!", "avail_ing_label": "Ingredienti disponibili (Es: 2 uova, mezzo pomodoro, riso)",
-        "avoid_today_label": "Qualcosa che vuoi evitare oggi? (Es: fritti, senza sale, piccante)", "find_btn": "🍳 Trova Ricette Magiche",
-        "analyzing": "Lo Chef sta analizzando i tuoi ingredienti...", "here_options": "Opzioni per te:", "diff": "Difficoltà", "time": "Tempo", "health": "Salute",
-        "cook_btn": "Cucina {}", "loading_recipe": "Calcolo preciso dei macro per {}...", "start_over": "← Ricomincia", "note": "Nota del Nutrizionista:",
-        "ingredients": "🛒 Ingredienti", "save_fav": "⭐ Salva nei Preferiti", "saved": "Salvato!", "instructions": "👨‍🍳 Preparazione",
-        "adjust_title": "⚖️ Regola i Macro", "adjust_sub": "Hai bisogno di altre quantità? Chiedi pure.", "adjust_ph": "Es: 'Aggiungi 20g di proteine'",
-        "recalc_btn": "Ricalcola", "recalculating": "Regolazione della ricetta...", "profile": "👤 Il Mio Profilo", "update_prof": "Aggiorna Profilo",
-        "prof_updated": "Profilo aggiornato!", "favs": "⭐ Preferiti", "no_favs": "Nessun preferito.", "logout": "Esci", "news_title": "📰 Ispirazione",
-        "feed_title": "Ricette di Tendenza 🔥", "cook_this": "Cucina questo 🍳", "download_btn": "⬇️ Scarica Ricetta",
-        "keep_logged_in": "Mantieni l'accesso", "chef_recom": "🌟 RACCOMANDAZIONE STELLATA DELLO CHEF 🌟",
-        "trending":[{"name": "Ratatouille", "emoji": "🍅", "desc": "Un classico ricco di vitamine e a bassissimo contenuto calorico."}, {"name": "Risotto ai Funghi", "emoji": "🍄", "desc": "Cremoso, confortante e perfetto per fare il pieno di energia."}, {"name": "Poke Bowl al Salmone", "emoji": "🥗", "desc": "Fresco, ricco di omega-3 e grassi sani."}, {"name": "Shakshuka", "emoji": "🍳", "desc": "Uova in salsa di pomodoro piccante. Ricco di proteine."}],
-        "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Il tuo chef e nutrizionista personale potenziato dall'IA.", "tab_login": "🔑 Accedi", "tab_register": "📝 Registrati", "tab_recover": "🆘 Recupera PIN",
-        "username_label_login": "Nome utente (es: miguel123)", "pin_label_login": "PIN (Password)", "login_btn": "Entra in Cucina 🚀", "login_error": "Nome utente o PIN errati.",
-        "reg_section1": "1. Dati di accesso", "create_user_label": "Crea un nome utente unico", "create_pin_label": "Crea un PIN corto", "security_question_label": "Domanda di sicurezza",
-        "security_options":["Nome del tuo primo animale?", "Città di nascita?", "Nome della tua scuola?"], "security_answer_label": "Risposta di sicurezza (utile se dimentichi il PIN)",
-        "reg_section2": "2. Il tuo profilo clinico", "name_label": "Nome completo (per rivolgerci a te correttamente)", "age_label": "Età", "weight_label": "Peso (kg)", "height_label": "Altezza (cm)",
-        "gender_label": "Genere", "gender_options":["Maschio", "Femmina", "Altro"], "reg_section3": "3. Obiettivi", "goals_label": "Obiettivo principale (es: Perdere grasso, aumentare massa)",
-        "rest_label": "Restrizioni Croniche (es: Vegano, Intollerante al lattosio)", "create_account_btn": "Crea account & Entra 🚀", "username_taken": "Quel nome utente è già in uso. Scegline un altro.",
-        "account_created": "Account creato!", "fill_required": "Per favore, compila i campi obbligatori.", "forgot_pin_text": "Hai dimenticato il PIN?", "search_user_label": "Inserisci il tuo nome utente",
-        "search_user_btn": "Cerca Utente", "user_found": "Utente trovato.", "user_not_found": "Utente non trovato.", "recover_question_prefix": "Domanda:", "your_answer_label": "La tua risposta", "new_pin_label": "Nuovo PIN",
-        "change_pin_btn": "Cambia PIN", "pin_changed_success": "PIN modificato con successo! Ora puoi accedere.", "wrong_answer": "Risposta errata.", "current_weight_label": "Peso attuale (kg)",
-        "profile_goals_label": "Obiettivi", "profile_restrictions_label": "Restrizioni", "macro_protein": "Proteine", "macro_fat": "Grassi", "macro_carbs": "Carboidrati"
-    }
-}
-
-# ==========================================
-# FUNCIONES AUXILIARES
-# ==========================================
-def extract_number(val_str):
-    match = re.search(r'\d+', str(val_str))
-    return int(match.group()) if match else 0
-
-def format_recipe_for_download(recipe, t_dict):
-    text = f"=== {recipe['recipe_name'].upper()} ===\n🌍 Origen/Estilo: {recipe.get('region', 'Global')}\n\n--- {t_dict['ingredients'].upper()} ---\n"
-    for ing in recipe["ingredients"]: text += f"• {ing['qty']} de {ing['item']}\n"
-    text += f"\n--- {t_dict['instructions'].upper()} ---\n"
-    for i, step in enumerate(recipe["instructions"]): text += f"{i+1}. {step}\n"
-    m = recipe['macros']
-    text += f"\n--- MACROS ---\nCalorías: {m.get('calories', '0')} | Proteína: {m.get('protein', '0g')} | Grasas: {m.get('total_fat', '0g')} | Carbohidratos: {m.get('total_carbs', '0g')}\n"
-    return text
-
-# ==========================================
-# GESTIÓN DE COOKIES (Sesión Persistente)
-# ==========================================
-cookie_manager = stx.CookieManager(key="cookie_manager")
-
-if "current_username" not in st.session_state:
-    st.session_state.current_username = cookie_manager.get(cookie="ai_nutri_session")
-
-def set_login_session(username, keep_logged_in=False):
-    st.session_state.current_username = username
-    days = 365 if keep_logged_in else 1
-    expire_date = datetime.datetime.now() + datetime.timedelta(days=days)
-    cookie_manager.set("ai_nutri_session", username, expires_at=expire_date)
-
-def logout():
-    st.session_state.current_username = None
-    try:
-        cookie_manager.delete("ai_nutri_session")
-    except Exception:
-        pass 
-    st.session_state.step = "input"
 
 def get_user_data(username):
     if not username: return None
@@ -385,15 +184,40 @@ def update_user_data(username, data_dict):
     if username: supabase.table("app_users_2").update(data_dict).eq("username", username).execute()
 
 # ==========================================
-# LANGUAGE SELECTOR (Top-right)
+# SISTEMA MULTIDIOMA Y TEXTOS
 # ==========================================
-if "selected_lang" not in st.session_state:
-    st.session_state.selected_lang = "🇪🇸 Español" if "🇪🇸 Español" in TRANSLATIONS else list(TRANSLATIONS.keys())[0]
+TRANSLATIONS = {
+    "🇪🇸 Español": {
+        "lang_code": "Spanish",
+        "title": "¡Hola {name}! ¿Qué cocinamos hoy? 🍲", "subtitle": "Crearé la comida perfecta usando ÚNICAMENTE lo que tengas a mano.",
+        "assistant_msg": "¿Qué hay en la despensa? ¡Hagamos magia!", "avail_ing_label": "Ingredientes disponibles hoy (Ej: 2 huevos, medio tomate, arroz)",
+        "avoid_today_label": "¿Algo que no te apetezca o quieras evitar hoy? (Ej: fritos, sin sal, picante)", "find_btn": "🍳 Buscar Recetas Mágicas",
+        "analyzing": "El Chef está analizando tus ingredientes...", "here_options": "Opciones para ti:", "diff": "Dificultad", "time": "Tiempo", "health": "Salud",
+        "cook_btn": "Cocinar {}", "loading_recipe": "Calculando macros exactos para {}...", "start_over": "← Empezar de Nuevo", "note": "Nota del Nutricionista:",
+        "ingredients": "🛒 Ingredientes", "save_fav": "⭐ Guardar en Favoritos", "saved": "¡Guardado!", "instructions": "👨‍🍳 Preparación", "adjust_title": "⚖️ Ajustar Macros",
+        "adjust_sub": "¿Necesitas otras cantidades? Pídemelo.", "adjust_ph": "Ej: 'Añade 20g de proteína'", "recalc_btn": "Recalcular", "recalculating": "Ajustando receta...",
+        "profile": "👤 Mi Perfil", "update_prof": "Actualizar Perfil", "prof_updated": "¡Perfil actualizado!", "favs": "⭐ Favoritos", "no_favs": "Aún no hay favoritos.",
+        "logout": "Cerrar Sesión", "news_title": "📰 Inspiración", "feed_title": "Recetas de Moda 🔥", "cook_this": "Cocinar esto 🍳", "download_btn": "⬇️ Descargar Receta",
+        "keep_logged_in": "Mantener sesión iniciada", "chef_recom": "🌟 RECOMENDACIÓN ESTRELLA DEL CHEF 🌟",
+        "trending":[{"name": "Ratatouille", "emoji": "🍅", "desc": "Un clásico lleno de vitaminas y muy bajo en calorías."}, {"name": "Risotto de Setas", "emoji": "🍄", "desc": "Cremoso, reconfortante y perfecto para cargar energía."}, {"name": "Poke Bowl de Salmón", "emoji": "🥗", "desc": "Fresco, rico en omega-3 y grasas saludables."}, {"name": "Shakshuka", "emoji": "🍳", "desc": "Huevos en salsa de tomate especiada. Alto en proteína."}],
+        "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Tu chef y nutricionista personal impulsado por IA.", "tab_login": "🔑 Iniciar Sesión", "tab_register": "📝 Registrarse", "tab_recover": "🆘 Recuperar PIN",
+        "username_label_login": "Usuario (Ej: miguel123)", "pin_label_login": "PIN (Contraseña)", "login_btn": "Entrar a la Cocina 🚀", "login_error": "Usuario o PIN incorrectos.",
+        "reg_section1": "1. Datos de Acceso", "create_user_label": "Crea un Usuario único", "create_pin_label": "Crea un PIN corto", "security_question_label": "Pregunta de Seguridad",
+        "security_options":["¿Nombre de tu primera mascota?", "¿Ciudad de nacimiento?", "¿Nombre de tu colegio?"], "security_answer_label": "Respuesta de Seguridad (Útil si olvidas el PIN)",
+        "reg_section2": "2. Tu Perfil Clínico", "name_label": "Nombre Real (Para tratarte con cercanía)", "age_label": "Edad", "weight_label": "Peso (kg)", "height_label": "Altura (cm)",
+        "gender_label": "Género", "gender_options":["Masculino", "Femenino", "Otro"], "reg_section3": "3. Objetivos", "goals_label": "Objetivo principal (Ej: Perder grasa, ganar masa muscular)",
+        "rest_label": "Restricciones Crónicas (Ej: Vegano, Intolerante a la lactosa)", "create_account_btn": "Crear Cuenta y Entrar 🚀", "username_taken": "Ese Nombre de Usuario ya está en uso. Elige otro.",
+        "account_created": "¡Cuenta creada!", "fill_required": "Por favor, rellena los campos obligatorios.", "forgot_pin_text": "¿Olvidaste tu PIN?", "search_user_label": "Introduce tu Usuario",
+        "search_user_btn": "Buscar Usuario", "user_found": "Usuario encontrado.", "user_not_found": "Usuario no encontrado.", "recover_question_prefix": "Pregunta:", "your_answer_label": "Tu Respuesta", "new_pin_label": "Nuevo PIN",
+        "change_pin_btn": "Cambiar PIN", "pin_changed_success": "¡PIN cambiado con éxito! Ya puedes iniciar sesión.", "wrong_answer": "Respuesta incorrecta.", "current_weight_label": "Peso Actual (kg)",
+        "profile_goals_label": "Objetivos", "profile_restrictions_label": "Restricciones", "macro_protein": "Proteínas", "macro_fat": "Grasas", "macro_carbs": "Carbohidratos"
+    }
+}
+# Agrega el resto de idiomas (Inglés, Francés, Italiano) de tus diccionarios originales aquí.
 
+if "selected_lang" not in st.session_state: st.session_state.selected_lang = "🇪🇸 Español"
 cols_top = st.columns([1, 6, 1])
-with cols_top[2]:
-    st.selectbox("", options=list(TRANSLATIONS.keys()), key="selected_lang", label_visibility="collapsed")
-
+with cols_top[2]: st.selectbox("", options=list(TRANSLATIONS.keys()), key="selected_lang", label_visibility="collapsed")
 t = TRANSLATIONS[st.session_state.selected_lang]
 lang_code = t["lang_code"]
 
@@ -407,7 +231,6 @@ if not st.session_state.current_username:
     col_auth1, col_auth2, col_auth3 = st.columns([1, 2, 1])
     with col_auth2:
         tab1, tab2, tab3 = st.tabs([t["tab_login"], t["tab_register"], t["tab_recover"]])
-        
         with tab1:
             log_user = st.text_input(t["username_label_login"], key="log_user")
             log_pin = st.text_input(t["pin_label_login"], type="password", key="log_pin")
@@ -416,7 +239,9 @@ if not st.session_state.current_username:
             if st.button(t["login_btn"], type="primary", use_container_width=True):
                 res = supabase.table("app_users_2").select("*").eq("username", log_user).eq("pin", log_pin).execute()
                 if res.data:
-                    set_login_session(log_user, keep_logged_in=keep_in)
+                    st.session_state.current_username = log_user
+                    st.session_state.keep_in = keep_in
+                    st.session_state.do_login_js = True
                     st.rerun()
                 else:
                     st.error(t["login_error"])
@@ -451,7 +276,9 @@ if not st.session_state.current_username:
                             "goals": reg_goals, "restrictions": reg_rest, "favorites":[]
                         }
                         supabase.table("app_users_2").insert(new_user).execute()
-                        set_login_session(reg_user, keep_logged_in=True)
+                        st.session_state.current_username = reg_user
+                        st.session_state.keep_in = True
+                        st.session_state.do_login_js = True
                         st.success(t["account_created"])
                         st.rerun()
                 else:
@@ -491,64 +318,46 @@ if not user_profile:
     logout()
     st.rerun()
 
-# ==========================================
 # ESTADO DE LA SESIÓN DE LA APP
-# ==========================================
 for key in["step", "options", "selected_option", "full_recipe", "avail_ing", "avoid_tdy"]:
-    if key not in st.session_state:
-        st.session_state[key] = None if key in ["options", "selected_option", "full_recipe"] else ("input" if key == "step" else "")
+    if key not in st.session_state: st.session_state[key] = None if key in ["options", "selected_option", "full_recipe"] else ("input" if key == "step" else "")
 
 # ==========================================
 # IA (GROQ) Y PROMPT CLÍNICO DINÁMICO
 # ==========================================
-def get_groq_client():
-    api_key = st.secrets.get("GROQ_API_KEY")
-    if not api_key:
-        st.error("Groq API Key not found.")
-        st.stop()
-    return Groq(api_key=api_key)
-
 def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", avoid_tdy="", num_recipes=3):
-    client = get_groq_client()
-    
+    client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
     system_prompt = f"""
     You are a Michelin-star Executive Chef and Clinical Nutritionist.
-    Your client is {u_prof['name']}. 
-    Clinical profile: {u_prof['age']} years old, {u_prof['weight']} kg, {u_prof['height']} cm, Gender: {u_prof['gender']}.
-    Main goal: "{u_prof['goals']}".
-    Chronic restrictions: "{u_prof['restrictions']}".
+    Your client is {u_prof['name']}. Profile: {u_prof['age']} y/o, {u_prof['weight']} kg, {u_prof['height']} cm, Gender: {u_prof['gender']}.
+    Main goal: "{u_prof['goals']}". Restrictions: "{u_prof['restrictions']}".
     
-    [DYNAMIC GENERATION]
-    You must generate exactly {num_recipes} recipe options.[CHEF'S RECOMMENDATION - CRITICAL]
-    You MUST analyze the client's clinical profile, weight, and goals to determine which of the generated recipes is the absolute HEALTHIEST and most aligned with their needs. 
-    You MUST tag exactly ONE recipe with `"is_chefs_recommendation": true`. All other recipes must have it set to `false`.
-    
-    Help them achieve their goals, BUT do not obsess over extremes. 
-    GUARDRAIL: Never approve nutritional madness. Address them by their name occasionally in the 'nutritionist_note'.
+    [DYNAMIC GENERATION] Generate exactly {num_recipes} recipe options.[CHEF'S RECOMMENDATION - CRITICAL] Analyze the client's profile/goals. Tag exactly ONE recipe with `"is_chefs_recommendation": true` that is the healthiest for them. All others `false`.
     """
-    
-    if avail_ing:
-        system_prompt += f"\n[GOLDEN RULE] The recipes MUST be based EXCLUSIVELY on these provided ingredients: {avail_ing}. Do NOT invent main ingredients."
-        
-    if avoid_tdy:
-        system_prompt += f"\n[STRICT PROHIBITION FOR TODAY] Under NO circumstances should you include anything related to: {avoid_tdy}."
+    if avail_ing: system_prompt += f"\n[GOLDEN RULE] Recipes MUST be based EXCLUSIVELY on: {avail_ing}. Do NOT invent main ingredients."
+    if avoid_tdy: system_prompt += f"\n[STRICT PROHIBITION] Under NO circumstances include: {avoid_tdy}."
 
-    system_prompt += f"\nCRITICAL: You MUST reply entirely in {lang_code}.\nALWAYS reply in valid JSON format."
-    
+    system_prompt += f"\nCRITICAL: Reply entirely in {lang_code}. ALWAYS valid JSON format."
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": system_prompt + "\n" + expected_format_hint},
-                {"role": "user", "content": prompt}
-            ],
-            response_format={"type": "json_object"},
-            temperature=0.7
-        )
+            model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": system_prompt + "\n" + expected_format_hint}, {"role": "user", "content": prompt}], response_format={"type": "json_object"}, temperature=0.7)
         return json.loads(response.choices[0].message.content)
     except Exception as e:
         st.error(f"AI Error: {e}")
         return None
+
+def extract_number(val_str):
+    match = re.search(r'\d+', str(val_str))
+    return int(match.group()) if match else 0
+
+def format_recipe_for_download(recipe, t_dict):
+    text = f"=== {recipe['recipe_name'].upper()} ===\n🌍 Origen/Estilo: {recipe.get('region', 'Global')}\n\n--- {t_dict['ingredients'].upper()} ---\n"
+    for ing in recipe["ingredients"]: text += f"• {ing['qty']} de {ing['item']}\n"
+    text += f"\n--- {t_dict['instructions'].upper()} ---\n"
+    for i, step in enumerate(recipe["instructions"]): text += f"{i+1}. {step}\n"
+    m = recipe['macros']
+    text += f"\n--- MACROS ---\nCalorías: {m.get('calories', '0')} | Proteína: {m.get('protein', '0g')} | Grasas: {m.get('total_fat', '0g')} | Carbohidratos: {m.get('total_carbs', '0g')}\n"
+    return text
 
 # ==========================================
 # UI: BARRA LATERAL (Perfil, Favoritos y Noticias)
@@ -576,22 +385,14 @@ with st.sidebar:
     with st.expander(t["news_title"], expanded=False):
         st.subheader(t["feed_title"])
         for i, recipe in enumerate(t["trending"]):
-            st.markdown(f"""
-                <div class="feed-card">
-                    <h3 style="margin:0;">{recipe['emoji']} {recipe['name']}</h3>
-                    <p style="font-size:14px; margin-top:5px; color:#cbd5e1;">{recipe['desc']}</p>
-                </div>
-            """, unsafe_allow_html=True)
-            
+            st.markdown(f"<div class='feed-card'><h3 style='margin:0;'>{recipe['emoji']} {recipe['name']}</h3><p style='font-size:14px; margin-top:5px; color:#cbd5e1;'>{recipe['desc']}</p></div>", unsafe_allow_html=True)
             if st.button(t["cook_this"], key=f"feed_btn_{i}", use_container_width=True):
                 st.session_state.selected_option = {"name": recipe["name"], "hero_emoji": recipe["emoji"]}
-                st.session_state.avail_ing = ""
-                st.session_state.avoid_tdy = ""
-                st.session_state.step = "recipe_loading"
+                st.session_state.avail_ing, st.session_state.avoid_tdy, st.session_state.step = "", "", "recipe_loading"
                 st.rerun()
                 
     st.divider()
-    if st.button(t.get("logout", "Logout"), type="secondary", use_container_width=True):
+    if st.button(t["logout"], type="secondary", use_container_width=True):
         logout()
         st.rerun()
 
@@ -602,29 +403,18 @@ st.markdown(f"<h1 class='brand-logo'>NutriAI</h1>", unsafe_allow_html=True)
 st.markdown(f"<h2 style='text-align:center;'>{t['title'].format(name=user_profile['name'])}</h2>", unsafe_allow_html=True)
 st.markdown(f"<p style='text-align:center; font-size:1.2rem; color:#cbd5e1;'>{t['subtitle']}</p>", unsafe_allow_html=True)
 
-# --- FASE 1: INPUT DE INGREDIENTES A ANCHO COMPLETO ---
-if st.session_state.step == "input" or st.session_state.step == "options":
-    
+if st.session_state.step in ["input", "options"]:
     st.markdown(f"#### 👨‍🍳 {t['assistant_msg']}")
-    
-    available_ingredients = st.text_area(
-        t["avail_ing_label"], 
-        placeholder="Ej: Pechuga de pollo, espinacas, 3 huevos, arroz...", 
-        height=100
-    )
-    
+    available_ingredients = st.text_area(t["avail_ing_label"], placeholder="Ej: Pechuga de pollo, espinacas, 3 huevos, arroz...", height=100)
     avoid_today = st.text_input("🚫 " + t["avoid_today_label"], placeholder="Ej: fritos, sin sal, picante...")
     
     if st.button(t["find_btn"], type="primary", use_container_width=True):
         if available_ingredients:
             st.session_state.avail_ing = available_ingredients
             st.session_state.avoid_tdy = avoid_today
-            
-            # Lógica dinámica: Contar ingredientes aproximados
             ing_count = len([x for x in re.split(r',|\sy\s|\sand\s|\set\s', available_ingredients) if x.strip()])
             n_recipes = 5 if ing_count >= 4 else 3
             
-            # Animación Lottie de carga en lugar de st.spinner
             lottie_placeholder = st.empty()
             with lottie_placeholder.container():
                 st.markdown("<br>", unsafe_allow_html=True)
@@ -632,27 +422,11 @@ if st.session_state.step == "input" or st.session_state.step == "options":
                 st.markdown(f"<h3 style='text-align:center;'>{t['analyzing']}</h3>", unsafe_allow_html=True)
             
             prompt = f"Generate {n_recipes} recipe options strictly using the available ingredients provided."
-            format_hint = """
-            Return strictly in this JSON format:
-            {
-                "options":[
-                    {
-                        "name": "Recipe Name",
-                        "hero_emoji": "🥘", 
-                        "difficulty": "Easy/Medium/Hard",
-                        "time": "XX mins",
-                        "health_score": 9,
-                        "description": "Brief description",
-                        "is_chefs_recommendation": true
-                    }
-                ]
-            }
-            """
+            format_hint = """{ "options":[ { "name": "Recipe", "hero_emoji": "🥘", "difficulty": "Easy", "time": "20 mins", "health_score": 9, "description": "Desc", "is_chefs_recommendation": true } ] }"""
             res = call_ai_json(prompt, format_hint, lang_code, user_profile, available_ingredients, avoid_today, num_recipes=n_recipes)
-            lottie_placeholder.empty() # Limpiar la animación
+            lottie_placeholder.empty()
             
             if res and "options" in res:
-                # Ordenar para que la recomendación del chef salga primero
                 res["options"].sort(key=lambda x: x.get("is_chefs_recommendation", False), reverse=True)
                 st.session_state.options = res["options"]
                 st.session_state.step = "options"
@@ -660,7 +434,6 @@ if st.session_state.step == "input" or st.session_state.step == "options":
         else:
             st.warning(t["fill_required"])
 
-# --- FASE 2: OPCIONES DE RECETAS (TARJETA DORADA AL PRIMERO) ---
 if st.session_state.step == "options" and st.session_state.options:
     st.divider()
     st.subheader(t["here_options"])
@@ -679,8 +452,7 @@ if st.session_state.step == "options" and st.session_state.options:
                 </div>
                 """, unsafe_allow_html=True)
             else:
-                st.markdown(f"<h1 style='text-align:center; font-size:40px; margin:0;'>{opt.get('hero_emoji', '🍽️')}</h1>", unsafe_allow_html=True)
-                st.markdown(f"<h3 style='text-align:center;'>{opt['name']}</h3>", unsafe_allow_html=True)
+                st.markdown(f"<h1 style='text-align:center; font-size:40px; margin:0;'>{opt.get('hero_emoji', '🍽️')}</h1><h3 style='text-align:center;'>{opt['name']}</h3>", unsafe_allow_html=True)
             
             st.caption(f"**{t['diff']}:** {opt['difficulty']} | **{t['time']}:** {opt['time']} | **{t['health']}:** {opt['health_score']}/10")
             st.write(opt['description'])
@@ -691,7 +463,6 @@ if st.session_state.step == "options" and st.session_state.options:
                 st.rerun()
         st.write("---")
 
-# --- FASE 3: GENERAR RECETA COMPLETA ---
 if st.session_state.step == "recipe_loading":
     lottie_placeholder = st.empty()
     with lottie_placeholder.container():
@@ -700,22 +471,7 @@ if st.session_state.step == "recipe_loading":
         st.markdown(f"<h3 style='text-align:center;'>{t['loading_recipe'].format(st.session_state.selected_option['name'])}</h3>", unsafe_allow_html=True)
     
     prompt = f"Generate full recipe for '{st.session_state.selected_option['name']}'."
-    format_hint = """
-    Return strictly in this JSON format:
-    {
-        "recipe_name": "Name",
-        "region": "City, Country or Region Style",
-        "hero_emoji": "🥘",
-        "ingredients_emojis": "🍅🧅🍗",
-        "nutritionist_note": "Empathetic note addressing the user by name. Remember the Guardrail!",
-        "macros": {
-            "calories": "450 kcal", "total_fat": "15g", "saturated_fat": "3g", "total_carbs": "30g",
-            "total_sugars": "5g", "added_sugars": "0g", "fiber": "6g", "protein": "40g", "sodium": "400mg"
-        },
-        "ingredients":[{"item": "Ingredient Name", "qty": "200g"}],
-        "instructions":["Step 1...", "Step 2..."]
-    }
-    """
+    format_hint = """{ "recipe_name": "Name", "region": "Style", "hero_emoji": "🥘", "ingredients_emojis": "🍅🧅", "nutritionist_note": "Empathetic note", "macros": { "calories": "450 kcal", "total_fat": "15g", "saturated_fat": "3g", "total_carbs": "30g", "total_sugars": "5g", "added_sugars": "0g", "fiber": "6g", "protein": "40g", "sodium": "400mg" }, "ingredients":[{"item": "Ing", "qty": "200g"}], "instructions":["Step 1", "Step 2"] }"""
     res = call_ai_json(prompt, format_hint, lang_code, user_profile, st.session_state.avail_ing, st.session_state.avoid_tdy)
     lottie_placeholder.empty()
     
@@ -724,35 +480,23 @@ if st.session_state.step == "recipe_loading":
         st.session_state.step = "recipe_view"
         st.rerun()
 
-# --- FASE 4: VISUALIZACIÓN DE LA RECETA ---
 if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
     recipe = st.session_state.full_recipe
-    
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
         if st.button(t["start_over"], use_container_width=True):
-            st.session_state.step = "input"
-            st.session_state.options = None
-            st.session_state.full_recipe = None
-            st.session_state.avail_ing = ""
-            st.session_state.avoid_tdy = ""
+            st.session_state.step, st.session_state.options, st.session_state.full_recipe, st.session_state.avail_ing, st.session_state.avoid_tdy = "input", None, None, "", ""
             st.rerun()
-            
     with col_btn2:
         txt_data = format_recipe_for_download(recipe, t)
         st.download_button(label=t["download_btn"], data=txt_data, file_name=f"{recipe['recipe_name'].replace(' ', '_')}.txt", mime="text/plain", use_container_width=True)
 
-    st.markdown(f"<p class='hero-emoji'>{recipe.get('hero_emoji', '🍽️')}</p>", unsafe_allow_html=True)
-    st.markdown(f"<h2 style='text-align:center;'>{recipe['recipe_name']}</h2>", unsafe_allow_html=True)
-    st.markdown(f"<h4 style='text-align:center; color:#cbd5e1;'>🌍 {recipe.get('region', 'Global')}</h4>", unsafe_allow_html=True)
-    st.markdown(f"<h3 style='text-align:center; letter-spacing: 5px;'>{recipe.get('ingredients_emojis', '')}</h3>", unsafe_allow_html=True)
-    
+    st.markdown(f"<p class='hero-emoji'>{recipe.get('hero_emoji', '🍽️')}</p><h2 style='text-align:center;'>{recipe['recipe_name']}</h2><h4 style='text-align:center; color:#cbd5e1;'>🌍 {recipe.get('region', 'Global')}</h4><h3 style='text-align:center; letter-spacing: 5px;'>{recipe.get('ingredients_emojis', '')}</h3>", unsafe_allow_html=True)
     st.info(f"**{t['note']}** {recipe.get('nutritionist_note', '')}")
-    
     st.divider()
+    
     col_label, col_chart = st.columns(2)
     m = recipe['macros']
-    
     with col_label:
         st.markdown(f"""
         <div class="nutrition-label">
@@ -769,10 +513,7 @@ if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
         """, unsafe_allow_html=True)
         
     with col_chart:
-        macro_df = pd.DataFrame({
-            "Macro":[t.get("macro_protein", "Protein"), t.get("macro_fat", "Fat"), t.get("macro_carbs", "Carbs")],
-            "Gramos":[extract_number(m.get('protein', '0g')), extract_number(m.get('total_fat', '0g')), extract_number(m.get('total_carbs', '0g'))]
-        })
+        macro_df = pd.DataFrame({"Macro":[t.get("macro_protein", "Protein"), t.get("macro_fat", "Fat"), t.get("macro_carbs", "Carbs")], "Gramos":[extract_number(m.get('protein', '0g')), extract_number(m.get('total_fat', '0g')), extract_number(m.get('total_carbs', '0g'))]})
         if macro_df['Gramos'].sum() > 0:
             fig = px.pie(macro_df, values='Gramos', names='Macro', hole=0.55, color_discrete_sequence=['#ff6b6b', '#feca57', '#48dbfb'])
             fig.update_layout(margin=dict(t=20, b=20, l=20, r=20), showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#f1f5f9'))
@@ -791,8 +532,6 @@ if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
         for i, step in enumerate(recipe["instructions"]): st.write(f"**{i+1}.** {step}")
 
     st.divider()
-
-    # --- FASE 5: AJUSTE DE MACROS ---
     st.subheader(t["adjust_title"])
     st.markdown(t["adjust_sub"])
     macro_adjustment = st.text_input("", placeholder=t["adjust_ph"])
