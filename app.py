@@ -634,8 +634,30 @@ elif st.session_state.current_page == "mod1":
             if lottie_cooking: st_lottie(lottie_cooking, height=200, key="loading_anim_2")
             st.markdown(f"<h3 style='text-align:center;'>{t['loading_recipe'].format(st.session_state.selected_option['name'])}</h3>", unsafe_allow_html=True)
         
-        prompt = f"Generate full recipe for '{st.session_state.selected_option['name']}'."
-        format_hint = """{ "recipe_name": "Name", "region": "Style", "hero_emoji": "🥘", "ingredients_emojis": "🍅🧅", "nutritionist_note": "Empathetic note", "macros": { "calories": "450 kcal", "total_fat": "15g", "saturated_fat": "3g", "total_carbs": "30g", "total_sugars": "5g", "added_sugars": "0g", "fiber": "6g", "protein": "40g", "sodium": "400mg" }, "ingredients":[{"item": "Ing", "qty": "200g"}], "instructions":["Step 1", "Step 2"] }"""
+        # PROMPT MEJORADO: Tono pedagógico y macros detallados
+        prompt = f"Genera la receta completa para '{st.session_state.selected_option['name']}'. Actúa como un chef amigable y pedagógico. Explica el porqué de cada paso de forma detallada, clara y cercana para que no haya dudas."
+        format_hint = """{ 
+            "recipe_name": "Name", 
+            "region": "Style", 
+            "hero_emoji": "🥘", 
+            "ingredients_emojis": "🍅🧅", 
+            "nutritionist_note": "Empathetic note", 
+            "macros": { 
+                "calories": "450 kcal", 
+                "total_fat": "15g", 
+                "saturated_fat": "3g", 
+                "sodium": "400mg", 
+                "total_carbs": "30g", 
+                "fiber": "6g", 
+                "sugars": "5g", 
+                "protein": "40g" 
+            }, 
+            "ingredients":[{"item": "Ing", "qty": "200g"}], 
+            "instructions":[
+                "1. 🍳 Empezaremos calentando la sartén a fuego medio para que los sabores se liberen lentamente...", 
+                "2. 🔪 Ahora cortamos..."
+            ] 
+        }"""
         res = call_ai_json(prompt, format_hint, lang_code, user_profile, st.session_state.avail_ing, st.session_state.avoid_tdy)
         lottie_placeholder.empty()
         
@@ -661,23 +683,47 @@ elif st.session_state.current_page == "mod1":
         
         col_label, col_chart = st.columns(2)
         m = recipe['macros']
+        
         with col_label:
+            # ETIQUETA NUTRICIONAL DETALLADA TIPO FDA
             st.markdown(f"""
             <div class="nutrition-label">
                 <h2>Nutrition Facts</h2>
                 <div class="nut-row thick"><span class="nut-bold">Calories</span> <span class="nut-bold">{m.get('calories', '0')}</span></div>
                 <div class="nut-row"><span class="nut-bold">Total Fat</span> {m.get('total_fat', '0g')}</div>
+                <div class="nut-row" style="padding-left: 1.5rem;">Saturated Fat {m.get('saturated_fat', '0g')}</div>
+                <div class="nut-row"><span class="nut-bold">Sodium</span> {m.get('sodium', '0mg')}</div>
                 <div class="nut-row"><span class="nut-bold">Total Carbohydrate</span> {m.get('total_carbs', '0g')}</div>
+                <div class="nut-row" style="padding-left: 1.5rem;">Dietary Fiber {m.get('fiber', '0g')}</div>
+                <div class="nut-row" style="padding-left: 1.5rem;">Total Sugars {m.get('sugars', '0g')}</div>
                 <div class="nut-row thick"><span class="nut-bold">Protein</span> <span class="nut-bold">{m.get('protein', '0g')}</span></div>
             </div>
             """, unsafe_allow_html=True)
             
         with col_chart:
-            macro_df = pd.DataFrame({"Macro":[t.get("macro_protein", "Protein"), t.get("macro_fat", "Fat"), t.get("macro_carbs", "Carbs")], "Gramos":[extract_number(m.get('protein', '0g')), extract_number(m.get('total_fat', '0g')), extract_number(m.get('total_carbs', '0g'))]})
+            # GRÁFICO PLOTLY CON LEYENDA Y TEXTOS EN BLANCO
+            macro_df = pd.DataFrame({
+                "Macro":[t.get("macro_protein", "Protein"), t.get("macro_fat", "Fat"), t.get("macro_carbs", "Carbs")], 
+                "Gramos":[extract_number(m.get('protein', '0g')), extract_number(m.get('total_fat', '0g')), extract_number(m.get('total_carbs', '0g'))]
+            })
             if macro_df['Gramos'].sum() > 0:
                 fig = px.pie(macro_df, values='Gramos', names='Macro', hole=0.55, color_discrete_sequence=['#ff6b6b', '#feca57', '#48dbfb'])
                 fig.update_traces(textfont_color='white')
-                fig.update_layout(margin=dict(t=20, b=20, l=20, r=20), showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#f1f5f9'))
+                fig.update_layout(
+                    margin=dict(t=20, b=20, l=20, r=20), 
+                    showlegend=True, 
+                    legend=dict(
+                        orientation="h", 
+                        yanchor="bottom", 
+                        y=-0.3, 
+                        xanchor="center", 
+                        x=0.5,
+                        font=dict(color='white') # Leyenda forzada a color blanco
+                    ), 
+                    paper_bgcolor='rgba(0,0,0,0)', 
+                    plot_bgcolor='rgba(0,0,0,0)', 
+                    font=dict(color='white') # Fuente general del gráfico en blanco
+                )
                 st.plotly_chart(fig, use_container_width=True)
         
         c_act1, c_act2 = st.columns(2)
@@ -697,7 +743,8 @@ elif st.session_state.current_page == "mod1":
             for ing in recipe["ingredients"]: st.markdown(f"- **{ing['qty']}** {ing['item']}")
                 
         with st.expander("👨‍🍳 " + t["instructions"], expanded=True):
-            for i, step in enumerate(recipe["instructions"]): st.write(f"**{i+1}.** {step}")
+            for i, step in enumerate(recipe["instructions"]): 
+                st.write(f"{step}") # Se asume que el JSON ya trae el número y el emoji
 
         st.divider()
         st.subheader(t["adjust_title"])
