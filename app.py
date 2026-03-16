@@ -175,7 +175,7 @@ if not st.session_state.current_username:
                         "name": reg_name, "age": reg_age, "weight": reg_weight, "height": reg_height, "gender": reg_gender,
                         "goals": reg_goals, "restrictions": reg_rest, "favorites":[]
                     }
-                    supabase.table("app_users").insert(new_user).execute()
+                    supabase.table("app_users_2").insert(new_user).execute()
                     set_login_session(reg_user)
                     st.success("¡Cuenta creada!")
                     st.rerun()
