@@ -55,13 +55,46 @@ st.markdown("""
         background-size: cover !important; color: #f1f5f9;
     }
     
-    .block-container,[data-testid="stSidebar"] {
+    /* 🔥 Contenedor Principal (Oscuro) */
+    .block-container {
         background: rgba(30, 41, 59, 0.45) !important;
         backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important;
         border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
     
+    /* 🔥 BARRA LATERAL REDISEÑADA (Beige Glassmorphism) */[data-testid="stSidebar"] {
+        background: rgba(245, 245, 220, 0.4) !important;
+        backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    /* Forzar texto oscuro SOLO en la barra lateral para garantizar contraste */[data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3,[data-testid="stSidebar"] h4, 
+    [data-testid="stSidebar"] span,[data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] strong, [data-testid="stSidebar"] div {
+        color: #1e293b !important;
+    }
+
+    /* Ajuste de inputs y botones dentro del Sidebar para encajar con fondo claro */
+    [data-testid="stSidebar"] div[data-baseweb="input"] > div, 
+    [data-testid="stSidebar"] div[data-baseweb="textarea"] > div {
+        background-color: rgba(255, 255, 255, 0.5) !important;
+        border: 1px solid rgba(30, 41, 59, 0.2) !important; color: #1e293b !important;
+    }
+    [data-testid="stSidebar"] div[data-baseweb="input"] input, 
+    [data-testid="stSidebar"] div[data-baseweb="textarea"] textarea { color: #1e293b !important; }
+    
+    /* Expanders del Sidebar */
+    [data-testid="stSidebar"][data-testid="stExpander"] {
+        background-color: rgba(255, 255, 255, 0.3) !important;
+        border: 1px solid rgba(30, 41, 59, 0.1) !important;
+    }[data-testid="stSidebar"] [data-testid="stExpander"] summary {
+        background-color: rgba(245, 245, 220, 0.6) !important; border-radius: 8px !important;
+    }
+
+    /* Textos Principal Oscuros */
     h1, h2, h3, h4, p, label, .stMarkdown { color: #f8fafc !important; }
 
     /* 🔥 Botones Principales Premium */
@@ -74,72 +107,52 @@ st.markdown("""
     .stButton > button * { color: white !important; }
     .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important; }
 
-    /* 🔥 Botones Secundarios y Descarga (Alto Contraste) */
+    /* Botones de eliminar (Lista de compra) */
+    button[key^="del_"] { background: transparent !important; box-shadow: none !important; color: #ef4444 !important; font-size: 1.2rem !important; }
+    button[key^="del_"]:hover { transform: scale(1.1) !important; }
+
+    /* Botones Secundarios */
     .stDownloadButton > button, button[kind="secondaryFormSubmit"], button[kind="secondary"] {
         background: rgba(30, 41, 59, 0.8) !important; 
-        border: 1px solid #3b82f6 !important; 
-        color: #ffffff !important;
+        border: 1px solid #3b82f6 !important; color: #ffffff !important;
     }
+    [data-testid="stSidebar"] button[kind="secondary"] * { color: #ffffff !important; }
     
     /* 🔥 Tarjetas Grandes del Dashboard */
     .dashboard-grid .stButton > button {
-        height: 160px !important;
-        font-size: 22px !important;
+        height: 160px !important; font-size: 22px !important;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
         border-radius: 20px !important;
         background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)) !important;
         border: 2px solid rgba(255,255,255,0.1) !important;
     }
-    .dashboard-grid .stButton > button:hover {
-        border: 2px solid #10b981 !important; transform: scale(1.02);
-    }
+    .dashboard-grid .stButton > button:hover { border: 2px solid #10b981 !important; transform: scale(1.02); }
 
-    /* 🔥 Desplegables (Expanders) Alto Contraste */
-    [data-testid="stExpander"] {
+    /* 🔥 Desplegables Main UI (Alto Contraste) */
+    .block-container[data-testid="stExpander"] {
         background-color: rgba(30, 41, 59, 0.6) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 10px !important;
-    }[data-testid="stExpander"] summary {
-        background-color: rgba(15, 23, 42, 0.9) !important;
-        color: #ffffff !important;
-        border-radius: 10px !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important; border-radius: 10px !important;
     }
-    [data-testid="stExpander"] summary p { color: #ffffff !important; font-weight: bold; }
+    .block-container [data-testid="stExpander"] summary {
+        background-color: rgba(15, 23, 42, 0.9) !important; color: #ffffff !important; border-radius: 10px !important;
+    }
 
-    /* 🔥 Inputs Oscuros (Glassmorphism) */
-    div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div, div[data-baseweb="select"] > div {
+    /* Inputs Oscuros Main UI */
+    .block-container div[data-baseweb="input"] > div, .block-container div[data-baseweb="select"] > div {
         background-color: rgba(15, 23, 42, 0.6) !important;
         border: 1px solid rgba(255,255,255,0.2) !important; border-radius: 8px !important; color: white !important;
     }
-    div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] div { color: white !important; }
+    .block-container div[data-baseweb="input"] input, .block-container div[data-baseweb="select"] div { color: white !important; }
 
-    /* 🔥 Flechitas Sidebar Visibles */
-    button[data-testid="stSidebarCollapseButton"] {
-        background-color: #f1f5f9 !important; border-radius: 50% !important;
-    }
-    button[data-testid="stSidebarCollapseButton"] svg {
-        fill: #0f172a !important; color: #0f172a !important; stroke: #0f172a !important;
-    }
-    button[data-testid="collapsedControl"] svg {
-        fill: #ffffff !important; color: #ffffff !important; stroke: #ffffff !important;
-    }
-    button[data-testid="collapsedControl"] {
-        background-color: rgba(15, 23, 42, 0.6) !important; border-radius: 50% !important;
-    }
+    /* 🔥 Flechitas Visibles */
+    button[data-testid="stSidebarCollapseButton"] { background-color: rgba(245, 245, 220, 0.9) !important; border-radius: 50% !important; }
+    button[data-testid="stSidebarCollapseButton"] svg { fill: #1e293b !important; color: #1e293b !important; }
+    button[data-testid="collapsedControl"] { background-color: rgba(15, 23, 42, 0.6) !important; border-radius: 50% !important; }
+    button[data-testid="collapsedControl"] svg { fill: #ffffff !important; color: #ffffff !important; }
 
-    /* Tarjeta Dorada y Etiquetas */
-    .golden-card { background: linear-gradient(135deg, #FFDF00 0%, #D4AF37 100%); padding: 3px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 25px rgba(212, 175, 55, 0.4); }
-    .golden-card-content { background: rgba(15, 23, 42, 0.95); padding: 25px; border-radius: 14px; text-align: center; }
-    .hero-emoji { font-size: 80px; text-align: center; margin: 0; padding: 0; line-height: 1.2; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
-    .nutrition-label { border: 2px solid #fff; padding: 20px; background: rgba(255,255,255,0.95); color: black !important; font-family: 'Arial', sans-serif; border-radius: 12px; width: 100%; margin: auto auto 20px auto; }
-    .nutrition-label h2, .nutrition-label span, .nutrition-label div { color: black !important; }
-    .nutrition-label h2 { margin: 0; font-size: 24px; font-weight: 900; border-bottom: 8px solid #111; padding-bottom: 5px; }
-    .nut-row { display: flex; justify-content: space-between; border-bottom: 1px solid #999; padding: 6px 0; font-size: 15px; }
-    .nut-row.thick { border-bottom: 4px solid #111; }
-    
     .brand-logo { font-family: 'Georgia', serif; font-size: 3rem; font-weight: bold; text-align: center; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .brand-subtitle { text-align: center; font-size: 1.2rem; font-weight: 300; letter-spacing: 2px; color: #cbd5e1; margin-top: -10px; margin-bottom: 30px;}
     </style>
+""", unsafe_allow_html=True)
 """, unsafe_allow_html=True)
 
 # ==========================================
