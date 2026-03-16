@@ -125,7 +125,7 @@ def get_user_data(username):
 
 def update_user_data(username, data_dict):
     if username:
-        supabase.table("app_users_2").update(data_dict).eq("username", username).execute()execute()
+        supabase.table("app_users_2").update(data_dict).eq("username", username).execute()
 
 # Selector de Idioma Global
 with st.sidebar:
