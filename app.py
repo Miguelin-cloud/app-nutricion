@@ -12,8 +12,6 @@ from supabase import create_client, Client
 # ==========================================
 # CONFIGURACIÓN DE PÁGINA Y CSS (Mobile-First)
 # ==========================================
-# Usamos layout="wide" para que las columnas respiren mejor en PC. 
-# En móvil, Streamlit automáticamente apila las columnas de forma nativa.
 st.set_page_config(page_title="Smart AI Nutritionist", page_icon="🍲", layout="wide")
 
 st.markdown("""
@@ -37,6 +35,8 @@ st.markdown("""
     .nut-bold { font-weight: bold; }
     .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 1200px; }
     .feed-card { background-color: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e9ecef; }
+    /* Small style for the top language selector */
+    .lang-select { display:flex; justify-content:flex-end; align-items:center; margin-bottom:10px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -48,7 +48,7 @@ def init_supabase() -> Client:
     url = st.secrets.get("SUPABASE_URL")
     key = st.secrets.get("SUPABASE_KEY")
     if not url or not key:
-        st.error("Faltan las credenciales de Supabase en st.secrets.")
+        st.error("Supabase credentials missing in st.secrets.")
         st.stop()
     return create_client(url, key)
 
@@ -57,9 +57,11 @@ supabase = init_supabase()
 # ==========================================
 # SISTEMA MULTIDIOMA Y TEXTOS
 # ==========================================
+# NOTE: He añadido todas las cadenas necesarias para la pantalla de autenticación y los labels de macros
 TRANSLATIONS = {
     "🇪🇸 Español": {
         "lang_code": "Spanish",
+        # Main app strings (already existed)
         "title": "¡Hola {name}! ¿Qué cocinamos hoy? 🍲",
         "subtitle": "Dime qué ingredientes tienes y crearé la comida perfecta para tus objetivos.",
         "assistant_msg": "Escribe tus ingredientes abajo. ¡Hagamos algo sano y delicioso!",
@@ -82,7 +84,56 @@ TRANSLATIONS = {
             {"name": "Risotto de Setas", "emoji": "🍄", "desc": "Cremoso, reconfortante y perfecto para cargar energía."},
             {"name": "Poke Bowl de Salmón", "emoji": "🥗", "desc": "Fresco, rico en omega-3 y grasas saludables."},
             {"name": "Shakshuka", "emoji": "🍳", "desc": "Huevos en salsa de tomate especiada. Alto en proteína."}
-        ]
+        ],
+        # Authentication screen strings (NEW / translated)
+        "auth_app_name": "NutriAI 🍲",
+        "auth_subtitle": "Tu nutricionista inteligente. Inicia sesión o regístrate para continuar.",
+        "tab_login": "🔑 Iniciar Sesión",
+        "tab_register": "📝 Registrarse",
+        "tab_recover": "🆘 Recuperar PIN",
+        "username_label_login": "Usuario (Ej: miguel123)",
+        "pin_label_login": "PIN (Contraseña)",
+        "login_btn": "Entrar",
+        "login_error": "Usuario o PIN incorrectos.",
+        "reg_section1": "1. Datos de Acceso",
+        "create_user_label": "Crea un Usuario único",
+        "create_pin_label": "Crea un PIN corto",
+        "security_question_label": "Pregunta de Seguridad",
+        "security_options": ["¿Nombre de tu primera mascota?", "¿Ciudad de nacimiento?", "¿Nombre de tu colegio?"],
+        "security_answer_label": "Respuesta de Seguridad (Útil si olvidas el PIN)",
+        "reg_section2": "2. Tu Perfil Clínico",
+        "name_label": "Nombre Real (Para tratarte con cercanía)",
+        "age_label": "Edad",
+        "weight_label": "Peso (kg)",
+        "height_label": "Altura (cm)",
+        "gender_label": "Género",
+        "gender_options": ["Masculino", "Femenino", "Otro"],
+        "reg_section3": "3. Objetivos",
+        "goals_label": "Objetivo principal (Ej: Perder grasa, ganar masa muscular)",
+        "rest_label": "Restricciones (Ej: Vegano, Intolerante a la lactosa)",
+        "create_account_btn": "Crear Cuenta y Entrar 🚀",
+        "username_taken": "Ese Nombre de Usuario ya está en uso. Elige otro.",
+        "account_created": "¡Cuenta creada!",
+        "fill_required": "Por favor, rellena los campos obligatorios.",
+        "forgot_pin_text": "¿Olvidaste tu PIN?",
+        "search_user_label": "Introduce tu Usuario",
+        "search_user_btn": "Buscar Usuario",
+        "user_found": "Usuario encontrado.",
+        "user_not_found": "Usuario no encontrado.",
+        "recover_question_prefix": "Pregunta:",
+        "your_answer_label": "Tu Respuesta",
+        "new_pin_label": "Nuevo PIN",
+        "change_pin_btn": "Cambiar PIN",
+        "pin_changed_success": "¡PIN cambiado con éxito! Ya puedes iniciar sesión.",
+        "wrong_answer": "Respuesta incorrecta.",
+        # Sidebar profile small labels (translated)
+        "current_weight_label": "Peso Actual (kg)",
+        "profile_goals_label": "Objetivos",
+        "profile_restrictions_label": "Restricciones",
+        # Macronutrients (for the 'rosco')
+        "macro_protein": "Proteínas",
+        "macro_fat": "Grasas",
+        "macro_carbs": "Carbohidratos"
     },
     "🇬🇧 English": {
         "lang_code": "English",
@@ -106,7 +157,56 @@ TRANSLATIONS = {
             {"name": "Mushroom Risotto", "emoji": "🍄", "desc": "Creamy, comforting, and perfect for carb-loading."},
             {"name": "Salmon Poke Bowl", "emoji": "🥗", "desc": "Fresh, rich in omega-3s and healthy fats."},
             {"name": "Shakshuka", "emoji": "🍳", "desc": "Eggs in spicy tomato sauce. High in protein."}
-        ]
+        ],
+        # Authentication
+        "auth_app_name": "NutriAI 🍲",
+        "auth_subtitle": "Your smart nutritionist. Log in or sign up to continue.",
+        "tab_login": "🔑 Log In",
+        "tab_register": "📝 Register",
+        "tab_recover": "🆘 Recover PIN",
+        "username_label_login": "Username (e.g., miguel123)",
+        "pin_label_login": "PIN (Password)",
+        "login_btn": "Enter",
+        "login_error": "Incorrect username or PIN.",
+        "reg_section1": "1. Access Data",
+        "create_user_label": "Create a unique Username",
+        "create_pin_label": "Create a short PIN",
+        "security_question_label": "Security Question",
+        "security_options": ["What was your first pet's name?", "City of birth?", "Name of your school?"],
+        "security_answer_label": "Security Answer (Useful if you forget your PIN)",
+        "reg_section2": "2. Your Clinical Profile",
+        "name_label": "Full Name (to address you properly)",
+        "age_label": "Age",
+        "weight_label": "Weight (kg)",
+        "height_label": "Height (cm)",
+        "gender_label": "Gender",
+        "gender_options": ["Male", "Female", "Other"],
+        "reg_section3": "3. Goals",
+        "goals_label": "Main goal (e.g., Lose fat, gain muscle)",
+        "rest_label": "Restrictions (e.g., Vegan, Lactose intolerant)",
+        "create_account_btn": "Create Account & Enter 🚀",
+        "username_taken": "That username is already taken. Choose another.",
+        "account_created": "Account created!",
+        "fill_required": "Please fill the required fields.",
+        "forgot_pin_text": "Forgot your PIN?",
+        "search_user_label": "Enter your Username",
+        "search_user_btn": "Find User",
+        "user_found": "User found.",
+        "user_not_found": "User not found.",
+        "recover_question_prefix": "Question:",
+        "your_answer_label": "Your Answer",
+        "new_pin_label": "New PIN",
+        "change_pin_btn": "Change PIN",
+        "pin_changed_success": "PIN changed successfully! You can now log in.",
+        "wrong_answer": "Incorrect answer.",
+        # Sidebar profile small labels
+        "current_weight_label": "Current Weight (kg)",
+        "profile_goals_label": "Goals",
+        "profile_restrictions_label": "Restrictions",
+        # Macronutrients
+        "macro_protein": "Protein",
+        "macro_fat": "Fat",
+        "macro_carbs": "Carbohydrates"
     },
     "🇫🇷 Français": {
         "lang_code": "French",
@@ -130,7 +230,56 @@ TRANSLATIONS = {
             {"name": "Risotto aux Champignons", "emoji": "🍄", "desc": "Crémeux, réconfortant et parfait pour faire le plein d'énergie."},
             {"name": "Poke Bowl au Saumon", "emoji": "🥗", "desc": "Frais, riche en oméga-3 et en bonnes graisses."},
             {"name": "Shakshuka", "emoji": "🍳", "desc": "Œufs à la sauce tomate épicée. Riche en protéines."}
-        ]
+        ],
+        # Authentication
+        "auth_app_name": "NutriAI 🍲",
+        "auth_subtitle": "Votre nutritionniste intelligent. Connectez-vous ou inscrivez-vous pour continuer.",
+        "tab_login": "🔑 Se connecter",
+        "tab_register": "📝 S'inscrire",
+        "tab_recover": "🆘 Récupérer le PIN",
+        "username_label_login": "Nom d'utilisateur (ex : miguel123)",
+        "pin_label_login": "PIN (Mot de passe)",
+        "login_btn": "Entrer",
+        "login_error": "Nom d'utilisateur ou PIN incorrect.",
+        "reg_section1": "1. Données d'accès",
+        "create_user_label": "Créez un nom d'utilisateur unique",
+        "create_pin_label": "Créez un PIN court",
+        "security_question_label": "Question de sécurité",
+        "security_options": ["Nom de votre premier animal ?", "Ville de naissance ?", "Nom de votre école ?"],
+        "security_answer_label": "Réponse de sécurité (utile si vous oubliez le PIN)",
+        "reg_section2": "2. Votre profil clinique",
+        "name_label": "Nom complet (pour s'adresser correctement à vous)",
+        "age_label": "Âge",
+        "weight_label": "Poids (kg)",
+        "height_label": "Taille (cm)",
+        "gender_label": "Genre",
+        "gender_options": ["Homme", "Femme", "Autre"],
+        "reg_section3": "3. Objectifs",
+        "goals_label": "Objectif principal (ex : Perdre de la graisse, prendre de la masse)",
+        "rest_label": "Restrictions (ex : Végétalien, Intolérant au lactose)",
+        "create_account_btn": "Créer un compte et entrer 🚀",
+        "username_taken": "Ce nom d'utilisateur est déjà pris. Choisissez-en un autre.",
+        "account_created": "Compte créé !",
+        "fill_required": "Veuillez remplir les champs obligatoires.",
+        "forgot_pin_text": "Vous avez oublié votre PIN ?",
+        "search_user_label": "Entrez votre nom d'utilisateur",
+        "search_user_btn": "Rechercher l'utilisateur",
+        "user_found": "Utilisateur trouvé.",
+        "user_not_found": "Utilisateur non trouvé.",
+        "recover_question_prefix": "Question :",
+        "your_answer_label": "Votre réponse",
+        "new_pin_label": "Nouveau PIN",
+        "change_pin_btn": "Changer le PIN",
+        "pin_changed_success": "PIN modifié avec succès ! Vous pouvez maintenant vous connecter.",
+        "wrong_answer": "Réponse incorrecte.",
+        # Sidebar small labels
+        "current_weight_label": "Poids actuel (kg)",
+        "profile_goals_label": "Objectifs",
+        "profile_restrictions_label": "Restrictions",
+        # Macronutrients
+        "macro_protein": "Protéines",
+        "macro_fat": "Graisses",
+        "macro_carbs": "Glucides"
     },
     "🇮🇹 Italiano": {
         "lang_code": "Italian",
@@ -154,7 +303,56 @@ TRANSLATIONS = {
             {"name": "Risotto ai Funghi", "emoji": "🍄", "desc": "Cremoso, confortante e perfetto per fare il pieno di energia."},
             {"name": "Poke Bowl al Salmone", "emoji": "🥗", "desc": "Fresco, ricco di omega-3 e grassi sani."},
             {"name": "Shakshuka", "emoji": "🍳", "desc": "Uova in salsa di pomodoro piccante. Ricco di proteine."}
-        ]
+        ],
+        # Authentication
+        "auth_app_name": "NutriAI 🍲",
+        "auth_subtitle": "Il tuo nutrizionista intelligente. Accedi o registrati per continuare.",
+        "tab_login": "🔑 Accedi",
+        "tab_register": "📝 Registrati",
+        "tab_recover": "🆘 Recupera PIN",
+        "username_label_login": "Nome utente (es: miguel123)",
+        "pin_label_login": "PIN (Password)",
+        "login_btn": "Entra",
+        "login_error": "Nome utente o PIN errati.",
+        "reg_section1": "1. Dati di accesso",
+        "create_user_label": "Crea un nome utente unico",
+        "create_pin_label": "Crea un PIN corto",
+        "security_question_label": "Domanda di sicurezza",
+        "security_options": ["Nome del tuo primo animale?", "Città di nascita?", "Nome della tua scuola?"],
+        "security_answer_label": "Risposta di sicurezza (utile se dimentichi il PIN)",
+        "reg_section2": "2. Il tuo profilo clinico",
+        "name_label": "Nome completo (per rivolgerci a te correttamente)",
+        "age_label": "Età",
+        "weight_label": "Peso (kg)",
+        "height_label": "Altezza (cm)",
+        "gender_label": "Genere",
+        "gender_options": ["Maschio", "Femmina", "Altro"],
+        "reg_section3": "3. Obiettivi",
+        "goals_label": "Obiettivo principale (es: Perdere grasso, aumentare massa)",
+        "rest_label": "Restrizioni (es: Vegano, Intollerante al lattosio)",
+        "create_account_btn": "Crea account & Entra 🚀",
+        "username_taken": "Quel nome utente è già in uso. Scegline un altro.",
+        "account_created": "Account creato!",
+        "fill_required": "Per favore, compila i campi obbligatori.",
+        "forgot_pin_text": "Hai dimenticato il PIN?",
+        "search_user_label": "Inserisci il tuo nome utente",
+        "search_user_btn": "Cerca Utente",
+        "user_found": "Utente trovato.",
+        "user_not_found": "Utente non trovato.",
+        "recover_question_prefix": "Domanda:",
+        "your_answer_label": "La tua risposta",
+        "new_pin_label": "Nuovo PIN",
+        "change_pin_btn": "Cambia PIN",
+        "pin_changed_success": "PIN modificato con successo! Ora puoi accedere.",
+        "wrong_answer": "Risposta errata.",
+        # Sidebar small labels
+        "current_weight_label": "Peso attuale (kg)",
+        "profile_goals_label": "Obiettivi",
+        "profile_restrictions_label": "Restrizioni",
+        # Macronutrients
+        "macro_protein": "Proteine",
+        "macro_fat": "Grassi",
+        "macro_carbs": "Carboidrati"
     }
 }
 
@@ -214,56 +412,75 @@ def update_user_data(username, data_dict):
     if username:
         supabase.table("app_users_2").update(data_dict).eq("username", username).execute()
 
-# Selector de Idioma Global
-with st.sidebar:
-    selected_lang = st.selectbox("🌐 Language", list(TRANSLATIONS.keys()))
-t = TRANSLATIONS[selected_lang]
+# ==========================================
+# LANGUAGE SELECTOR (Top-right)  <-- MOVED FROM SIDEBAR
+# - Visible on auth screen and after login
+# - Stores selection in st.session_state.selected_lang
+# ==========================================
+if "selected_lang" not in st.session_state:
+    # default to Spanish key if present, else first key
+    default_key = "🇪🇸 Español" if "🇪🇸 Español" in TRANSLATIONS else list(TRANSLATIONS.keys())[0]
+    st.session_state.selected_lang = default_key
+
+# Top bar placement: columns to push selectbox to the right
+cols_top = st.columns([1, 6, 1])
+with cols_top[2]:
+    # The visual options are the keys and already contain emojis (e.g., "🇪🇸 Español")
+    st.session_state.selected_lang = st.selectbox("", options=list(TRANSLATIONS.keys()), index=list(TRANSLATIONS.keys()).index(st.session_state.selected_lang), key="selected_lang", help="Select language / Selecciona idioma")
+
+# Update current translation dict based on selection
+t = TRANSLATIONS[st.session_state.selected_lang]
 lang_code = t["lang_code"]
 
 # ==========================================
-# PANTALLA DE AUTENTICACIÓN
+# PANTALLA DE AUTENTICACIÓN (AHORA TODO TRADUCIDO)
 # ==========================================
 if not st.session_state.current_username:
-    st.title("NutriAI 🍲")
-    st.markdown("Tu nutricionista inteligente. Inicia sesión o regístrate para continuar.")
+    # Use the translated app name and subtitle
+    st.title(t["auth_app_name"])
+    st.markdown(t["auth_subtitle"])
     
-    tab1, tab2, tab3 = st.tabs(["🔑 Iniciar Sesión", "📝 Registrarse", "🆘 Recuperar PIN"])
+    # Tabs labels taken from translations
+    tab1, tab2, tab3 = st.tabs([t["tab_login"], t["tab_register"], t["tab_recover"]])
     
+    # ---------- LOGIN TAB ----------
     with tab1:
-        log_user = st.text_input("Usuario (Ej: miguel123)", key="log_user")
-        log_pin = st.text_input("PIN (Contraseña)", type="password", key="log_pin")
-        if st.button("Entrar", type="primary", use_container_width=True):
+        log_user = st.text_input(t["username_label_login"], key="log_user")
+        log_pin = st.text_input(t["pin_label_login"], type="password", key="log_pin")
+        if st.button(t["login_btn"], type="primary", use_container_width=True):
             res = supabase.table("app_users_2").select("*").eq("username", log_user).eq("pin", log_pin).execute()
             if res.data:
                 set_login_session(log_user)
                 st.rerun()
             else:
-                st.error("Usuario o PIN incorrectos.")
+                st.error(t["login_error"])
                 
+    # ---------- REGISTER TAB ----------
     with tab2:
-        st.markdown("**1. Datos de Acceso**")
-        reg_user = st.text_input("Crea un Usuario único", key="reg_user")
-        reg_pin = st.text_input("Crea un PIN corto", type="password", key="reg_pin")
-        reg_sq = st.selectbox("Pregunta de Seguridad",["¿Nombre de tu primera mascota?", "¿Ciudad de nacimiento?", "¿Nombre de tu colegio?"])
-        reg_sa = st.text_input("Respuesta de Seguridad (Útil si olvidas el PIN)")
+        st.markdown(f"**{t['reg_section1']}**")
+        reg_user = st.text_input(t["create_user_label"], key="reg_user")
+        reg_pin = st.text_input(t["create_pin_label"], type="password", key="reg_pin")
+        # security question options come from translations
+        reg_sq = st.selectbox(t["security_question_label"], t["security_options"])
+        reg_sa = st.text_input(t["security_answer_label"])
         
-        st.markdown("**2. Tu Perfil Clínico**")
-        reg_name = st.text_input("Nombre Real (Para tratarte con cercanía)")
+        st.markdown(f"**{t['reg_section2']}**")
+        reg_name = st.text_input(t["name_label"])
         col1, col2, col3 = st.columns(3)
-        reg_age = col1.number_input("Edad", min_value=10, max_value=100, step=1, value=25)
-        reg_weight = col2.number_input("Peso (kg)", min_value=30.0, max_value=200.0, step=0.1, value=70.0)
-        reg_height = col3.number_input("Altura (cm)", min_value=100, max_value=250, step=1, value=170)
-        reg_gender = st.selectbox("Género",["Masculino", "Femenino", "Otro"])
+        reg_age = col1.number_input(t["age_label"], min_value=10, max_value=100, step=1, value=25)
+        reg_weight = col2.number_input(t["weight_label"], min_value=30.0, max_value=200.0, step=0.1, value=70.0)
+        reg_height = col3.number_input(t["height_label"], min_value=100, max_value=250, step=1, value=170)
+        reg_gender = st.selectbox(t["gender_label"], t["gender_options"])
         
-        st.markdown("**3. Objetivos**")
-        reg_goals = st.text_area("Objetivo principal (Ej: Perder grasa, ganar masa muscular)")
-        reg_rest = st.text_input("Restricciones (Ej: Vegano, Intolerante a la lactosa)")
+        st.markdown(f"**{t['reg_section3']}**")
+        reg_goals = st.text_area(t["goals_label"])
+        reg_rest = st.text_input(t["rest_label"])
         
-        if st.button("Crear Cuenta y Entrar 🚀", type="primary", use_container_width=True):
+        if st.button(t["create_account_btn"], type="primary", use_container_width=True):
             if reg_user and reg_pin and reg_sa and reg_name:
                 check = supabase.table("app_users_2").select("username").eq("username", reg_user).execute()
                 if check.data:
-                    st.error("Ese Nombre de Usuario ya está en uso. Elige otro.")
+                    st.error(t["username_taken"])
                 else:
                     new_user = {
                         "username": reg_user, "pin": reg_pin, "security_question": reg_sq, "security_answer": reg_sa.lower(),
@@ -272,37 +489,38 @@ if not st.session_state.current_username:
                     }
                     supabase.table("app_users_2").insert(new_user).execute()
                     set_login_session(reg_user)
-                    st.success("¡Cuenta creada!")
+                    st.success(t["account_created"])
                     st.rerun()
             else:
-                st.warning("Por favor, rellena los campos obligatorios.")
-
+                st.warning(t["fill_required"])
+    
+    # ---------- RECOVER TAB ----------
     with tab3:
-        st.markdown("¿Olvidaste tu PIN?")
-        rec_user = st.text_input("Introduce tu Usuario", key="rec_user")
-        if st.button("Buscar Usuario"):
+        st.markdown(t["forgot_pin_text"])
+        rec_user = st.text_input(t["search_user_label"], key="rec_user")
+        if st.button(t["search_user_btn"]):
             res = supabase.table("app_users_2").select("security_question").eq("username", rec_user).execute()
             if res.data:
                 st.session_state.recover_user = rec_user
                 st.session_state.recover_q = res.data[0]["security_question"]
-                st.success("Usuario trovato / User found.")
+                st.success(t["user_found"])
             else:
-                st.error("Usuario no encontrado.")
+                st.error(t["user_not_found"])
                 
         if "recover_user" in st.session_state:
-            st.info(f"Pregunta: **{st.session_state.recover_q}**")
-            rec_ans = st.text_input("Tu Respuesta")
-            new_pin = st.text_input("Nuevo PIN", type="password")
-            if st.button("Cambiar PIN", use_container_width=True):
+            st.info(f"{t['recover_question_prefix']} **{st.session_state.recover_q}**")
+            rec_ans = st.text_input(t["your_answer_label"])
+            new_pin = st.text_input(t["new_pin_label"], type="password")
+            if st.button(t["change_pin_btn"], use_container_width=True):
                 res = supabase.table("app_users_2").select("security_answer").eq("username", st.session_state.recover_user).execute()
                 if res.data and res.data[0]["security_answer"] == rec_ans.lower():
                     supabase.table("app_users_2").update({"pin": new_pin}).eq("username", st.session_state.recover_user).execute()
-                    st.success("¡PIN cambiado con éxito! Ya puedes iniciar sesión.")
+                    st.success(t["pin_changed_success"])
                     del st.session_state.recover_user
                 else:
-                    st.error("Respuesta incorrecta.")
+                    st.error(t["wrong_answer"])
                     
-    st.stop() 
+    st.stop()
 
 # ==========================================
 # CARGAR PERFIL DEL USUARIO ACTIVO
@@ -326,7 +544,7 @@ if "full_recipe" not in st.session_state: st.session_state.full_recipe = None
 def get_groq_client():
     api_key = st.secrets.get("GROQ_API_KEY")
     if not api_key:
-        st.error("Groq API Key no encontrada.")
+        st.error("Groq API Key not found.")
         st.stop()
     return Groq(api_key=api_key)
 
@@ -365,12 +583,14 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof):
 
 # ==========================================
 # UI: BARRA LATERAL (Perfil y Favoritos)
+# Note: El selector de idioma fue MOVIDO arriba.
 # ==========================================
 with st.sidebar:
     with st.expander(t["profile"], expanded=False):
-        upd_weight = st.number_input("Peso Actual (kg)", value=float(user_profile.get("weight", 70.0)))
-        upd_goals = st.text_area("Objetivos", value=user_profile.get("goals", ""))
-        upd_rest = st.text_input("Restricciones", value=user_profile.get("restrictions", ""))
+        # NOTE: minor labels inside profile now translated (current_weight_label, profile_goals_label, profile_restrictions_label)
+        upd_weight = st.number_input(t["current_weight_label"], value=float(user_profile.get("weight", 70.0)))
+        upd_goals = st.text_area(t["profile_goals_label"], value=user_profile.get("goals", ""))
+        upd_rest = st.text_input(t["profile_restrictions_label"], value=user_profile.get("restrictions", ""))
         if st.button(t["update_prof"], use_container_width=True):
             update_user_data(user_profile["username"], {"weight": upd_weight, "goals": upd_goals, "restrictions": upd_rest})
             st.success(t["prof_updated"])
@@ -387,7 +607,7 @@ with st.sidebar:
         st.info(t["no_favs"])
         
     st.divider()
-    if st.button(t.get("logout", "Cerrar Sesión"), type="secondary", use_container_width=True):
+    if st.button(t.get("logout", "Logout"), type="secondary", use_container_width=True):
         logout()
         st.rerun()
 
@@ -542,6 +762,7 @@ if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
     m = recipe['macros']
     
     with col_label:
+        # NOTE: Nutrition label left in English for now; this block wasn't requested for translation.
         st.markdown(f"""
         <div class="nutrition-label">
             <h2>Nutrition Facts</h2>
@@ -558,9 +779,16 @@ if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
         """, unsafe_allow_html=True)
         
     with col_chart:
-        # Extraemos los números y preparamos los datos para Plotly
+        # ==========================================
+        # DYNAMIC MACRO LABELS FOR PLOTLY (translated)
+        # - Replace the hardcoded Spanish macros with the translated labels
+        # ==========================================
         macro_df = pd.DataFrame({
-            "Macro": ["Proteína", "Grasas", "Carbohidratos"],
+            "Macro": [
+                t.get("macro_protein", "Protein"),
+                t.get("macro_fat", "Fat"),
+                t.get("macro_carbs", "Carbs")
+            ],
             "Gramos": [
                 extract_number(m.get('protein', '0g')),
                 extract_number(m.get('total_fat', '0g')),
@@ -583,7 +811,14 @@ if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
             )
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.write("Gráfico no disponible para esta receta.")
+            # Provide translated fallback message (small touch)
+            fallback_msg = {
+                "🇪🇸 Español": "Gráfico no disponible para esta receta.",
+                "🇬🇧 English": "Chart not available for this recipe.",
+                "🇫🇷 Français": "Graphique non disponible pour cette recette.",
+                "🇮🇹 Italiano": "Grafico non disponibile per questa ricetta."
+            }.get(st.session_state.selected_lang, "Chart not available for this recipe.")
+            st.write(fallback_msg)
     
     if st.button(t["save_fav"], use_container_width=True):
         favs = user_profile.get("favorites",[])
@@ -593,6 +828,7 @@ if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
             "protein": m.get('protein', '0g')
         })
         update_user_data(user_profile["username"], {"favorites": favs})
+        # Use toast / saved translation
         st.toast(t["saved"])
             
     with st.expander("🛒 " + t["ingredients"], expanded=True):
@@ -615,12 +851,9 @@ if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
             with st.spinner(t["recalculating"]):
                 prompt = f"Current recipe: {json.dumps(recipe)}. Adjustment: '{macro_adjustment}'. Recalculate quantities."
                 format_hint = "Return strictly in the exact same JSON format as the original recipe."
-                # NOTA: Corregido el error de tu código original, donde se llamaba dos veces la función perdiendo el u_prof
+                # Call AI once and update recipe if OK
                 new_recipe = call_ai_json(prompt, format_hint, lang_code, user_profile)
                 if new_recipe:
                     st.session_state.full_recipe = new_recipe
                     st.rerun()
-                    new_recipe = call_ai_json(prompt, format_hint, lang_code)
-                    if new_recipe:
-                        st.session_state.full_recipe = new_recipe
-                        st.rerun()
+                    # Note: original code had duplicate calls and a bug; fixed by making a single call above.
