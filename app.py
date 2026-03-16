@@ -60,6 +60,10 @@ supabase = init_supabase()
 TRANSLATIONS = {
     "🇪🇸 Español": {
         "lang_code": "Spanish",
+        "login_sub": "Tu nutricionista inteligente. Inicia sesión o regístrate para continuar.",
+        "tab_login": "🔑 Iniciar Sesión", "tab_reg": "📝 Registrarse", "tab_rec": "🆘 Recuperar PIN",
+        "user_label": "Usuario (Ej: miguel123)", "pin_label": "PIN (Contraseña)",
+        "enter_btn": "Entrar", "login_err": "Usuario o PIN incorrectos.",
         "title": "¡Hola {name}! ¿Qué cocinamos hoy? 🍲",
         "subtitle": "Dime qué ingredientes tienes y crearé la comida perfecta para tus objetivos.",
         "assistant_msg": "Escribe tus ingredientes abajo. ¡Hagamos algo sano y delicioso!",
@@ -86,6 +90,10 @@ TRANSLATIONS = {
     },
     "🇬🇧 English": {
         "lang_code": "English",
+        "login_sub": "Your smart nutritionist. Log in or sign up to continue.",
+        "tab_login": "🔑 Login", "tab_reg": "📝 Sign Up", "tab_rec": "🆘 Recover PIN",
+        "user_label": "Username (e.g., mike123)", "pin_label": "PIN (Password)",
+        "enter_btn": "Log In", "login_err": "Incorrect Username or PIN.",
         "title": "Hi {name}! What are we cooking today? 🍲",
         "subtitle": "Tell me your ingredients, and I'll craft the perfect meal for your goals.",
         "assistant_msg": "List your ingredients below. Let's cook!",
@@ -110,6 +118,10 @@ TRANSLATIONS = {
     },
     "🇫🇷 Français": {
         "lang_code": "French",
+        "login_sub": "Votre nutritionniste intelligent. Connectez-vous ou inscrivez-vous pour continuer.",
+        "tab_login": "🔑 Connexion", "tab_reg": "📝 S'inscrire", "tab_rec": "🆘 Récupérer PIN",
+        "user_label": "Utilisateur (Ex : michel123)", "pin_label": "PIN (Mot de passe)",
+        "enter_btn": "Entrer", "login_err": "Utilisateur ou PIN incorrect.",
         "title": "Bonjour {name} ! Qu'est-ce qu'on cuisine aujourd'hui ? 🍲",
         "subtitle": "Dis-moi quels ingrédients tu as et je créerai le repas parfait pour tes objectifs.",
         "assistant_msg": "Écris tes ingrédients ci-dessous. Cuisinons sainement !",
@@ -134,6 +146,10 @@ TRANSLATIONS = {
     },
     "🇮🇹 Italiano": {
         "lang_code": "Italian",
+        "login_sub": "Il tuo nutrizionista intelligente. Accedi o registrati per continuare.",
+        "tab_login": "🔑 Accedi", "tab_reg": "📝 Registrati", "tab_rec": "🆘 Recupera PIN",
+        "user_label": "Utente (Es: michele123)", "pin_label": "PIN (Password)",
+        "enter_btn": "Entra", "login_err": "Utente o PIN errati.",
         "title": "Ciao {name}! Cosa cuciniamo oggi? 🍲",
         "subtitle": "Dimmi che ingredienti hai e creerò il pasto perfetto per i tuoi obiettivi.",
         "assistant_msg": "Scrivi i tuoi ingredienti qui sotto. Cuciniamo sano!",
@@ -214,56 +230,88 @@ def update_user_data(username, data_dict):
     if username:
         supabase.table("app_users_2").update(data_dict).eq("username", username).execute()
 
-# Selector de Idioma Global
-with st.sidebar:
-    selected_lang = st.selectbox("🌐 Language", list(TRANSLATIONS.keys()))
-t = TRANSLATIONS[selected_lang]
+# ==========================================
+# SELECTOR DE IDIOMA Y TRADUCCIONES
+# ==========================================
+# Usamos session_state para recordar el idioma elegido en toda la app
+if "selected_lang" not in st.session_state:
+    st.session_state.selected_lang = "🇪🇸 Español"
+
+def update_lang():
+    st.session_state.selected_lang = st.session_state.lang_selector
+
+# Cargamos las traducciones basadas en el estado actual
+t = TRANSLATIONS[st.session_state.selected_lang]
 lang_code = t["lang_code"]
 
 # ==========================================
 # PANTALLA DE AUTENTICACIÓN
 # ==========================================
+# Lógica para mantener el selector de idioma sincronizado
+if "selected_lang" not in st.session_state:
+    st.session_state.selected_lang = "🇪🇸 Español"
+
+def update_lang():
+    st.session_state.selected_lang = st.session_state.lang_selector
+
+# Asignamos las variables de traducción basadas en la selección
+t = TRANSLATIONS[st.session_state.selected_lang]
+lang_code = t["lang_code"]
+
 if not st.session_state.current_username:
+    # Selector de idioma elegante y centrado en la pantalla de inicio
+    st.write("") # Espacio
+    col_lang1, col_lang2, col_lang3 = st.columns([1, 2, 1])
+    with col_lang2:
+        st.selectbox(
+            "🌍 Language / Langue / Lingua / Idioma:", 
+            list(TRANSLATIONS.keys()), 
+            index=list(TRANSLATIONS.keys()).index(st.session_state.selected_lang),
+            key="lang_selector",
+            on_change=update_lang
+        )
+    st.write("---")
+
     st.title("NutriAI 🍲")
-    st.markdown("Tu nutricionista inteligente. Inicia sesión o regístrate para continuar.")
+    st.markdown(t.get("login_sub", "Tu nutricionista inteligente. Inicia sesión o regístrate para continuar."))
     
-    tab1, tab2, tab3 = st.tabs(["🔑 Iniciar Sesión", "📝 Registrarse", "🆘 Recuperar PIN"])
+    tab1, tab2, tab3 = st.tabs([t.get("tab_login", "🔑 Iniciar Sesión"), t.get("tab_reg", "📝 Registrarse"), t.get("tab_rec", "🆘 Recuperar PIN")])
     
     with tab1:
-        log_user = st.text_input("Usuario (Ej: miguel123)", key="log_user")
-        log_pin = st.text_input("PIN (Contraseña)", type="password", key="log_pin")
-        if st.button("Entrar", type="primary", use_container_width=True):
+        log_user = st.text_input(t.get("user_label", "Usuario"), key="log_user")
+        log_pin = st.text_input(t.get("pin_label", "PIN"), type="password", key="log_pin")
+        if st.button(t.get("enter_btn", "Entrar"), type="primary", use_container_width=True):
             res = supabase.table("app_users_2").select("*").eq("username", log_user).eq("pin", log_pin).execute()
             if res.data:
                 set_login_session(log_user)
                 st.rerun()
             else:
-                st.error("Usuario o PIN incorrectos.")
+                st.error(t.get("login_err", "Usuario o PIN incorrectos."))
                 
     with tab2:
-        st.markdown("**1. Datos de Acceso**")
-        reg_user = st.text_input("Crea un Usuario único", key="reg_user")
-        reg_pin = st.text_input("Crea un PIN corto", type="password", key="reg_pin")
-        reg_sq = st.selectbox("Pregunta de Seguridad",["¿Nombre de tu primera mascota?", "¿Ciudad de nacimiento?", "¿Nombre de tu colegio?"])
-        reg_sa = st.text_input("Respuesta de Seguridad (Útil si olvidas el PIN)")
+        st.markdown(t["reg_step1"])
+        reg_user = st.text_input(t["reg_user_label"], key="reg_user")
+        reg_pin = st.text_input(t["reg_pin_label"], type="password", key="reg_pin")
+        reg_sq = st.selectbox(t["reg_sq_label"], t["reg_sq_options"])
+        reg_sa = st.text_input(t["reg_sa_label"])
         
-        st.markdown("**2. Tu Perfil Clínico**")
-        reg_name = st.text_input("Nombre Real (Para tratarte con cercanía)")
+        st.markdown(t["reg_step2"])
+        reg_name = st.text_input(t["reg_name_label"])
         col1, col2, col3 = st.columns(3)
-        reg_age = col1.number_input("Edad", min_value=10, max_value=100, step=1, value=25)
-        reg_weight = col2.number_input("Peso (kg)", min_value=30.0, max_value=200.0, step=0.1, value=70.0)
-        reg_height = col3.number_input("Altura (cm)", min_value=100, max_value=250, step=1, value=170)
-        reg_gender = st.selectbox("Género",["Masculino", "Femenino", "Otro"])
+        reg_age = col1.number_input(t["reg_age"], min_value=10, max_value=100, step=1, value=25)
+        reg_weight = col2.number_input(t["reg_weight"], min_value=30.0, max_value=200.0, step=0.1, value=70.0)
+        reg_height = col3.number_input(t["reg_height"], min_value=100, max_value=250, step=1, value=170)
+        reg_gender = st.selectbox(t["reg_gender_label"], t["reg_gender_options"])
         
-        st.markdown("**3. Objetivos**")
-        reg_goals = st.text_area("Objetivo principal (Ej: Perder grasa, ganar masa muscular)")
-        reg_rest = st.text_input("Restricciones (Ej: Vegano, Intolerante a la lactosa)")
+        st.markdown(t["reg_step3"])
+        reg_goals = st.text_area(t["reg_goals_label"])
+        reg_rest = st.text_input(t["reg_rest_label"])
         
-        if st.button("Crear Cuenta y Entrar 🚀", type="primary", use_container_width=True):
+        if st.button(t["reg_btn"], type="primary", use_container_width=True):
             if reg_user and reg_pin and reg_sa and reg_name:
                 check = supabase.table("app_users_2").select("username").eq("username", reg_user).execute()
                 if check.data:
-                    st.error("Ese Nombre de Usuario ya está en uso. Elige otro.")
+                    st.error(t["reg_err_user"])
                 else:
                     new_user = {
                         "username": reg_user, "pin": reg_pin, "security_question": reg_sq, "security_answer": reg_sa.lower(),
@@ -272,35 +320,35 @@ if not st.session_state.current_username:
                     }
                     supabase.table("app_users_2").insert(new_user).execute()
                     set_login_session(reg_user)
-                    st.success("¡Cuenta creada!")
+                    st.success(t["reg_success"])
                     st.rerun()
             else:
-                st.warning("Por favor, rellena los campos obligatorios.")
+                st.warning(t["reg_warn_fields"])
 
     with tab3:
-        st.markdown("¿Olvidaste tu PIN?")
-        rec_user = st.text_input("Introduce tu Usuario", key="rec_user")
-        if st.button("Buscar Usuario"):
+        st.markdown(t["rec_title"])
+        rec_user = st.text_input(t["rec_user_label"], key="rec_user")
+        if st.button(t["rec_btn_search"]):
             res = supabase.table("app_users_2").select("security_question").eq("username", rec_user).execute()
             if res.data:
                 st.session_state.recover_user = rec_user
                 st.session_state.recover_q = res.data[0]["security_question"]
-                st.success("Usuario trovato / User found.")
+                st.success(t["rec_found"])
             else:
-                st.error("Usuario no encontrado.")
+                st.error(t["rec_not_found"])
                 
         if "recover_user" in st.session_state:
-            st.info(f"Pregunta: **{st.session_state.recover_q}**")
-            rec_ans = st.text_input("Tu Respuesta")
-            new_pin = st.text_input("Nuevo PIN", type="password")
-            if st.button("Cambiar PIN", use_container_width=True):
+            st.info(f"{t['rec_q_label']} **{st.session_state.recover_q}**")
+            rec_ans = st.text_input(t["rec_ans_label"])
+            new_pin = st.text_input(t["rec_new_pin"], type="password")
+            if st.button(t["rec_btn_change"], use_container_width=True):
                 res = supabase.table("app_users_2").select("security_answer").eq("username", st.session_state.recover_user).execute()
                 if res.data and res.data[0]["security_answer"] == rec_ans.lower():
                     supabase.table("app_users_2").update({"pin": new_pin}).eq("username", st.session_state.recover_user).execute()
-                    st.success("¡PIN cambiado con éxito! Ya puedes iniciar sesión.")
+                    st.success(t["rec_success"])
                     del st.session_state.recover_user
                 else:
-                    st.error("Respuesta incorrecta.")
+                    st.error(t["rec_err_ans"])
                     
     st.stop() 
 
@@ -367,18 +415,30 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof):
 # UI: BARRA LATERAL (Perfil y Favoritos)
 # ==========================================
 with st.sidebar:
+    # Selector de idioma en el sidebar (solo visible cuando ya han iniciado sesión)
+    if st.session_state.current_username:
+        st.selectbox(
+            "🌐 Language", 
+            list(TRANSLATIONS.keys()), 
+            index=list(TRANSLATIONS.keys()).index(st.session_state.selected_lang),
+            key="lang_selector_sidebar",
+            on_change=lambda: st.session_state.update(selected_lang=st.session_state.lang_selector_sidebar)
+        )
+        st.divider()
+
     with st.expander(t["profile"], expanded=False):
-        upd_weight = st.number_input("Peso Actual (kg)", value=float(user_profile.get("weight", 70.0)))
-        upd_goals = st.text_area("Objetivos", value=user_profile.get("goals", ""))
-        upd_rest = st.text_input("Restricciones", value=user_profile.get("restrictions", ""))
+        upd_weight = st.number_input(t["weight_label"], value=float(user_profile.get("weight", 70.0)))
+        upd_goals = st.text_area(t["goals_label"], value=user_profile.get("goals", ""))
+        upd_rest = st.text_input(t["rest_label"], value=user_profile.get("restrictions", ""))
         if st.button(t["update_prof"], use_container_width=True):
             update_user_data(user_profile["username"], {"weight": upd_weight, "goals": upd_goals, "restrictions": upd_rest})
             st.success(t["prof_updated"])
             st.rerun()
             
     st.divider()
+    
     st.subheader(t["favs"])
-    favs = user_profile.get("favorites",[])
+    favs = user_profile.get("favorites", [])
     if favs:
         for f in favs:
             with st.expander(f["name"]):
@@ -387,7 +447,8 @@ with st.sidebar:
         st.info(t["no_favs"])
         
     st.divider()
-    if st.button(t.get("logout", "Cerrar Sesión"), type="secondary", use_container_width=True):
+    
+    if st.button(t["logout"], type="secondary", use_container_width=True):
         logout()
         st.rerun()
 
