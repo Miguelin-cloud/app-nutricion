@@ -413,22 +413,24 @@ def update_user_data(username, data_dict):
         supabase.table("app_users_2").update(data_dict).eq("username", username).execute()
 
 # ==========================================
-# LANGUAGE SELECTOR (Top-right)  <-- MOVED FROM SIDEBAR
-# - Visible on auth screen and after login
-# - Stores selection in st.session_state.selected_lang
+# LANGUAGE SELECTOR (Top-right)
 # ==========================================
-if "selected_lang" not in st.session_state:
-    # default to Spanish key if present, else first key
-    default_key = "🇪🇸 Español" if "🇪🇸 Español" in TRANSLATIONS else list(TRANSLATIONS.keys())[0]
-    st.session_state.selected_lang = default_key
 
-# Top bar placement: columns to push selectbox to the right
+# Inicializar estado una sola vez
+if "selected_lang" not in st.session_state:
+    st.session_state.selected_lang = "🇪🇸 Español" if "🇪🇸 Español" in TRANSLATIONS else list(TRANSLATIONS.keys())[0]
+
+# Selector arriba a la derecha
 cols_top = st.columns([1, 6, 1])
 with cols_top[2]:
-    # The visual options are the keys and already contain emojis (e.g., "🇪🇸 Español")
-    st.session_state.selected_lang = st.selectbox("", options=list(TRANSLATIONS.keys()), index=list(TRANSLATIONS.keys()).index(st.session_state.selected_lang), key="selected_lang", help="Select language / Selecciona idioma")
+    st.selectbox(
+        "",
+        options=list(TRANSLATIONS.keys()),
+        key="selected_lang",
+        help="Select language / Selecciona idioma"
+    )
 
-# Update current translation dict based on selection
+# Diccionario activo de traducción
 t = TRANSLATIONS[st.session_state.selected_lang]
 lang_code = t["lang_code"]
 
