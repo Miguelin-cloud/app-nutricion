@@ -1,8 +1,9 @@
 streamlit
+requests
 pandas
 plotly
 groq
 supabase
 streamlit-lottie
-requests
 streamlit-javascript
+duckduckgo-search
