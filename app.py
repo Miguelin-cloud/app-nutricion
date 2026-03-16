@@ -135,10 +135,10 @@ st.markdown("""
         stroke: #ffffff !important;
     }
     
-    /* Asegurar que el fondo del botón de la flecha sea transparente y se vea bien */
+    /* Asegurar que el fondo del botón de la flecha sea blanco y se vea bien */
     button[data-testid="collapsedControl"], 
     button[data-testid="stSidebarCollapseButton"] {
-        background-color: rgba(15, 23, 42, 0.6) !important;
+        background-color: #FFFFFF !important;
         border-radius: 50% !important;
     }
     </style>
