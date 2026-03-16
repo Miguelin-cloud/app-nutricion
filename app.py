@@ -211,9 +211,83 @@ TRANSLATIONS = {
         "search_user_btn": "Buscar Usuario", "user_found": "Usuario encontrado.", "user_not_found": "Usuario no encontrado.", "recover_question_prefix": "Pregunta:", "your_answer_label": "Tu Respuesta", "new_pin_label": "Nuevo PIN",
         "change_pin_btn": "Cambiar PIN", "pin_changed_success": "¡PIN cambiado con éxito! Ya puedes iniciar sesión.", "wrong_answer": "Respuesta incorrecta.", "current_weight_label": "Peso Actual (kg)",
         "profile_goals_label": "Objetivos", "profile_restrictions_label": "Restricciones", "macro_protein": "Proteínas", "macro_fat": "Grasas", "macro_carbs": "Carbohidratos"
+    },
+    "🇬🇧 English": {
+        "lang_code": "English", "title": "Hi {name}! What are we cooking today? 🍲", "subtitle": "I will craft the perfect meal using ONLY what you have on hand.",
+        "assistant_msg": "What's in the pantry? Let's make magic!", "avail_ing_label": "Available ingredients today (e.g., 2 eggs, half a tomato, rice)",
+        "avoid_today_label": "Anything to avoid today? (e.g., fried food, no salt, spicy)", "find_btn": "🍳 Find Magic Recipes",
+        "analyzing": "The Chef is analyzing your ingredients...", "here_options": "Options for you:", "diff": "Difficulty", "time": "Time", "health": "Health",
+        "cook_btn": "Cook {}", "loading_recipe": "Calculating precise macros for {}...", "start_over": "← Start Over", "note": "Nutritionist's Note:",
+        "ingredients": "🛒 Ingredients", "save_fav": "⭐ Save Favorite", "saved": "Saved!", "instructions": "👨‍🍳 Instructions",
+        "adjust_title": "⚖️ Adjust Macros", "adjust_sub": "Need different targets? Just ask.", "adjust_ph": "e.g., 'Add 20g of protein'",
+        "recalc_btn": "Recalculate", "recalculating": "Adjusting recipe...", "profile": "👤 My Profile", "update_prof": "Update Profile",
+        "prof_updated": "Profile updated!", "favs": "⭐ Favorites", "no_favs": "No favorites yet.", "logout": "Logout", "news_title": "📰 Inspiration",
+        "feed_title": "Trending Recipes 🔥", "cook_this": "Cook this 🍳", "download_btn": "⬇️ Download Recipe",
+        "keep_logged_in": "Keep me logged in", "chef_recom": "🌟 CHEF'S STAR RECOMMENDATION 🌟",
+        "trending":[{"name": "Ratatouille", "emoji": "🍅", "desc": "A vitamin-packed classic, very low in calories."}, {"name": "Mushroom Risotto", "emoji": "🍄", "desc": "Creamy, comforting, and perfect for carb-loading."}, {"name": "Salmon Poke Bowl", "emoji": "🥗", "desc": "Fresh, rich in omega-3s and healthy fats."}, {"name": "Shakshuka", "emoji": "🍳", "desc": "Eggs in spicy tomato sauce. High in protein."}],
+        "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Your AI-powered personal chef and nutritionist.", "tab_login": "🔑 Log In", "tab_register": "📝 Register", "tab_recover": "🆘 Recover PIN",
+        "username_label_login": "Username (e.g., miguel123)", "pin_label_login": "PIN (Password)", "login_btn": "Enter the Kitchen 🚀", "login_error": "Incorrect username or PIN.",
+        "reg_section1": "1. Access Data", "create_user_label": "Create a unique Username", "create_pin_label": "Create a short PIN", "security_question_label": "Security Question",
+        "security_options":["What was your first pet's name?", "City of birth?", "Name of your school?"], "security_answer_label": "Security Answer (Useful if you forget your PIN)",
+        "reg_section2": "2. Your Clinical Profile", "name_label": "Full Name (to address you properly)", "age_label": "Age", "weight_label": "Weight (kg)", "height_label": "Height (cm)",
+        "gender_label": "Gender", "gender_options":["Male", "Female", "Other"], "reg_section3": "3. Goals", "goals_label": "Main goal (e.g., Lose fat, gain muscle)",
+        "rest_label": "Chronic Restrictions (e.g., Vegan, Lactose intolerant)", "create_account_btn": "Create Account & Enter 🚀", "username_taken": "That username is already taken. Choose another.",
+        "account_created": "Account created!", "fill_required": "Please fill the required fields.", "forgot_pin_text": "Forgot your PIN?", "search_user_label": "Enter your Username",
+        "search_user_btn": "Find User", "user_found": "User found.", "user_not_found": "User not found.", "recover_question_prefix": "Question:", "your_answer_label": "Your Answer", "new_pin_label": "New PIN",
+        "change_pin_btn": "Change PIN", "pin_changed_success": "PIN changed successfully! You can now log in.", "wrong_answer": "Incorrect answer.", "current_weight_label": "Current Weight (kg)",
+        "profile_goals_label": "Goals", "profile_restrictions_label": "Restrictions", "macro_protein": "Protein", "macro_fat": "Fat", "macro_carbs": "Carbohydrates"
+    },
+    "🇫🇷 Français": {
+        "lang_code": "French", "title": "Bonjour {name} ! Qu'est-ce qu'on cuisine aujourd'hui ? 🍲", "subtitle": "Je créerai le repas parfait en utilisant UNIQUEMENT ce que tu as sous la main.",
+        "assistant_msg": "Qu'y a-t-il dans le frigo ? Faisons de la magie !", "avail_ing_label": "Ingrédients disponibles (Ex: 2 œufs, demi tomate, riz)",
+        "avoid_today_label": "Quelque chose à éviter aujourd'hui ? (Ex: fritures, sans sel, épicé)", "find_btn": "🍳 Trouver des Recettes Magiques",
+        "analyzing": "Le Chef analyse vos ingrédients...", "here_options": "Options pour toi :", "diff": "Difficulté", "time": "Temps", "health": "Santé",
+        "cook_btn": "Cuisiner {}", "loading_recipe": "Calcul précis des macros pour {}...", "start_over": "← Recommencer", "note": "Note du Nutritionniste :",
+        "ingredients": "🛒 Ingrédients", "save_fav": "⭐ Sauvegarder", "saved": "Sauvegardé !", "instructions": "👨‍🍳 Préparation",
+        "adjust_title": "⚖️ Ajuster les Macros", "adjust_sub": "Besoin d'autres quantités ? Demande-moi.", "adjust_ph": "Ex : 'Ajoute 20g de protéines'",
+        "recalc_btn": "Recalculer", "recalculating": "Ajustement de la recette...", "profile": "👤 Mon Profil", "update_prof": "Mettre à jour",
+        "prof_updated": "Profil mis à jour !", "favs": "⭐ Favoris", "no_favs": "Pas encore de favoris.", "logout": "Déconnexion", "news_title": "📰 Inspiration",
+        "feed_title": "Recettes Tendance 🔥", "cook_this": "Cuisiner ça 🍳", "download_btn": "⬇️ Télécharger la Recette",
+        "keep_logged_in": "Rester connecté", "chef_recom": "🌟 RECOMMANDATION ÉTOILÉE DU CHEF 🌟",
+        "trending":[{"name": "Ratatouille", "emoji": "🍅", "desc": "Un classique plein de vitamines et très peu calorique."}, {"name": "Risotto aux Champignons", "emoji": "🍄", "desc": "Crémeux, réconfortant et parfait pour l'énergie."}, {"name": "Poke Bowl au Saumon", "emoji": "🥗", "desc": "Frais, riche en oméga-3 et en bonnes graisses."}, {"name": "Shakshuka", "emoji": "🍳", "desc": "Œufs à la sauce tomate épicée. Riche en protéines."}],
+        "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Votre chef et nutritionniste personnel alimenté par l'IA.", "tab_login": "🔑 Se connecter", "tab_register": "📝 S'inscrire", "tab_recover": "🆘 Récupérer le PIN",
+        "username_label_login": "Nom d'utilisateur (ex : miguel123)", "pin_label_login": "PIN (Mot de passe)", "login_btn": "Entrer en Cuisine 🚀", "login_error": "Nom d'utilisateur ou PIN incorrect.",
+        "reg_section1": "1. Données d'accès", "create_user_label": "Créez un nom d'utilisateur unique", "create_pin_label": "Créez un PIN court", "security_question_label": "Question de sécurité",
+        "security_options":["Nom de votre premier animal ?", "Ville de naissance ?", "Nom de votre école ?"], "security_answer_label": "Réponse de sécurité (utile si vous oubliez le PIN)",
+        "reg_section2": "2. Votre profil clinique", "name_label": "Nom complet (pour s'adresser correctement à vous)", "age_label": "Âge", "weight_label": "Poids (kg)", "height_label": "Taille (cm)",
+        "gender_label": "Genre", "gender_options":["Homme", "Femme", "Autre"], "reg_section3": "3. Objectifs", "goals_label": "Objectif principal (ex : Perdre de la graisse, prendre de la masse)",
+        "rest_label": "Restrictions Chroniques (ex : Végétalien, Intolérant au lactose)", "create_account_btn": "Créer un compte et entrer 🚀", "username_taken": "Ce nom d'utilisateur est déjà pris.",
+        "account_created": "Compte créé !", "fill_required": "Veuillez remplir les champs obligatoires.", "forgot_pin_text": "Vous avez oublié votre PIN ?", "search_user_label": "Entrez votre nom d'utilisateur",
+        "search_user_btn": "Rechercher l'utilisateur", "user_found": "Utilisateur trouvé.", "user_not_found": "Utilisateur non trouvé.", "recover_question_prefix": "Question :", "your_answer_label": "Votre réponse", "new_pin_label": "Nouveau PIN",
+        "change_pin_btn": "Changer le PIN", "pin_changed_success": "PIN modifié avec succès ! Vous pouvez maintenant vous connecter.", "wrong_answer": "Réponse incorrecte.", "current_weight_label": "Poids actuel (kg)",
+        "profile_goals_label": "Objectifs", "profile_restrictions_label": "Restrictions", "macro_protein": "Protéines", "macro_fat": "Graisses", "macro_carbs": "Glucides"
+    },
+    "🇮🇹 Italiano": {
+        "lang_code": "Italian", "title": "Ciao {name}! Cosa cuciniamo oggi? 🍲", "subtitle": "Creerò il pasto perfetto usando SOLO quello che hai a disposizione.",
+        "assistant_msg": "Cosa c'è in dispensa? Facciamo una magia!", "avail_ing_label": "Ingredienti disponibili (Es: 2 uova, mezzo pomodoro, riso)",
+        "avoid_today_label": "Qualcosa che vuoi evitare oggi? (Es: fritti, senza sale, piccante)", "find_btn": "🍳 Trova Ricette Magiche",
+        "analyzing": "Lo Chef sta analizzando i tuoi ingredienti...", "here_options": "Opzioni per te:", "diff": "Difficoltà", "time": "Tempo", "health": "Salute",
+        "cook_btn": "Cucina {}", "loading_recipe": "Calcolo preciso dei macro per {}...", "start_over": "← Ricomincia", "note": "Nota del Nutrizionista:",
+        "ingredients": "🛒 Ingredienti", "save_fav": "⭐ Salva nei Preferiti", "saved": "Salvato!", "instructions": "👨‍🍳 Preparazione",
+        "adjust_title": "⚖️ Regola i Macro", "adjust_sub": "Hai bisogno di altre quantità? Chiedi pure.", "adjust_ph": "Es: 'Aggiungi 20g di proteine'",
+        "recalc_btn": "Ricalcola", "recalculating": "Regolazione della ricetta...", "profile": "👤 Il Mio Profilo", "update_prof": "Aggiorna Profilo",
+        "prof_updated": "Profilo aggiornato!", "favs": "⭐ Preferiti", "no_favs": "Nessun preferito.", "logout": "Esci", "news_title": "📰 Ispirazione",
+        "feed_title": "Ricette di Tendenza 🔥", "cook_this": "Cucina questo 🍳", "download_btn": "⬇️ Scarica Ricetta",
+        "keep_logged_in": "Mantieni l'accesso", "chef_recom": "🌟 RACCOMANDAZIONE STELLATA DELLO CHEF 🌟",
+        "trending":[{"name": "Ratatouille", "emoji": "🍅", "desc": "Un classico ricco di vitamine e a bassissimo contenuto calorico."}, {"name": "Risotto ai Funghi", "emoji": "🍄", "desc": "Cremoso, confortante e perfetto per fare il pieno di energia."}, {"name": "Poke Bowl al Salmone", "emoji": "🥗", "desc": "Fresco, ricco di omega-3 e grassi sani."}, {"name": "Shakshuka", "emoji": "🍳", "desc": "Uova in salsa di pomodoro piccante. Ricco di proteine."}],
+        "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Il tuo chef e nutrizionista personale potenziato dall'IA.", "tab_login": "🔑 Accedi", "tab_register": "📝 Registrati", "tab_recover": "🆘 Recupera PIN",
+        "username_label_login": "Nome utente (es: miguel123)", "pin_label_login": "PIN (Password)", "login_btn": "Entra in Cucina 🚀", "login_error": "Nome utente o PIN errati.",
+        "reg_section1": "1. Dati di accesso", "create_user_label": "Crea un nome utente unico", "create_pin_label": "Crea un PIN corto", "security_question_label": "Domanda di sicurezza",
+        "security_options":["Nome del tuo primo animale?", "Città di nascita?", "Nome della tua scuola?"], "security_answer_label": "Risposta di sicurezza (utile se dimentichi il PIN)",
+        "reg_section2": "2. Il tuo profilo clinico", "name_label": "Nome completo (per rivolgerci a te correttamente)", "age_label": "Età", "weight_label": "Peso (kg)", "height_label": "Altezza (cm)",
+        "gender_label": "Genere", "gender_options":["Maschio", "Femmina", "Altro"], "reg_section3": "3. Obiettivi", "goals_label": "Obiettivo principale (es: Perdere grasso, aumentare massa)",
+        "rest_label": "Restrizioni Croniche (es: Vegano, Intollerante al lattosio)", "create_account_btn": "Crea account & Entra 🚀", "username_taken": "Quel nome utente è già in uso. Scegline un altro.",
+        "account_created": "Account creato!", "fill_required": "Per favore, compila i campi obbligatori.", "forgot_pin_text": "Hai dimenticato il PIN?", "search_user_label": "Inserisci il tuo nome utente",
+        "search_user_btn": "Cerca Utente", "user_found": "Utente trovato.", "user_not_found": "Utente non trovato.", "recover_question_prefix": "Domanda:", "your_answer_label": "La tua risposta", "new_pin_label": "Nuovo PIN",
+        "change_pin_btn": "Cambia PIN", "pin_changed_success": "PIN modificato con successo! Ora puoi accedere.", "wrong_answer": "Risposta errata.", "current_weight_label": "Peso attuale (kg)",
+        "profile_goals_label": "Obiettivi", "profile_restrictions_label": "Restrizioni", "macro_protein": "Proteine", "macro_fat": "Grassi", "macro_carbs": "Carboidrati"
     }
 }
-# Agrega el resto de idiomas (Inglés, Francés, Italiano) de tus diccionarios originales aquí.
 
 if "selected_lang" not in st.session_state: st.session_state.selected_lang = "🇪🇸 Español"
 cols_top = st.columns([1, 6, 1])
@@ -320,7 +394,7 @@ if not user_profile:
 
 # ESTADO DE LA SESIÓN DE LA APP
 for key in["step", "options", "selected_option", "full_recipe", "avail_ing", "avoid_tdy"]:
-    if key not in st.session_state: st.session_state[key] = None if key in ["options", "selected_option", "full_recipe"] else ("input" if key == "step" else "")
+    if key not in st.session_state: st.session_state[key] = None if key in["options", "selected_option", "full_recipe"] else ("input" if key == "step" else "")
 
 # ==========================================
 # IA (GROQ) Y PROMPT CLÍNICO DINÁMICO
@@ -330,9 +404,7 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", 
     system_prompt = f"""
     You are a Michelin-star Executive Chef and Clinical Nutritionist.
     Your client is {u_prof['name']}. Profile: {u_prof['age']} y/o, {u_prof['weight']} kg, {u_prof['height']} cm, Gender: {u_prof['gender']}.
-    Main goal: "{u_prof['goals']}". Restrictions: "{u_prof['restrictions']}".
-    
-    [DYNAMIC GENERATION] Generate exactly {num_recipes} recipe options.[CHEF'S RECOMMENDATION - CRITICAL] Analyze the client's profile/goals. Tag exactly ONE recipe with `"is_chefs_recommendation": true` that is the healthiest for them. All others `false`.
+    Main goal: "{u_prof['goals']}". Restrictions: "{u_prof['restrictions']}".[DYNAMIC GENERATION] Generate exactly {num_recipes} recipe options.[CHEF'S RECOMMENDATION - CRITICAL] Analyze the client's profile/goals. Tag exactly ONE recipe with `"is_chefs_recommendation": true` that is the healthiest for them. All others `false`.
     """
     if avail_ing: system_prompt += f"\n[GOLDEN RULE] Recipes MUST be based EXCLUSIVELY on: {avail_ing}. Do NOT invent main ingredients."
     if avoid_tdy: system_prompt += f"\n[STRICT PROHIBITION] Under NO circumstances include: {avoid_tdy}."
