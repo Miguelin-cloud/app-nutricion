@@ -76,6 +76,7 @@ TRANSLATIONS = {
         "recalc_btn": "Recalcular", "recalculating": "Ajustando...", "profile": "👤 Mi Perfil",
         "update_prof": "Actualizar Perfil", "prof_updated": "¡Perfil actualizado!",
         "favs": "⭐ Favoritos", "no_favs": "Aún no hay favoritos.", "logout": "Cerrar Sesión",
+        "news_title": "📰 Noticias",
         "feed_title": "Recetas de Moda 🔥", "cook_this": "Cocinar esto 🍳", "download_btn": "⬇️ Descargar Receta",
         "trending":[
             {"name": "Ratatouille", "emoji": "🍅", "desc": "Un clásico lleno de vitaminas y muy bajo en calorías."},
@@ -124,6 +125,7 @@ TRANSLATIONS = {
         "recalc_btn": "Recalculate", "recalculating": "Adjusting...", "profile": "👤 My Profile",
         "update_prof": "Update Profile", "prof_updated": "Profile updated!",
         "favs": "⭐ Favorites", "no_favs": "No favorites yet.", "logout": "Logout",
+        "news_title": "📰 News",
         "feed_title": "Trending Recipes 🔥", "cook_this": "Cook this 🍳", "download_btn": "⬇️ Download Recipe",
         "trending":[
             {"name": "Ratatouille", "emoji": "🍅", "desc": "A vitamin-packed classic, very low in calories."},
@@ -171,6 +173,7 @@ TRANSLATIONS = {
         "recalc_btn": "Recalculer", "recalculating": "Ajustement...", "profile": "👤 Mon Profil",
         "update_prof": "Mettre à jour", "prof_updated": "Profil mis à jour !",
         "favs": "⭐ Favoris", "no_favs": "Pas encore de favoris.", "logout": "Déconnexion",
+        "news_title": "📰 Actualités",
         "feed_title": "Recettes Tendance 🔥", "cook_this": "Cuisiner ça 🍳", "download_btn": "⬇️ Télécharger la Recette",
         "trending":[
             {"name": "Ratatouille", "emoji": "🍅", "desc": "Un classique plein de vitamines et très peu calorique."},
@@ -218,6 +221,7 @@ TRANSLATIONS = {
         "recalc_btn": "Ricalcola", "recalculating": "Regolazione in corso...", "profile": "👤 Il Mio Profilo",
         "update_prof": "Aggiorna Profilo", "prof_updated": "Profilo aggiornato!",
         "favs": "⭐ Preferiti", "no_favs": "Nessun preferito.", "logout": "Esci",
+        "news_title": "📰 Notizie",
         "feed_title": "Ricette di Tendenza 🔥", "cook_this": "Cucina questo 🍳", "download_btn": "⬇️ Scarica Ricetta",
         "trending":[
             {"name": "Ratatouille", "emoji": "🍅", "desc": "Un classico ricco di vitamine e a bassissimo contenuto calorico."},
@@ -421,7 +425,6 @@ if "step" not in st.session_state: st.session_state.step = "input"
 if "options" not in st.session_state: st.session_state.options = None
 if "selected_option" not in st.session_state: st.session_state.selected_option = None
 if "full_recipe" not in st.session_state: st.session_state.full_recipe = None
-# Nuevos estados para los ingredientes de la sesión
 if "avail_ing" not in st.session_state: st.session_state.avail_ing = ""
 if "avoid_tdy" not in st.session_state: st.session_state.avoid_tdy = ""
 
@@ -435,11 +438,9 @@ def get_groq_client():
         st.stop()
     return Groq(api_key=api_key)
 
-# NOTE: Añadidos los argumentos avail_ing y avoid_tdy para integrarlos dinámicamente en el System Prompt
 def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", avoid_tdy=""):
     client = get_groq_client()
     
-    # Base del prompt clínico
     system_prompt = f"""
     You are a strict but empathetic Clinical Nutritionist and Executive Chef.
     Your client is {u_prof['name']}. 
@@ -454,7 +455,6 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", 
     Never approve nutritional madness. Address them by their name occasionally in the 'nutritionist_note'.
     """
     
-    # Inyección estricta de Regla de Oro e Ingredientes Disponibles
     if avail_ing:
         system_prompt += f"""
         \n[GOLDEN RULE - STRICT INGREDIENT ENFORCEMENT]
@@ -463,7 +463,6 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", 
         [PANTRY FLEXIBILITY] You are allowed to use common "pantry staples" (water, olive oil, salt, pepper, garlic, common dry spices) assuming the user has them.
         """
         
-    # Inyección estricta de Restricciones del Día
     if avoid_tdy:
         system_prompt += f"""
         \n[STRICT PROHIBITION FOR TODAY]
@@ -489,7 +488,7 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", 
         return None
 
 # ==========================================
-# UI: BARRA LATERAL (Perfil y Favoritos)
+# UI: BARRA LATERAL (Perfil, Favoritos y Noticias)
 # ==========================================
 with st.sidebar:
     with st.expander(t["profile"], expanded=False):
@@ -512,6 +511,26 @@ with st.sidebar:
         st.info(t["no_favs"])
         
     st.divider()
+    
+    # --- MOVIDO: FEED DE INSPIRACIÓN / NOTICIAS EN EL SIDEBAR ---
+    with st.expander(t["news_title"], expanded=False):
+        st.subheader(t["feed_title"])
+        for i, recipe in enumerate(t["trending"]):
+            st.markdown(f"""
+                <div class="feed-card">
+                    <h3 style="margin:0;">{recipe['emoji']} {recipe['name']}</h3>
+                    <p style="font-size:14px; color:#555; margin-top:5px;">{recipe['desc']}</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button(t["cook_this"], key=f"feed_btn_{i}", use_container_width=True):
+                st.session_state.selected_option = {"name": recipe["name"], "hero_emoji": recipe["emoji"]}
+                st.session_state.avail_ing = ""
+                st.session_state.avoid_tdy = ""
+                st.session_state.step = "recipe_loading"
+                st.rerun()
+                
+    st.divider()
     if st.button(t.get("logout", "Logout"), type="secondary", use_container_width=True):
         logout()
         st.rerun()
@@ -522,77 +541,51 @@ with st.sidebar:
 st.title(t["title"].format(name=user_profile["name"]))
 st.markdown(t["subtitle"])
 
-# --- FASE 1: INPUT DE INGREDIENTES Y FEED DE INSPIRACIÓN ---
+# --- FASE 1: INPUT DE INGREDIENTES A ANCHO COMPLETO ---
 if st.session_state.step == "input" or st.session_state.step == "options":
     
-    col_main, col_feed = st.columns([7, 3])
+    st.markdown(f"#### 👨‍🍳 {t['assistant_msg']}")
     
-    with col_main:
-        # NOTE: Modificada la interfaz para incorporar los dos nuevos campos solicitados.
-        st.markdown(f"#### 👨‍🍳 {t['assistant_msg']}")
-        
-        available_ingredients = st.text_area(
-            t["avail_ing_label"], 
-            placeholder=t["input_placeholder"], 
-            height=100
-        )
-        
-        avoid_today = st.text_input(
-            "🚫 " + t["avoid_today_label"], 
-            placeholder="Ej: fritos, sin sal, picante..."
-        )
-        
-        if st.button(t["find_btn"], type="primary", use_container_width=True):
-            if available_ingredients:
-                # Guardamos los inputs en el estado para que la fase 3 también los recuerde
-                st.session_state.avail_ing = available_ingredients
-                st.session_state.avoid_tdy = avoid_today
-                
-                with st.spinner(t["analyzing"]):
-                    prompt = "Generate 3 recipe options strictly using the available ingredients provided."
-                    format_hint = """
-                    Return strictly in this JSON format:
-                    {
-                        "options":[
-                            {
-                                "name": "Recipe Name",
-                                "hero_emoji": "🥘", 
-                                "difficulty": "Easy/Medium/Hard",
-                                "time": "XX mins",
-                                "health_score": 9,
-                                "description": "Brief description"
-                            }
-                        ]
-                    }
-                    """
-                    # Llamamos a la IA pasando las nuevas restricciones
-                    res = call_ai_json(prompt, format_hint, lang_code, user_profile, available_ingredients, avoid_today)
-                    if res and "options" in res:
-                        st.session_state.options = res["options"]
-                        st.session_state.step = "options"
-                        st.rerun()
-            else:
-                st.warning(t["fill_required"])
-                        
-    # FEED DE INSPIRACIÓN EN LA COLUMNA DERECHA
-    with col_feed:
-        st.subheader(t["feed_title"])
-        with st.container(height=450, border=True):
-            for i, recipe in enumerate(t["trending"]):
-                st.markdown(f"""
-                    <div class="feed-card">
-                        <h3 style="margin:0;">{recipe['emoji']} {recipe['name']}</h3>
-                        <p style="font-size:14px; color:#555; margin-top:5px;">{recipe['desc']}</p>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                if st.button(t["cook_this"], key=f"feed_btn_{i}", use_container_width=True):
-                    st.session_state.selected_option = {"name": recipe["name"], "hero_emoji": recipe["emoji"]}
-                    # Si el usuario selecciona del feed, limpiamos los ingredientes obligatorios para que no se restrinja.
-                    st.session_state.avail_ing = ""
-                    st.session_state.avoid_tdy = ""
-                    st.session_state.step = "recipe_loading"
+    available_ingredients = st.text_area(
+        t["avail_ing_label"], 
+        placeholder=t.get("input_placeholder", ""), 
+        height=100
+    )
+    
+    avoid_today = st.text_input(
+        "🚫 " + t["avoid_today_label"], 
+        placeholder="Ej: fritos, sin sal, picante..."
+    )
+    
+    if st.button(t["find_btn"], type="primary", use_container_width=True):
+        if available_ingredients:
+            st.session_state.avail_ing = available_ingredients
+            st.session_state.avoid_tdy = avoid_today
+            
+            with st.spinner(t["analyzing"]):
+                prompt = "Generate 3 recipe options strictly using the available ingredients provided."
+                format_hint = """
+                Return strictly in this JSON format:
+                {
+                    "options":[
+                        {
+                            "name": "Recipe Name",
+                            "hero_emoji": "🥘", 
+                            "difficulty": "Easy/Medium/Hard",
+                            "time": "XX mins",
+                            "health_score": 9,
+                            "description": "Brief description"
+                        }
+                    ]
+                }
+                """
+                res = call_ai_json(prompt, format_hint, lang_code, user_profile, available_ingredients, avoid_today)
+                if res and "options" in res:
+                    st.session_state.options = res["options"]
+                    st.session_state.step = "options"
                     st.rerun()
+        else:
+            st.warning(t["fill_required"])
 
 # --- FASE 2: OPCIONES DE RECETAS (TARJETA DORADA) ---
 if st.session_state.step == "options" and st.session_state.options:
@@ -644,7 +637,6 @@ if st.session_state.step == "recipe_loading":
             "instructions":["Step 1...", "Step 2..."]
         }
         """
-        # IMPORTANTE: En la fase de receta completa, seguimos inyectando las restricciones para que no añada ingredientes nuevos en el paso a paso
         res = call_ai_json(prompt, format_hint, lang_code, user_profile, st.session_state.avail_ing, st.session_state.avoid_tdy)
         if res:
             st.session_state.full_recipe = res
@@ -743,7 +735,6 @@ if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
             with st.spinner(t["recalculating"]):
                 prompt = f"Current recipe: {json.dumps(recipe)}. Adjustment: '{macro_adjustment}'. Recalculate quantities."
                 format_hint = "Return strictly in the exact same JSON format as the original recipe."
-                # Pasamos los parámetros de la sesión para evitar que el recálculo añada ingredientes bloqueados
                 new_recipe = call_ai_json(prompt, format_hint, lang_code, user_profile, st.session_state.avail_ing, st.session_state.avoid_tdy)
                 if new_recipe:
                     st.session_state.full_recipe = new_recipe
