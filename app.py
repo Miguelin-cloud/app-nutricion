@@ -93,11 +93,7 @@ TRANSLATIONS = {
 # ==========================================
 # GESTIÓN DE COOKIES (Sesión Persistente)
 # ==========================================
-@st.cache_resource(experimental_allow_widgets=True)
-def get_manager():
-    return stx.CookieManager()
-
-cookie_manager = get_manager()
+cookie_manager = stx.CookieManager(key="cookie_manager")
 
 # Usamos session_state para reflejar cambios de UI al instante sin esperar la recarga de la cookie
 if "current_username" not in st.session_state:
