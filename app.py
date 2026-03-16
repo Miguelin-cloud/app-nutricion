@@ -40,7 +40,7 @@ st.components.v1.html("""
     }
 
     var meta1 = document.createElement('meta'); meta1.name = "apple-mobile-web-app-capable"; meta1.content = "yes"; document.head.appendChild(meta1);
-    var meta2 = document.createElement('meta'); meta2.name = "apple-mobile-web-app-status-bar-style"; meta2.content = "black-translucent"; document.head.appendChild(meta2);
+    var meta2 = document.createElement('meta'); meta2.name = "apple-mobile-web-app-status-bar-"; meta2.content = "black-translucent"; document.head.appendChild(meta2);
 </script>
 """, height=0, width=0)
 
@@ -151,6 +151,67 @@ st.markdown("""
     button[data-testid="collapsedControl"] svg { fill: #ffffff !important; color: #ffffff !important; }
 
     .brand-logo { font-family: 'Georgia', serif; font-size: 3rem; font-weight: bold; text-align: center; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    /* ============================= */
+/* GOLDEN CARD (Chef Recommendation) */
+/* ============================= */
+
+.golden-card {
+    background: linear-gradient(135deg, #FFDF00 0%, #D4AF37 100%);
+    padding: 3px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.golden-card-content {
+    background: #0f172a;
+    border-radius: 14px;
+    padding: 25px;
+    text-align: center;
+}
+
+/* ============================= */
+/* HERO EMOJI */
+/* ============================= */
+
+.hero-emoji {
+    text-align: center;
+    font-size: 70px;
+    margin-bottom: -10px;
+}
+
+/* ============================= */
+/* NUTRITION LABEL */
+/* ============================= */
+
+.nutrition-label {
+    background: white;
+    color: black;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 350px;
+    font-family: Arial, sans-serif;
+}
+
+.nutrition-label h2 {
+    border-bottom: 4px solid black;
+    padding-bottom: 5px;
+}
+
+.nut-row {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid black;
+    padding: 5px 0;
+}
+
+.nut-row.thick {
+    border-top: 3px solid black;
+}
+
+.nut-bold {
+    font-weight: bold;
+}
+    
     </style>
 """, unsafe_allow_html=True)
 
