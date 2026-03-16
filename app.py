@@ -126,21 +126,30 @@ st.markdown("""
         background: -webkit-linear-gradient(45deg, #10b981, #3b82f6);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .brand-subtitle { text-align: center; font-size: 1.2rem; font-weight: 300; letter-spacing: 2px; color: #cbd5e1; margin-top: -10px; margin-bottom: 30px;}
-    /* 🔥 SOLUCIÓN: Hacer blancas las flechitas de la barra lateral */
-    button[data-testid="collapsedControl"] svg,
-    button[data-testid="stSidebarCollapseButton"] svg {
-        fill: #ffffff !important;
-        color: #ffffff !important;
-        stroke: #ffffff !important;
-    }
-    
-    /* Asegurar que el fondo del botón de la flecha sea blanco y se vea bien */
-    button[data-testid="collapsedControl"], 
-    button[data-testid="stSidebarCollapseButton"] {
-        background-color: #FFFFFF !important;
-        border-radius: 50% !important;
-    }
+.brand-subtitle { 
+    text-align: center; 
+    font-size: 1.2rem; 
+    font-weight: 300; 
+    letter-spacing: 2px; 
+    color: #cbd5e1; 
+    margin-top: -10px; 
+    margin-bottom: 30px;
+}
+
+/* 🔥 SOLUCIÓN: Hacer blancas las flechitas de la barra lateral */
+button[data-testid="collapsedControl"] svg,
+button[data-testid="stSidebarCollapseButton"] svg {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* Asegurar que el fondo del botón de la flecha sea blanco y se vea bien */
+button[data-testid="collapsedControl"], 
+button[data-testid="stSidebarCollapseButton"] {
+    background-color: #FFFFFF !important;
+    border-radius: 50% !important;
+}
     </style>
 """, unsafe_allow_html=True)
 
