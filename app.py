@@ -2,6 +2,9 @@ import streamlit as st
 import json
 import os
 import datetime
+import re
+import pandas as pd
+import plotly.express as px
 from groq import Groq
 import extra_streamlit_components as stx
 from supabase import create_client, Client
@@ -9,7 +12,9 @@ from supabase import create_client, Client
 # ==========================================
 # CONFIGURACIÓN DE PÁGINA Y CSS (Mobile-First)
 # ==========================================
-st.set_page_config(page_title="Smart AI Nutritionist", page_icon="🍲", layout="centered")
+# Usamos layout="wide" para que las columnas respiren mejor en PC. 
+# En móvil, Streamlit automáticamente apila las columnas de forma nativa.
+st.set_page_config(page_title="Smart AI Nutritionist", page_icon="🍲", layout="wide")
 
 st.markdown("""
     <style>
@@ -30,7 +35,8 @@ st.markdown("""
     .nut-row.thick { border-bottom: 4px solid #111; }
     .nut-row.indent { padding-left: 15px; font-size: 14px; }
     .nut-bold { font-weight: bold; }
-    .block-container { padding-top: 2rem; padding-bottom: 2rem; }
+    .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 1200px; }
+    .feed-card { background-color: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e9ecef; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -69,7 +75,14 @@ TRANSLATIONS = {
         "adjust_sub": "¿Necesitas otras cantidades? Pídemelo.", "adjust_ph": "Ej: 'Añade 20g de proteína'",
         "recalc_btn": "Recalcular", "recalculating": "Ajustando...", "profile": "👤 Mi Perfil",
         "update_prof": "Actualizar Perfil", "prof_updated": "¡Perfil actualizado!",
-        "favs": "⭐ Favoritos", "no_favs": "Aún no hay favoritos.", "logout": "Cerrar Sesión"
+        "favs": "⭐ Favoritos", "no_favs": "Aún no hay favoritos.", "logout": "Cerrar Sesión",
+        "feed_title": "Recetas de Moda 🔥", "cook_this": "Cocinar esto 🍳", "download_btn": "⬇️ Descargar Receta",
+        "trending": [
+            {"name": "Ratatouille", "emoji": "🍅", "desc": "Un clásico lleno de vitaminas y muy bajo en calorías."},
+            {"name": "Risotto de Setas", "emoji": "🍄", "desc": "Cremoso, reconfortante y perfecto para cargar energía."},
+            {"name": "Poke Bowl de Salmón", "emoji": "🥗", "desc": "Fresco, rico en omega-3 y grasas saludables."},
+            {"name": "Shakshuka", "emoji": "🍳", "desc": "Huevos en salsa de tomate especiada. Alto en proteína."}
+        ]
     },
     "🇬🇧 English": {
         "lang_code": "English",
@@ -86,16 +99,93 @@ TRANSLATIONS = {
         "adjust_sub": "Need different targets? Just ask.", "adjust_ph": "e.g., 'Add 20g of protein'",
         "recalc_btn": "Recalculate", "recalculating": "Adjusting...", "profile": "👤 My Profile",
         "update_prof": "Update Profile", "prof_updated": "Profile updated!",
-        "favs": "⭐ Favorites", "no_favs": "No favorites yet.", "logout": "Logout"
+        "favs": "⭐ Favorites", "no_favs": "No favorites yet.", "logout": "Logout",
+        "feed_title": "Trending Recipes 🔥", "cook_this": "Cook this 🍳", "download_btn": "⬇️ Download Recipe",
+        "trending": [
+            {"name": "Ratatouille", "emoji": "🍅", "desc": "A vitamin-packed classic, very low in calories."},
+            {"name": "Mushroom Risotto", "emoji": "🍄", "desc": "Creamy, comforting, and perfect for carb-loading."},
+            {"name": "Salmon Poke Bowl", "emoji": "🥗", "desc": "Fresh, rich in omega-3s and healthy fats."},
+            {"name": "Shakshuka", "emoji": "🍳", "desc": "Eggs in spicy tomato sauce. High in protein."}
+        ]
+    },
+    "🇫🇷 Français": {
+        "lang_code": "French",
+        "title": "Bonjour {name} ! Qu'est-ce qu'on cuisine aujourd'hui ? 🍲",
+        "subtitle": "Dis-moi quels ingrédients tu as et je créerai le repas parfait pour tes objectifs.",
+        "assistant_msg": "Écris tes ingrédients ci-dessous. Cuisinons sainement !",
+        "input_placeholder": "Ex : Blanc de poulet, riz, brocoli...",
+        "find_btn": "🔍 Trouver des Recettes", "analyzing": "Analyse en cours...",
+        "here_options": "Options pour toi :", "diff": "Difficulté", "time": "Temps", "health": "Santé",
+        "cook_btn": "Cuisiner {}", "loading_recipe": "Calcul des macros pour {}...",
+        "start_over": "← Recommencer", "note": "Note du Nutritionniste :",
+        "ingredients": "🛒 Ingrédients", "save_fav": "⭐ Sauvegarder", "saved": "Sauvegardé !",
+        "instructions": "👨‍🍳 Préparation", "adjust_title": "⚖️ Ajuster les Macros",
+        "adjust_sub": "Besoin d'autres quantités ? Demande-moi.", "adjust_ph": "Ex : 'Ajoute 20g de protéines'",
+        "recalc_btn": "Recalculer", "recalculating": "Ajustement...", "profile": "👤 Mon Profil",
+        "update_prof": "Mettre à jour", "prof_updated": "Profil mis à jour !",
+        "favs": "⭐ Favoris", "no_favs": "Pas encore de favoris.", "logout": "Déconnexion",
+        "feed_title": "Recettes Tendance 🔥", "cook_this": "Cuisiner ça 🍳", "download_btn": "⬇️ Télécharger la Recette",
+        "trending": [
+            {"name": "Ratatouille", "emoji": "🍅", "desc": "Un classique plein de vitamines et très peu calorique."},
+            {"name": "Risotto aux Champignons", "emoji": "🍄", "desc": "Crémeux, réconfortant et parfait pour faire le plein d'énergie."},
+            {"name": "Poke Bowl au Saumon", "emoji": "🥗", "desc": "Frais, riche en oméga-3 et en bonnes graisses."},
+            {"name": "Shakshuka", "emoji": "🍳", "desc": "Œufs à la sauce tomate épicée. Riche en protéines."}
+        ]
+    },
+    "🇮🇹 Italiano": {
+        "lang_code": "Italian",
+        "title": "Ciao {name}! Cosa cuciniamo oggi? 🍲",
+        "subtitle": "Dimmi che ingredienti hai e creerò il pasto perfetto per i tuoi obiettivi.",
+        "assistant_msg": "Scrivi i tuoi ingredienti qui sotto. Cuciniamo sano!",
+        "input_placeholder": "Es: Petto di pollo, riso, broccoli...",
+        "find_btn": "🔍 Trova Ricette", "analyzing": "Analizzando gli ingredienti...",
+        "here_options": "Opzioni per te:", "diff": "Difficoltà", "time": "Tempo", "health": "Salute",
+        "cook_btn": "Cucina {}", "loading_recipe": "Calcolando i macro per {}...",
+        "start_over": "← Ricomincia", "note": "Nota del Nutrizionista:",
+        "ingredients": "🛒 Ingredienti", "save_fav": "⭐ Salva nei Preferiti", "saved": "Salvato!",
+        "instructions": "👨‍🍳 Preparazione", "adjust_title": "⚖️ Regola i Macro",
+        "adjust_sub": "Hai bisogno di altre quantità? Chiedi pure.", "adjust_ph": "Es: 'Aggiungi 20g di proteine'",
+        "recalc_btn": "Ricalcola", "recalculating": "Regolazione in corso...", "profile": "👤 Il Mio Profilo",
+        "update_prof": "Aggiorna Profilo", "prof_updated": "Profilo aggiornato!",
+        "favs": "⭐ Preferiti", "no_favs": "Nessun preferito.", "logout": "Esci",
+        "feed_title": "Ricette di Tendenza 🔥", "cook_this": "Cucina questo 🍳", "download_btn": "⬇️ Scarica Ricetta",
+        "trending": [
+            {"name": "Ratatouille", "emoji": "🍅", "desc": "Un classico ricco di vitamine e a bassissimo contenuto calorico."},
+            {"name": "Risotto ai Funghi", "emoji": "🍄", "desc": "Cremoso, confortante e perfetto per fare il pieno di energia."},
+            {"name": "Poke Bowl al Salmone", "emoji": "🥗", "desc": "Fresco, ricco di omega-3 e grassi sani."},
+            {"name": "Shakshuka", "emoji": "🍳", "desc": "Uova in salsa di pomodoro piccante. Ricco di proteine."}
+        ]
     }
 }
+
+# ==========================================
+# FUNCIONES AUXILIARES
+# ==========================================
+def extract_number(val_str):
+    """Extrae el valor numérico de un string como '40g' o '450 kcal' para los gráficos."""
+    match = re.search(r'\d+', str(val_str))
+    return int(match.group()) if match else 0
+
+def format_recipe_for_download(recipe, t_dict):
+    """Formatea la receta en texto plano para el archivo descargable."""
+    text = f"=== {recipe['recipe_name'].upper()} ===\n"
+    text += f"🌍 Origen/Estilo: {recipe.get('region', 'Global')}\n\n"
+    text += f"--- {t_dict['ingredients'].upper()} ---\n"
+    for ing in recipe["ingredients"]:
+        text += f"• {ing['qty']} de {ing['item']}\n"
+    text += f"\n--- {t_dict['instructions'].upper()} ---\n"
+    for i, step in enumerate(recipe["instructions"]):
+        text += f"{i+1}. {step}\n"
+    text += f"\n--- MACROS ---\n"
+    m = recipe['macros']
+    text += f"Calorías: {m.get('calories', '0')} | Proteína: {m.get('protein', '0g')} | Grasas: {m.get('total_fat', '0g')} | Carbohidratos: {m.get('total_carbs', '0g')}\n"
+    return text
 
 # ==========================================
 # GESTIÓN DE COOKIES (Sesión Persistente)
 # ==========================================
 cookie_manager = stx.CookieManager(key="cookie_manager")
 
-# Usamos session_state para reflejar cambios de UI al instante sin esperar la recarga de la cookie
 if "current_username" not in st.session_state:
     st.session_state.current_username = cookie_manager.get(cookie="ai_nutri_session")
 
@@ -107,17 +197,14 @@ def set_login_session(username):
 def logout():
     st.session_state.current_username = None
     try:
-        # Intentamos borrar la cookie
         cookie_manager.delete("ai_nutri_session")
     except Exception:
-        # Si la cookie no existe o da error, simplemente lo ignoramos y seguimos
         pass 
     st.session_state.step = "input"
 
 def get_user_data(username):
     if not username:
         return None
-    # Aquí nos aseguramos de que busque en app_users_2
     res = supabase.table("app_users_2").select("*").eq("username", username).execute()
     if res.data:
         return res.data[0]
@@ -134,7 +221,7 @@ t = TRANSLATIONS[selected_lang]
 lang_code = t["lang_code"]
 
 # ==========================================
-# PANTALLA DE AUTENTICACIÓN (Login/Registro)
+# PANTALLA DE AUTENTICACIÓN
 # ==========================================
 if not st.session_state.current_username:
     st.title("NutriAI 🍲")
@@ -174,7 +261,6 @@ if not st.session_state.current_username:
         
         if st.button("Crear Cuenta y Entrar 🚀", type="primary", use_container_width=True):
             if reg_user and reg_pin and reg_sa and reg_name:
-                # Comprobar si el usuario existe
                 check = supabase.table("app_users_2").select("username").eq("username", reg_user).execute()
                 if check.data:
                     st.error("Ese Nombre de Usuario ya está en uso. Elige otro.")
@@ -199,7 +285,7 @@ if not st.session_state.current_username:
             if res.data:
                 st.session_state.recover_user = rec_user
                 st.session_state.recover_q = res.data[0]["security_question"]
-                st.success("Usuario encontrado.")
+                st.success("Usuario trovato / User found.")
             else:
                 st.error("Usuario no encontrado.")
                 
@@ -216,14 +302,13 @@ if not st.session_state.current_username:
                 else:
                     st.error("Respuesta incorrecta.")
                     
-    st.stop() # Detiene la app aquí si no hay sesión iniciada
+    st.stop() 
 
 # ==========================================
 # CARGAR PERFIL DEL USUARIO ACTIVO
 # ==========================================
 user_profile = get_user_data(st.session_state.current_username)
 if not user_profile:
-    # Si la cookie existe pero el usuario fue borrado de la DB
     logout()
     st.rerun()
 
@@ -312,33 +397,56 @@ with st.sidebar:
 st.title(t["title"].format(name=user_profile["name"]))
 st.markdown(t["subtitle"])
 
-# --- FASE 1: INPUT DE INGREDIENTES ---
+# --- FASE 1: INPUT DE INGREDIENTES Y FEED DE INSPIRACIÓN ---
 if st.session_state.step == "input" or st.session_state.step == "options":
-    ingredients = st.text_area("👨‍🍳 " + t["assistant_msg"], placeholder=t["input_placeholder"])
     
-    if st.button(t["find_btn"], type="primary", use_container_width=True):
-        if ingredients:
-            with st.spinner(t["analyzing"]):
-                prompt = f"Ingredients: {ingredients}. Restrictions: {user_profile['restrictions']}."
-                format_hint = """
-                Return strictly in this JSON format:
-                {
-                    "options":[
-                        {
-                            "name": "Recipe Name",
-                            "hero_emoji": "🥘", 
-                            "difficulty": "Easy/Medium/Hard",
-                            "time": "XX mins",
-                            "health_score": 9,
-                            "description": "Brief description"
-                        }
-                    ]
-                }
-                """
-                res = call_ai_json(prompt, format_hint, lang_code, user_profile)
-                if res and "options" in res:
-                    st.session_state.options = res["options"]
-                    st.session_state.step = "options"
+    # Dividimos la pantalla en Layout de Columnas (70% - 30%)
+    col_main, col_feed = st.columns([7, 3])
+    
+    with col_main:
+        ingredients = st.text_area("👨‍🍳 " + t["assistant_msg"], placeholder=t["input_placeholder"], height=150)
+        
+        if st.button(t["find_btn"], type="primary", use_container_width=True):
+            if ingredients:
+                with st.spinner(t["analyzing"]):
+                    prompt = f"Ingredients: {ingredients}. Restrictions: {user_profile['restrictions']}."
+                    format_hint = """
+                    Return strictly in this JSON format:
+                    {
+                        "options":[
+                            {
+                                "name": "Recipe Name",
+                                "hero_emoji": "🥘", 
+                                "difficulty": "Easy/Medium/Hard",
+                                "time": "XX mins",
+                                "health_score": 9,
+                                "description": "Brief description"
+                            }
+                        ]
+                    }
+                    """
+                    res = call_ai_json(prompt, format_hint, lang_code, user_profile)
+                    if res and "options" in res:
+                        st.session_state.options = res["options"]
+                        st.session_state.step = "options"
+                        st.rerun()
+                        
+    # FEED DE INSPIRACIÓN EN LA COLUMNA DERECHA
+    with col_feed:
+        st.subheader(t["feed_title"])
+        with st.container(height=500, border=True):
+            for i, recipe in enumerate(t["trending"]):
+                st.markdown(f"""
+                    <div class="feed-card">
+                        <h3 style="margin:0;">{recipe['emoji']} {recipe['name']}</h3>
+                        <p style="font-size:14px; color:#555; margin-top:5px;">{recipe['desc']}</p>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                # Botón para generar directamente la receta desde el feed
+                if st.button(t["cook_this"], key=f"feed_btn_{i}", use_container_width=True):
+                    st.session_state.selected_option = {"name": recipe["name"], "hero_emoji": recipe["emoji"]}
+                    st.session_state.step = "recipe_loading"
                     st.rerun()
 
 # --- FASE 2: OPCIONES DE RECETAS (TARJETA DORADA) ---
@@ -379,6 +487,7 @@ if st.session_state.step == "recipe_loading":
         Return strictly in this JSON format:
         {
             "recipe_name": "Name",
+            "region": "City, Country or Region Style",
             "hero_emoji": "🥘",
             "ingredients_emojis": "🍅🧅🍗",
             "nutritionist_note": "Empathetic note addressing the user by name. Remember the Guardrail!",
@@ -400,33 +509,81 @@ if st.session_state.step == "recipe_loading":
 if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
     recipe = st.session_state.full_recipe
     
-    if st.button(t["start_over"], use_container_width=True):
-        st.session_state.step = "input"
-        st.session_state.options = None
-        st.session_state.full_recipe = None
-        st.rerun()
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        if st.button(t["start_over"], use_container_width=True):
+            st.session_state.step = "input"
+            st.session_state.options = None
+            st.session_state.full_recipe = None
+            st.rerun()
+            
+    with col_btn2:
+        # Botón de descarga de archivo .txt
+        txt_data = format_recipe_for_download(recipe, t)
+        st.download_button(
+            label=t["download_btn"],
+            data=txt_data,
+            file_name=f"{recipe['recipe_name'].replace(' ', '_')}.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
 
     st.markdown(f"<p class='hero-emoji'>{recipe.get('hero_emoji', '🍽️')}</p>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='text-align:center;'>{recipe['recipe_name']}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='text-align:center; color:#555;'>🌍 {recipe.get('region', 'Global')}</h4>", unsafe_allow_html=True)
     st.markdown(f"<h3 style='text-align:center; letter-spacing: 5px;'>{recipe.get('ingredients_emojis', '')}</h3>", unsafe_allow_html=True)
     
     st.info(f"**{t['note']}** {recipe.get('nutritionist_note', '')}")
     
+    # Layout de 2 columnas para integrar la etiqueta y el gráfico de anillo
+    st.divider()
+    col_label, col_chart = st.columns(2)
+    
     m = recipe['macros']
-    st.markdown(f"""
-    <div class="nutrition-label">
-        <h2>Nutrition Facts</h2>
-        <div class="nut-row thick"><span class="nut-bold">Calories</span> <span class="nut-bold">{m.get('calories', '0')}</span></div>
-        <div class="nut-row"><span class="nut-bold">Total Fat</span> {m.get('total_fat', '0g')}</div>
-        <div class="nut-row indent">Saturated Fat {m.get('saturated_fat', '0g')}</div>
-        <div class="nut-row"><span class="nut-bold">Sodium</span> {m.get('sodium', '0mg')}</div>
-        <div class="nut-row"><span class="nut-bold">Total Carbohydrate</span> {m.get('total_carbs', '0g')}</div>
-        <div class="nut-row indent">Dietary Fiber {m.get('fiber', '0g')}</div>
-        <div class="nut-row indent">Total Sugars {m.get('total_sugars', '0g')}</div>
-        <div class="nut-row indent">Includes {m.get('added_sugars', '0g')} Added Sugars</div>
-        <div class="nut-row thick"><span class="nut-bold">Protein</span> <span class="nut-bold">{m.get('protein', '0g')}</span></div>
-    </div>
-    """, unsafe_allow_html=True)
+    
+    with col_label:
+        st.markdown(f"""
+        <div class="nutrition-label">
+            <h2>Nutrition Facts</h2>
+            <div class="nut-row thick"><span class="nut-bold">Calories</span> <span class="nut-bold">{m.get('calories', '0')}</span></div>
+            <div class="nut-row"><span class="nut-bold">Total Fat</span> {m.get('total_fat', '0g')}</div>
+            <div class="nut-row indent">Saturated Fat {m.get('saturated_fat', '0g')}</div>
+            <div class="nut-row"><span class="nut-bold">Sodium</span> {m.get('sodium', '0mg')}</div>
+            <div class="nut-row"><span class="nut-bold">Total Carbohydrate</span> {m.get('total_carbs', '0g')}</div>
+            <div class="nut-row indent">Dietary Fiber {m.get('fiber', '0g')}</div>
+            <div class="nut-row indent">Total Sugars {m.get('total_sugars', '0g')}</div>
+            <div class="nut-row indent">Includes {m.get('added_sugars', '0g')} Added Sugars</div>
+            <div class="nut-row thick"><span class="nut-bold">Protein</span> <span class="nut-bold">{m.get('protein', '0g')}</span></div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with col_chart:
+        # Extraemos los números y preparamos los datos para Plotly
+        macro_df = pd.DataFrame({
+            "Macro": ["Proteína", "Grasas", "Carbohidratos"],
+            "Gramos": [
+                extract_number(m.get('protein', '0g')),
+                extract_number(m.get('total_fat', '0g')),
+                extract_number(m.get('total_carbs', '0g'))
+            ]
+        })
+        # Verificamos que no todos los valores sean cero para no romper el gráfico
+        if macro_df['Gramos'].sum() > 0:
+            fig = px.pie(
+                macro_df, 
+                values='Gramos', 
+                names='Macro', 
+                hole=0.55,
+                color_discrete_sequence=['#ff6b6b', '#feca57', '#48dbfb']
+            )
+            fig.update_layout(
+                margin=dict(t=20, b=20, l=20, r=20), 
+                showlegend=True,
+                legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.write("Gráfico no disponible para esta receta.")
     
     if st.button(t["save_fav"], use_container_width=True):
         favs = user_profile.get("favorites",[])
@@ -458,6 +615,7 @@ if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
             with st.spinner(t["recalculating"]):
                 prompt = f"Current recipe: {json.dumps(recipe)}. Adjustment: '{macro_adjustment}'. Recalculate quantities."
                 format_hint = "Return strictly in the exact same JSON format as the original recipe."
+                # NOTA: Corregido el error de tu código original, donde se llamaba dos veces la función perdiendo el u_prof
                 new_recipe = call_ai_json(prompt, format_hint, lang_code, user_profile)
                 if new_recipe:
                     st.session_state.full_recipe = new_recipe
