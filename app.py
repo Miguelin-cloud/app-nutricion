@@ -153,7 +153,6 @@ st.markdown("""
     .brand-logo { font-family: 'Georgia', serif; font-size: 3rem; font-weight: bold; text-align: center; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 """, unsafe_allow_html=True)
-""", unsafe_allow_html=True)
 
 # ==========================================
 # ANIMACIONES LOTTIE
