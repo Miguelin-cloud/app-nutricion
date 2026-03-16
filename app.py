@@ -100,6 +100,34 @@ st.markdown("""
     
     .brand-logo { font-family: 'Georgia', serif; font-size: 3rem; font-weight: bold; text-align: center; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .brand-subtitle { text-align: center; font-size: 1.2rem; font-weight: 300; letter-spacing: 2px; color: #cbd5e1; margin-top: -10px; margin-bottom: 30px;}
+
+    /* Arreglar texto blanco sobre fondo blanco en Descargar y botones secundarios */
+    .stDownloadButton > button, button[kind="secondaryFormSubmit"], button[kind="secondary"] {
+        background: rgba(30, 41, 59, 0.8) !important; /* Fondo oscuro semi-transparente */
+        border: 1px solid #3b82f6 !important; /* Borde azul elegante */
+        color: #ffffff !important;
+    }
+    
+    /* Arreglar los Desplegables (Expanders) para que destaquen y se lea el texto */[data-testid="stExpander"] {
+        background-color: rgba(30, 41, 59, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 10px !important;
+    }
+    [data-testid="stExpander"] summary {
+        background-color: rgba(15, 23, 42, 0.9) !important;
+        color: #ffffff !important;
+        border-radius: 10px !important;
+    }
+    [data-testid="stExpander"] summary p { color: #ffffff !important; font-weight: bold; }
+    
+    /* Flecha de la barra lateral (Gris oscuro sobre fondo casi blanco para máximo contraste) */
+    button[data-testid="stSidebarCollapseButton"] {
+        background-color: #f1f5f9 !important; 
+    }
+    button[data-testid="stSidebarCollapseButton"] svg {
+        fill: #0f172a !important; color: #0f172a !important; stroke: #0f172a !important;
+    }
+    
     </style>
 """, unsafe_allow_html=True)
 
@@ -588,6 +616,7 @@ if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
         macro_df = pd.DataFrame({"Macro":[t.get("macro_protein", "Protein"), t.get("macro_fat", "Fat"), t.get("macro_carbs", "Carbs")], "Gramos":[extract_number(m.get('protein', '0g')), extract_number(m.get('total_fat', '0g')), extract_number(m.get('total_carbs', '0g'))]})
         if macro_df['Gramos'].sum() > 0:
             fig = px.pie(macro_df, values='Gramos', names='Macro', hole=0.55, color_discrete_sequence=['#ff6b6b', '#feca57', '#48dbfb'])
+            fig.update_traces(textfont_color='white')
             fig.update_layout(margin=dict(t=20, b=20, l=20, r=20), showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#f1f5f9'))
             st.plotly_chart(fig, use_container_width=True)
     
