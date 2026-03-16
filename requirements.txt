@@ -1,6 +1,8 @@
 streamlit
+pandas
+plotly
 groq
 extra-streamlit-components
 supabase
-pandas
-plotly
+streamlit-lottie
+requests
