@@ -110,13 +110,13 @@ def logout():
     st.session_state.step = "input"
 
 def get_user_data(username):
-    res = supabase.table("app_users").select("*").eq("username", username).execute()
+    res = supabase.table("app_users_2").select("*").eq("username", username).execute()
     if res.data:
         return res.data[0]
     return None
 
 def update_user_data(username, data_dict):
-    supabase.table("app_users").update(data_dict).eq("username", username).execute()
+    supabase.table("app_users_2").update(data_dict).eq("username", username).execute()
 
 # Selector de Idioma Global
 with st.sidebar:
@@ -137,7 +137,7 @@ if not st.session_state.current_username:
         log_user = st.text_input("Usuario (Ej: miguel123)", key="log_user")
         log_pin = st.text_input("PIN (Contraseña)", type="password", key="log_pin")
         if st.button("Entrar", type="primary", use_container_width=True):
-            res = supabase.table("app_users").select("*").eq("username", log_user).eq("pin", log_pin).execute()
+            res = supabase.table("app_users_2").select("*").eq("username", log_user).eq("pin", log_pin).execute()
             if res.data:
                 set_login_session(log_user)
                 st.rerun()
@@ -166,7 +166,7 @@ if not st.session_state.current_username:
         if st.button("Crear Cuenta y Entrar 🚀", type="primary", use_container_width=True):
             if reg_user and reg_pin and reg_sa and reg_name:
                 # Comprobar si el usuario existe
-                check = supabase.table("app_users").select("username").eq("username", reg_user).execute()
+                check = supabase.table("app_users_2").select("username").eq("username", reg_user).execute()
                 if check.data:
                     st.error("Ese Nombre de Usuario ya está en uso. Elige otro.")
                 else:
@@ -186,7 +186,7 @@ if not st.session_state.current_username:
         st.markdown("¿Olvidaste tu PIN?")
         rec_user = st.text_input("Introduce tu Usuario", key="rec_user")
         if st.button("Buscar Usuario"):
-            res = supabase.table("app_users").select("security_question").eq("username", rec_user).execute()
+            res = supabase.table("app_users_2").select("security_question").eq("username", rec_user).execute()
             if res.data:
                 st.session_state.recover_user = rec_user
                 st.session_state.recover_q = res.data[0]["security_question"]
@@ -199,9 +199,9 @@ if not st.session_state.current_username:
             rec_ans = st.text_input("Tu Respuesta")
             new_pin = st.text_input("Nuevo PIN", type="password")
             if st.button("Cambiar PIN", use_container_width=True):
-                res = supabase.table("app_users").select("security_answer").eq("username", st.session_state.recover_user).execute()
+                res = supabase.table("app_users_2").select("security_answer").eq("username", st.session_state.recover_user).execute()
                 if res.data and res.data[0]["security_answer"] == rec_ans.lower():
-                    supabase.table("app_users").update({"pin": new_pin}).eq("username", st.session_state.recover_user).execute()
+                    supabase.table("app_users_2").update({"pin": new_pin}).eq("username", st.session_state.recover_user).execute()
                     st.success("¡PIN cambiado con éxito! Ya puedes iniciar sesión.")
                     del st.session_state.recover_user
                 else:
