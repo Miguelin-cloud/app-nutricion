@@ -863,83 +863,182 @@ elif st.session_state.current_page == "mod1":
                     st.rerun()
 
 # ==========================================
-# MÓDULO 2: LISTA DE LA COMPRA & BÚSQUEDA WEB
-# ==========================================
-# ==========================================
 # MÓDULO 2: LISTA DE LA COMPRA E INVENTARIO
 # ==========================================
 elif st.session_state.current_page == "mod2":
-    if st.button(t["back_home"], type="secondary"): go_home()
+
+    if st.button(t["back_home"], type="secondary"):
+        go_home()
+
     st.divider()
-    st.markdown(f"<h2 style='text-align:center;'>{t['shop_title']}</h2>", unsafe_allow_html=True)
-    
-    # 1. Input Manual Elegante con Clasificación Groq
-    st.markdown("<br>", unsafe_allow_html=True)
-    col_in, col_btn = st.columns([4, 1])
-    with col_in:
-        new_item = st.text_input("Ingrediente", placeholder=t["type_food"], label_visibility="collapsed")
-    with col_btn:
-        add_pressed = st.button(t["add_to_list"], type="primary", use_container_width=True)
-        
+
+    st.markdown(
+        f"<h2 style='text-align:center;'>{t['shop_title']}</h2>",
+        unsafe_allow_html=True
+    )
+
+    # ==========================
+    # INPUT NUEVO ALIMENTO
+    # ==========================
+
+    col1, col2 = st.columns([4,1])
+
+    with col1:
+        new_item = st.text_input(
+            "",
+            placeholder=t["type_food"],
+            label_visibility="collapsed"
+        )
+
+    with col2:
+        add_pressed = st.button(
+            t["add_to_list"],
+            type="primary",
+            use_container_width=True
+        )
+
     if add_pressed and new_item:
-        with st.spinner("Categorizando alimento..."):
-            sys_prompt = "Eres un organizador de despensas experto. Categoriza el alimento dado por el usuario en EXACTAMENTE UNA de estas categorías JSON estrictas: 'cat_produce', 'cat_dairy', 'cat_white_meat', 'cat_red_meat', 'cat_seafood', 'cat_pantry', 'cat_other'. Devuelve un JSON: {\"category\": \"cat_...\"}."
-            parsed = groq_generic_json(sys_prompt, f"Alimento: {new_item}")
-            
+
+        with st.spinner("Organizando alimento..."):
+
+            sys_prompt = """
+            Clasifica el alimento del usuario en UNA sola categoría.
+
+            Categorías válidas:
+            - cat_produce
+            - cat_dairy
+            - cat_white_meat
+            - cat_red_meat
+            - cat_seafood
+            - cat_pantry
+            - cat_other
+
+            Devuelve SOLO JSON:
+            {"category":"cat_x"}
+            """
+
+            parsed = groq_generic_json(
+                sys_prompt,
+                f"Food: {new_item}"
+            )
+
             category = "cat_other"
+
             if parsed and "category" in parsed:
                 category = parsed["category"]
-                
+
             shop_list = user_profile.get("shopping_list",[])
-            # Limpieza en caso de existir la estructura "legacy"
-            if isinstance(shop_list, list) and len(shop_list) > 0 and "category" not in shop_list[0]:
-                shop_list =[]
-                
-            shop_list.append({"item": new_item.capitalize(), "category": category})
-            update_user_data(user_profile["username"], {"shopping_list": shop_list})
+
+            if not isinstance(shop_list,list):
+                shop_list = []
+
+            shop_list.append({
+                "item": new_item.capitalize(),
+                "category": category
+            })
+
+            update_user_data(
+                user_profile["username"],
+                {"shopping_list":shop_list}
+            )
+
             st.rerun()
 
-    st.divider()
-    st.subheader(t["shop_list_title"])
-    
-    shop_list = user_profile.get("shopping_list",[])
-    
-    if not shop_list or not isinstance(shop_list, list) or (len(shop_list)>0 and "category" not in shop_list[0]):
-        st.info("🛒 Tu lista de la compra está limpia y vacía.")
-    else:
-        # 2. Agrupación por Categoría Estricta
-        categorized = {}
-        for idx, obj in enumerate(shop_list):
-            cat = obj.get("category", "cat_other")
-            if cat not in categorized: categorized[cat] = []
-            categorized[cat].append((idx, obj.get("item", "")))
-            
-        # 3. Visualización Ordenada por Expander y Eliminar 1 a 1
-        category_order =["cat_produce", "cat_dairy", "cat_white_meat", "cat_red_meat", "cat_seafood", "cat_pantry", "cat_other"]
-        
-        for cat in category_order:
-            if cat in categorized and categorized[cat]:
-                items_in_cat = categorized[cat]
-                # Título traducido dinámicamente + conteo
-                with st.expander(f"{t.get(cat, cat)} ({len(items_in_cat)})", expanded=True):
-                    for idx, item_name in items_in_cat:
-                        col_item, col_del = st.columns([6, 1])
-                        with col_item:
-                            st.markdown(f"<p style='margin-top: 5px; font-weight: 500; font-size: 1.1rem;'>• {item_name}</p>", unsafe_allow_html=True)
-                        with col_del:
-                            # Botón minimalista para borrar
-                            if st.button("❌", key=f"del_{idx}"):
-                                shop_list.pop(idx)
-                                update_user_data(user_profile["username"], {"shopping_list": shop_list})
-                                st.rerun()
 
-    # Botón Global de Vaciar Lista
-    if isinstance(shop_list, list) and len(shop_list) > 0:
+    st.divider()
+
+    st.subheader(t["shop_list_title"])
+
+    shop_list = user_profile.get("shopping_list",[])
+
+    if not shop_list:
+
+        st.info("🛒 Tu lista está vacía.")
+
+    else:
+
+        categorized = {}
+
+        for idx,obj in enumerate(shop_list):
+
+            cat = obj.get("category","cat_other")
+
+            if cat not in categorized:
+                categorized[cat] = []
+
+            categorized[cat].append((idx,obj["item"]))
+
+
+        category_order = [
+            "cat_produce",
+            "cat_dairy",
+            "cat_white_meat",
+            "cat_red_meat",
+            "cat_seafood",
+            "cat_pantry",
+            "cat_other"
+        ]
+
+
+        for cat in category_order:
+
+            if cat in categorized:
+
+                items = categorized[cat]
+
+                if items:
+
+                    with st.expander(
+                        f"{t.get(cat,cat)} ({len(items)})",
+                        expanded=True
+                    ):
+
+                        for idx,item in items:
+
+                            c1,c2 = st.columns([6,1])
+
+                            with c1:
+                                st.markdown(
+                                    f"<p style='font-size:1.05rem;font-weight:500;margin-top:6px;'>• {item}</p>",
+                                    unsafe_allow_html=True
+                                )
+
+                            with c2:
+                                if st.button(
+                                    "🗑️",
+                                    key=f"del_{idx}",
+                                    use_container_width=True
+                                ):
+                                    shop_list.pop(idx)
+
+                                    update_user_data(
+                                        user_profile["username"],
+                                        {"shopping_list":shop_list}
+                                    )
+
+                                    st.rerun()
+
+
+    if shop_list:
+
         st.markdown("<br>", unsafe_allow_html=True)
-        col_space, col_clear = st.columns([3, 1])
-        with col_clear:
-            if st.button(t["clear_list"], type="secondary", use_container_width=True):
-                update_user_data(user_profile["username"], {"shopping_list":
+
+        col1,col2 = st.columns([3,1])
+
+        with col2:
+
+            if st.button(
+                t["clear_list"],
+                type="secondary",
+                use_container_width=True
+            ):
+
+                update_user_data(
+                    user_profile["username"],
+                    {"shopping_list":[]}
+                )
+
+                st.rerun()
 
 # ==========================================
 # MÓDULO 3: PLANIFICADOR SEMANAL
