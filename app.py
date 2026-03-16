@@ -510,64 +510,120 @@ def format_recipe_for_download(recipe, t_dict):
     text += f"\n--- MACROS ---\nCalorías: {m.get('calories', '0')} | Proteína: {m.get('protein', '0g')} | Grasas: {m.get('total_fat', '0g')} | Carbohidratos: {m.get('total_carbs', '0g')}\n"
     return text
 
-# ==========================================
-# FUNCIÓN CACHÉ PARA NOTICIAS (DuckDuckGo)
-# ==========================================
-@st.cache_data(ttl=datetime.timedelta(days=3))
-def fetch_nutrition_news(lang_code):
-    query_map = {
-        "Spanish": "últimas tendencias nutrición alimentación comida saludable",
-        "English": "latest nutrition healthy food diet trends news",
-        "French": "actualités nutrition tendances alimentation saine",
-        "Italian": "notizie nutrizione tendenze dieta sana"
-    }
-    query = query_map.get(lang_code, "healthy nutrition trends")
-    try:
-        results = list(DDGS().text(query, max_results=3))
-        return results
-    except Exception as e:
-        return[]
+from duckduckgo_search import DDGS
+from datetime import timedelta
 
 # ==========================================
-# UI: BARRA LATERAL REDISEÑADA
+# FUNCIÓN CACHÉ NOTICIAS RECETAS / TENDENCIAS
 # ==========================================
+
+@st.cache_data(ttl=timedelta(days=3))
+def fetch_food_trends():
+
+    query = "famous recipes food trends popular dishes gastronomy news"
+
+    try:
+        results = list(DDGS().text(query, max_results=4))
+        return results
+    except Exception:
+        return []
+
+
+# ==========================================
+# SIDEBAR REDISEÑADA
+# ==========================================
+
 with st.sidebar:
-    st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
+
+    st.markdown(
+        f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>",
+        unsafe_allow_html=True
+    )
+
     with st.expander(t["profile"], expanded=False):
-        upd_weight = st.number_input(t["current_weight_label"], value=float(user_profile.get("weight", 70.0)))
-        upd_goals = st.text_area(t["profile_goals_label"], value=user_profile.get("goals", ""))
-        upd_rest = st.text_input(t["profile_restrictions_label"], value=user_profile.get("restrictions", ""))
+
+        upd_weight = st.number_input(
+            t["current_weight_label"],
+            value=float(user_profile.get("weight",70))
+        )
+
+        upd_goals = st.text_area(
+            t["profile_goals_label"],
+            value=user_profile.get("goals","")
+        )
+
+        upd_rest = st.text_input(
+            t["profile_restrictions_label"],
+            value=user_profile.get("restrictions","")
+        )
+
         if st.button(t["update_prof"], use_container_width=True):
-            update_user_data(user_profile["username"], {"weight": upd_weight, "goals": upd_goals, "restrictions": upd_rest})
+            update_user_data(
+                user_profile["username"],
+                {"weight":upd_weight,"goals":upd_goals,"restrictions":upd_rest}
+            )
             st.success(t["prof_updated"])
             st.rerun()
-            
+
+
     st.divider()
+
     st.subheader(t["favs"])
+
     favs = user_profile.get("favorites",[])
+
     if favs:
         for f in favs:
-            with st.expander(f["name"]): st.write(f"🔥 {f['calories']} | 💪 {f['protein']}")
-    else: st.info(t["no_favs"])
-        
+            with st.expander(f["name"]):
+                st.write(f"🔥 {f['calories']} | 💪 {f['protein']}")
+    else:
+        st.info(t["no_favs"])
+
+
     st.divider()
-    with st.expander(t["news_title"], expanded=False):
-        st.subheader(t["feed_title"])
-        news_items = fetch_nutrition_news(lang_code)
-        
+
+    # ==========================================
+    # EXPANDER NOTICIAS RECETAS TENDENCIA
+    # ==========================================
+
+    with st.expander("🔥 Recetas y Tendencias", expanded=False):
+
+        news_items = fetch_food_trends()
+
         if news_items:
+
             for news in news_items:
+
                 st.markdown(f"""
-                <div style='background: rgba(255, 255, 255, 0.4); padding: 12px; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(0,0,0,0.05);'>
-                    <h4 style='margin:0; font-size:14px; font-weight:700;'>{news.get('title', '')}</h4>
-                    <p style='font-size:12px; margin-top:6px; margin-bottom:6px; line-height:1.4;'>{news.get('body', '')[:90]}...</p>
-                    <a href='{news.get('href', '#')}' target='_blank' style='font-size:12px; color:#2563eb; font-weight:bold; text-decoration:none;'>Leer más →</a>
+                <div style="
+                background: rgba(255,255,255,0.55);
+                padding:12px;
+                border-radius:10px;
+                margin-bottom:12px;
+                border:1px solid rgba(0,0,0,0.05);
+                ">
+                    <h4 style="margin:0;font-size:14px;font-weight:700;">
+                    {news.get('title','')}
+                    </h4>
+
+                    <p style="font-size:12px;margin-top:6px;margin-bottom:6px;line-height:1.4;">
+                    {news.get('body','')[:100]}...
+                    </p>
+
+                    <a href="{news.get('href','#')}"
+                       target="_blank"
+                       style="font-size:12px;color:#2563eb;font-weight:bold;text-decoration:none;">
+                       Ver receta / noticia →
+                    </a>
                 </div>
                 """, unsafe_allow_html=True)
+
         else:
-            st.write("No hay tendencias disponibles hoy.")
-                
+            st.write("No hay tendencias disponibles.")
+
+
     st.divider()
+
     if st.button(t["logout"], type="secondary", use_container_width=True):
         logout()
 
