@@ -52,7 +52,7 @@ st.markdown("""
         color: #f1f5f9;
     }
     
-    /* Efecto Cristal (Glassmorphism) para los contenedores principales y sidebar */
+    /* Efecto Cristal (Glassmorphism) para contenedores */
     .block-container, [data-testid="stSidebar"] {
         background: rgba(30, 41, 59, 0.45) !important;
         backdrop-filter: blur(16px) !important;
@@ -62,9 +62,38 @@ st.markdown("""
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
     
-    /* Ajuste de colores de texto para legibilidad */
-    h1, h2, h3, h4, p, label, span, .stMarkdown {
+    /* Colores base de texto (SIN afectar a los botones) */
+    h1, h2, h3, h4, p, label, .stMarkdown {
         color: #f8fafc !important;
+    }
+
+    /* 🔥 SOLUCIÓN: Botones Premium */
+    .stButton > button {
+        background: linear-gradient(45deg, #10b981, #3b82f6) !important; /* Degradado Verde-Azul */
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+        font-weight: bold !important;
+        transition: all 0.3s ease !important;
+    }
+    .stButton > button * {
+        color: white !important; /* Fuerza texto interno a blanco */
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+    }
+
+    /* 🔥 SOLUCIÓN: Cajas de texto (Inputs) oscuras estilo Glassmorphism */
+    div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div, div[data-baseweb="select"] > div {
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        border-radius: 8px !important;
+        color: white !important;
+    }
+    div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] div {
+        color: white !important;
     }
 
     /* Tarjeta Dorada Mejorada */
@@ -89,9 +118,6 @@ st.markdown("""
     .nutrition-label h2 { margin: 0; font-size: 24px; font-weight: 900; border-bottom: 8px solid #111; padding-bottom: 5px; }
     .nut-row { display: flex; justify-content: space-between; border-bottom: 1px solid #999; padding: 6px 0; font-size: 15px; }
     .nut-row.thick { border-bottom: 4px solid #111; }
-    .nut-row.indent { padding-left: 15px; font-size: 14px; }
-    .nut-bold { font-weight: bold; }
-    .feed-card { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid rgba(255, 255, 255, 0.1); }
     
     /* Logo de Texto Elegante */
     .brand-logo {
