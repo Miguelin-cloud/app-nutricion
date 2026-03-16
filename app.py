@@ -192,9 +192,14 @@ st.markdown("""
     font-family: Arial, sans-serif;
 }
 
+.nutrition-label * {
+    color: black !important;
+}
+
 .nutrition-label h2 {
     border-bottom: 4px solid black;
     padding-bottom: 5px;
+    color: black;
 }
 
 .nut-row {
