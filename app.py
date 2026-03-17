@@ -377,6 +377,9 @@ def fetch_daily_healthy_recipes(lang_code, category_key="trend_sweets"):
 # ==========================================
 # SISTEMA MULTIDIOMA Y TEXTOS (Actualizado Mod 3 y 4)
 # ==========================================
+# ==========================================
+# SISTEMA MULTIDIOMA Y TEXTOS
+# ==========================================
 TRANSLATIONS = {
     "🇪🇸 Español": {
         "lang_code": "Spanish",
@@ -419,7 +422,7 @@ TRANSLATIONS = {
         "mod4_title": "🩺 Dashboard de Salud y Análisis Médico", "mod4_period_label": "Selecciona el Período a Analizar",
         "mod4_period_today": "Hoy", "mod4_period_week": "Esta Semana", "mod4_period_month": "Este Mes",
         "mod4_total_cal": "Calorías Totales", "mod4_gen_btn": "🩺 Generar Análisis Clínico Profundo por IA",
-        "mod4_analyzing": "La IA médica está analizando tu nutrición..."
+        "mod4_analyzing": "La IA médica está analizando tu nutrición...",
         "ptr_default": "🖱️ Predeterminado", "ptr_drumstick": "🍗 Muslito", "ptr_avocado": "🥑 Aguacate", "ptr_pan": "🥘 Sartén", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Varita", "ptr_apple": "🍎 Manzana",
         "magic_pointer": "🪄 Puntero Mágico", "choose_pointer": "Elige tu puntero:",
         "trend_sweets": "🍰 Dulces", "trend_salty": "🥨 Salados", "trend_snacks": "🥪 Snacks Rápidos", "trend_breakfast": "🥣 Desayunos", "trend_drinks": "🥤 Bebidas/Smoothies",
@@ -465,7 +468,7 @@ TRANSLATIONS = {
         "mod4_title": "🩺 Health Dashboard & Medical Analysis", "mod4_period_label": "Select Period to Analyze",
         "mod4_period_today": "Today", "mod4_period_week": "This Week", "mod4_period_month": "This Month",
         "mod4_total_cal": "Total Calories", "mod4_gen_btn": "🩺 Generate Deep Clinical AI Analysis",
-        "mod4_analyzing": "Medical AI is analyzing your nutrition..."
+        "mod4_analyzing": "Medical AI is analyzing your nutrition...",
         "ptr_default": "🖱️ Default", "ptr_drumstick": "🍗 Drumstick", "ptr_avocado": "🥑 Avocado", "ptr_pan": "🥘 Pan", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Wand", "ptr_apple": "🍎 Apple",
         "magic_pointer": "🪄 Magic Pointer", "choose_pointer": "Choose your pointer:",
         "trend_sweets": "🍰 Sweets", "trend_salty": "🥨 Salty", "trend_snacks": "🥪 Quick Snacks", "trend_breakfast": "🥣 Breakfasts", "trend_drinks": "🥤 Drinks/Smoothies",
@@ -508,7 +511,7 @@ TRANSLATIONS = {
         "mod4_title": "🩺 Tableau de bord Santé et Analyse", "mod4_period_label": "Sélectionner la période à analyser",
         "mod4_period_today": "Aujourd'hui", "mod4_period_week": "Cette Semaine", "mod4_period_month": "Ce Mois",
         "mod4_total_cal": "Calories Totales", "mod4_gen_btn": "🩺 Générer une analyse clinique IA",
-        "mod4_analyzing": "L'IA médicale analyse votre nutrition..."
+        "mod4_analyzing": "L'IA médicale analyse votre nutrition...",
         "ptr_default": "🖱️ Par défaut", "ptr_drumstick": "🍗 Pilon", "ptr_avocado": "🥑 Avocat", "ptr_pan": "🥘 Poêle", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Baguette", "ptr_apple": "🍎 Pomme",
         "magic_pointer": "🪄 Pointeur Magique", "choose_pointer": "Choisissez votre pointeur :",
         "trend_sweets": "🍰 Sucreries", "trend_salty": "🥨 Salé", "trend_snacks": "🥪 En-cas", "trend_breakfast": "🥣 Petit-déj", "trend_drinks": "🥤 Boissons",
@@ -551,7 +554,7 @@ TRANSLATIONS = {
         "mod4_title": "🩺 Dashboard Salute e Analisi Medica", "mod4_period_label": "Seleziona Periodo da Analizzare",
         "mod4_period_today": "Oggi", "mod4_period_week": "Questa Settimana", "mod4_period_month": "Questo Mese",
         "mod4_total_cal": "Calorie Totali", "mod4_gen_btn": "🩺 Genera Analisi Clinica Profonda IA",
-        "mod4_analyzing": "L'IA medica sta analizzando la tua nutrizione..."
+        "mod4_analyzing": "L'IA medica sta analizzando la tua nutrizione...",
         "ptr_default": "🖱️ Predefinito", "ptr_drumstick": "🍗 Cosciotto", "ptr_avocado": "🥑 Avocado", "ptr_pan": "🥘 Padella", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Bacchetta", "ptr_apple": "🍎 Mela",
         "magic_pointer": "🪄 Puntatore Magico", "choose_pointer": "Scegli il puntatore:",
         "trend_sweets": "🍰 Dolci", "trend_salty": "🥨 Salati", "trend_snacks": "🥪 Spuntini", "trend_breakfast": "🥣 Colazioni", "trend_drinks": "🥤 Bevande",
