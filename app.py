@@ -856,9 +856,9 @@ if st.session_state.current_page == "home":
 
     st.markdown(f"""
     <style>
-    /* Diseño Base para los 4 botones (Restringido SOLO a la parte central "section.main") */
+    /* Diseño Base para los 4 botones. Nota las DOBLES llaves {{ }} para el CSS */
     section.main div[data-testid="stColumn"] button, 
-    section.main div[data-testid="column"] button {
+    section.main div[data-testid="column"] button {{
         background: #FFFFFF !important;
         background-image: none !important; 
         border-radius: 20px !important;
@@ -879,32 +879,32 @@ if st.session_state.current_page == "home":
         background-repeat: no-repeat !important;
         background-position: center top 35px !important;
         padding-top: 110px !important;
-    }
+    }}
 
     section.main div[data-testid="stColumn"] button p, 
-    section.main div[data-testid="column"] button p {
+    section.main div[data-testid="column"] button p {{
         margin: 0 !important;
         transition: transform 0.4s ease, color 0.4s ease !important;
         z-index: 2;
-    }
+    }}
 
     section.main div[data-testid="stColumn"] button:hover, 
-    section.main div[data-testid="column"] button:hover {
+    section.main div[data-testid="column"] button:hover {{
         transform: translateY(-8px) scale(1.02) !important;
         box-shadow: 16px 16px 32px rgba(16,185,129,0.15), -16px -16px 32px #ffffff !important;
         border-color: #10B981 !important;
         background-position: center top 20px !important;
-    }
+    }}
 
     section.main div[data-testid="stColumn"] button:hover p, 
-    section.main div[data-testid="column"] button:hover p {
+    section.main div[data-testid="column"] button:hover p {{
         transform: translateY(-15px) !important;
         color: #0F172A !important; 
         font-weight: 900 !important;
-    }
+    }}
 
     section.main div[data-testid="stColumn"] button::after, 
-    section.main div[data-testid="column"] button::after {
+    section.main div[data-testid="column"] button::after {{
         position: absolute !important;
         bottom: 20px !important;
         left: 10px !important;
@@ -921,49 +921,50 @@ if st.session_state.current_page == "home":
         padding: 5px !important;
         border-radius: 8px !important;
         background: rgba(255, 255, 255, 0.6) !important; 
-    }
+    }}
 
     section.main div[data-testid="stColumn"] button:hover::after, 
-    section.main div[data-testid="column"] button:hover::after {
+    section.main div[data-testid="column"] button:hover::after {{
         opacity: 1 !important;
         transform: translateY(0) !important;
-    }
+    }}
 
     /* COLUMNA 1, BOTÓN 1 (Cocina Mágica) */
     section.main div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(1) button,
-    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(1) button {
+    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(1) button {{
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z'/><line x1='6' y1='17' x2='18' y2='17'/><g><animateTransform attributeName='transform' type='rotate' values='-10 12 12; 10 12 12; -10 12 12' dur='2s' repeatCount='indefinite'/><circle cx='12' cy='3' r='1' fill='%2310b981'><animate attributeName='opacity' values='0;1;0' dur='1.5s' repeatCount='indefinite'/></circle></g></svg>") !important;
         background-size: 80px !important;
-    }
+    }}
+    /* Nota como {d_m1} SÍ lleva una sola llave porque es una variable de Python */
     section.main div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(1) button::after,
-    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(1) button::after { content: "{d_m1}" !important; }
+    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(1) button::after {{ content: "{d_m1}" !important; }}
 
     /* COLUMNA 1, BOTÓN 2 (Mis Menús) */
     section.main div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(2) button,
-    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(2) button {
+    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(2) button {{
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/><path d='M8 15 l2 2 l4 -4'><animate attributeName='stroke-dasharray' values='0,20; 20,0; 20,0' dur='2s' repeatCount='indefinite'/></path></svg>") !important;
         background-size: 80px !important;
-    }
+    }}
     section.main div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(2) button::after,
-    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(2) button::after { content: "{d_m3}" !important; }
+    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(2) button::after {{ content: "{d_m3}" !important; }}
 
     /* COLUMNA 2, BOTÓN 1 (Mi Compra - Stickman) */
     section.main div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(1) button,
-    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(1) button {
+    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(1) button {{
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'><g><animateTransform attributeName='transform' type='translate' values='-3,0; 3,0; -3,0' dur='1.2s' repeatCount='indefinite'/><path d='M28 15 h6 l4 10 h12'/><line x1='32' y1='25' x2='48' y2='25'/><circle cx='36' cy='30' r='2' fill='%233b82f6'/><circle cx='46' cy='30' r='2' fill='%233b82f6'/><circle cx='18' cy='8' r='3'/><path d='M18 11 v10'/><path d='M18 21 l-4 8'><animate attributeName='d' values='M18 21 l-4 8; M18 21 l4 8; M18 21 l-4 8' dur='0.4s' repeatCount='indefinite'/></path><path d='M18 21 l6 7'><animate attributeName='d' values='M18 21 l6 7; M18 21 l-2 8; M18 21 l6 7' dur='0.4s' repeatCount='indefinite'/></path><path d='M18 14 l10 3'/></g></svg>") !important;
         background-size: 110px !important;
-    }
+    }}
     section.main div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(1) button::after,
-    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(1) button::after { content: "{d_m2}" !important; }
+    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(1) button::after {{ content: "{d_m2}" !important; }}
 
     /* COLUMNA 2, BOTÓN 2 (Mi Salud) */
     section.main div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(2) button,
-    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(2) button {
+    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(2) button {{
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444' stroke='%23ef4444' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'><animate attributeName='transform' type='scale' values='1;1.15;1;1;1' dur='1.2s' repeatCount='indefinite' transform-origin='12 12'/></path><polyline points='9 12 11 12 12 9 13 15 14 12 16 12' stroke='white' stroke-width='1' fill='none'><animate attributeName='stroke-dasharray' values='0,20; 20,0; 20,0' dur='2s' repeatCount='indefinite'/></polyline></svg>") !important;
         background-size: 80px !important;
-    }
+    }}
     section.main div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(2) button::after,
-    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(2) button::after { content: "{d_m4}" !important; }
+    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(2) button::after {{ content: "{d_m4}" !important; }}
     </style>
     """, unsafe_allow_html=True)
 
