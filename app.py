@@ -488,20 +488,36 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", 
     Your client is {u_prof['name']}. Profile: {u_prof['age']} y/o, {u_prof['weight']} kg, {u_prof['height']} cm, Gender: {u_prof['gender']}.
     Main goal: "{u_prof['goals']}". Restrictions: "{u_prof['restrictions']}".
     [DYNAMIC GENERATION] Generate exactly {num_recipes} recipe options.
-    [CHEF'S RECOMMENDATION - CRITICAL] Analyze the client's profile/goals. Tag exactly ONE recipe with `"is_chefs_recommendation": true` that is the healthiest for them.
-    [COHERENCE FILTER - CRITICAL] Formulate ONLY realistic, delicious, and culturally sensible dishes. DO NOT invent bizarre or disgusting combinations (e.g., chorizo with Nutella). If the ingredients provided don't mix well, ignore the outliers and suggest a logical, tasty recipe using only a subset.[MULTILINGUAL - CRITICAL] You MUST translate the ENTIRE JSON response (recipe_name, description, ingredients, steps, nutritionist_note, health_badges) into {lang_code}. If {lang_code} is 'French', the title MUST be in French. NEVER mix languages.
+    [CHEF'S RECOMMENDATION] Tag exactly ONE recipe with `"is_chefs_recommendation": true`.
+    [COHERENCE FILTER] Formulate ONLY realistic, delicious, and culturally sensible dishes. Do not invent bizarre combinations.
     """
-    if avail_ing: system_prompt += f"\n[GOLDEN RULE] Recipes MUST be based EXCLUSIVELY on: {avail_ing}. Do NOT invent main ingredients."
+    if avail_ing: system_prompt += f"\n[GOLDEN RULE] Recipes MUST be based EXCLUSIVELY on: {avail_ing}."
     if avoid_tdy: system_prompt += f"\n[STRICT PROHIBITION] Under NO circumstances include: {avoid_tdy}."
+
+    # Inyección final CRÍTICA para el multidioma
+    final_prompt = system_prompt + f"""
+    \nEXPECTED JSON FORMAT:
+    {expected_format_hint}
+    
+    🔴 [CRITICAL LANGUAGE DIRECTIVE] 🔴
+    THE ENTIRE OUTPUT (titles, descriptions, difficulty, time, ingredients, instructions, notes, badges) MUST BE WRITTEN EXCLUSIVELY IN {lang_code.upper()}. 
+    IF THE USER SELECTED FRENCH, WRITE FRENCH. IF SPANISH, WRITE SPANISH. NEVER MIX LANGUAGES.
+    """
 
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": system_prompt + "\n" + expected_format_hint}, {"role": "user", "content": prompt}], response_format={"type": "json_object"}, temperature=0.6)
+            model="llama-3.3-70b-versatile", 
+            messages=[
+                {"role": "system", "content": final_prompt}, 
+                {"role": "user", "content": prompt}
+            ], 
+            response_format={"type": "json_object"}, 
+            temperature=0.4  # Bajamos a 0.4 para hacerla más obediente y menos errática
+        )
         return json.loads(response.choices[0].message.content)
     except Exception as e:
         st.error(f"AI Error: {e}")
         return None
-
 def groq_generic_json(system_prompt, user_prompt):
     client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
     try:
@@ -681,8 +697,8 @@ elif st.session_state.current_page == "mod1":
                     if lottie_cooking: st_lottie(lottie_cooking, height=200, key="loading_anim_1")
                     st.markdown(f"<h3 style='text-align:center;'>{t['analyzing']}</h3>", unsafe_allow_html=True)
                 
-                prompt = f"Generate {n_recipes} recipe options strictly using the available ingredients provided."
-                format_hint = """{ "options":[ { "name": "Recipe", "hero_emoji": "🥘", "difficulty": "Easy", "time": "20 mins", "health_score": 9, "description": "Desc", "is_chefs_recommendation": true } ] }"""
+                prompt = f"Generate {n_recipes} recipe options strictly using the available ingredients provided. ALL TEXT MUST BE IN {lang_code.upper()}."
+                format_hint = """{ "options":[ { "name": "Nombre de receta", "hero_emoji": "🥘", "difficulty": "Media/Fácil", "time": "20 min", "health_score": 9, "description": "Breve descripción", "is_chefs_recommendation": true } ] }"""
                 res = call_ai_json(prompt, format_hint, lang_code, user_profile, available_ingredients, avoid_today, num_recipes=n_recipes)
                 lottie_placeholder.empty()
                 
@@ -738,15 +754,17 @@ elif st.session_state.current_page == "mod1":
         
         # También usamos la extracción segura aquí
         safe_name = st.session_state.selected_option.get('name', st.session_state.selected_option.get('recipe_name', 'la receta seleccionada'))
-        prompt = f"Genera la receta completa para '{safe_name}'. Explica cada paso."
+        
+        # PROMPT BLINDADO CON EL IDIOMA
+        prompt = f"Write the complete and detailed recipe for '{safe_name}'. Explain each step carefully. IT IS MANDATORY THAT ALL YOUR RESPONSE IS IN {lang_code.upper()}."
         
         # Incorporación de Health Badges en el prompt
         format_hint = """{ 
-            "recipe_name": "Name", 
-            "region": "Style", 
+            "recipe_name": "Nombre de la receta", 
+            "region": "Estilo", 
             "hero_emoji": "🥘", 
             "ingredients_emojis": "🍅🧅", 
-            "nutritionist_note": "Empathetic note", 
+            "nutritionist_note": "Nota del nutricionista", 
             "health_badges":[
                 {"icon": "🟢", "label": "Sin Colesterol", "type": "positive"},
                 {"icon": "🔴", "label": "Alto en Sodio", "type": "warning"}
@@ -761,8 +779,8 @@ elif st.session_state.current_page == "mod1":
                 "sugars": "5g", 
                 "protein": "40g" 
             }, 
-            "ingredients":[{"item": "Ing", "qty": "200g"}], 
-            "instructions":["1. 🍳 Paso 1...", "2. 🔪 Paso 2..."] 
+            "ingredients":[{"item": "Nombre del ingrediente", "qty": "200g"}], 
+            "instructions":["1. 🍳 Primer paso...", "2. 🔪 Segundo paso..."] 
         }"""
         res = call_ai_json(prompt, format_hint, lang_code, user_profile, st.session_state.avail_ing, st.session_state.avoid_tdy)
         lottie_placeholder.empty()
