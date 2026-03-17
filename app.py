@@ -327,49 +327,78 @@ def format_recipe_for_download(recipe, t_dict):
 
 @st.cache_data(ttl=timedelta(days=1), show_spinner=False)
 def fetch_daily_healthy_recipes(lang_code):
-    # Consulta más amplia y natural para evitar que el buscador bloquee la petición
-    query = "mejores recetas saludables fáciles rápidas nutrición blog"
+    # 1. Conexión DIRECTA a las revistas de cocina (Infalible, sin bloqueos de buscador)
+    rss_feeds =[
+        "https://www.vitonica.com/categoria/recetas-saludables/feed",
+        "https://www.directoalpaladar.com/categoria/recetas-saludables/feed"
+    ]
+    
+    raw_results =[]
+    for url in rss_feeds:
+        try:
+            # Nos conectamos como si fuéramos un navegador para extraer el XML de las noticias
+            res = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}, timeout=5)
+            
+            # Separamos cada noticia de la revista
+            items = res.text.split('<item>')
+            
+            # Cogemos las 3 recetas más recientes de cada revista
+            for item in items[1:4]: 
+                # Extraemos el Título
+                t_match = re.search(r'<title>(.*?)</title>', item, re.IGNORECASE | re.DOTALL)
+                title = t_match.group(1).replace('<![CDATA[', '').replace(']]>', '').strip() if t_match else "Receta Saludable"
+                
+                # Extraemos el Enlace Real de la página
+                l_match = re.search(r'<link>(.*?)</link>', item, re.IGNORECASE | re.DOTALL)
+                link = l_match.group(1).replace('<![CDATA[', '').replace(']]>', '').strip() if l_match else "#"
+                
+                # Extraemos la descripción y le borramos las etiquetas de HTML o imágenes
+                d_match = re.search(r'<description>(.*?)</description>', item, re.IGNORECASE | re.DOTALL)
+                desc = d_match.group(1).replace('<![CDATA[', '').replace(']]>', '').strip() if d_match else "Deliciosa opción sana."
+                desc_clean = re.sub(r'<[^>]+>', '', desc)[:150] # Limpia todo y corta a 150 caracteres
+                
+                raw_results.append({"title": title, "url": link, "summary": desc_clean})
+        except Exception as e:
+            continue
+            
+    # Mezclamos las recetas de ambas revistas y nos quedamos con las 4 mejores
+    random.shuffle(raw_results)
+    raw_results = raw_results[:4]
+    
+    if not raw_results:
+        return[] # Solo se devolverá vacío si el servidor web se queda sin internet
+        
+    # 2. PROMPT DE LA IA (Traduce y mejora los textos obtenidos directamente de las revistas)
+    sys_prompt = f"""
+    You are a Michelin-star Chef and an expert culinary copywriter.
+    I am providing you with a JSON list of REAL daily recipes extracted directly from famous culinary websites.
+    
+    Your task:
+    1. Rewrite the 'title' to make it sound irresistible, premium, and highly nutritious.
+    2. Rewrite the 'summary' into a mouth-watering 2-line description highlighting its health benefits.
+    3. TRANSLATE both the title and the summary entirely into {lang_code.upper()}. This is mandatory.
+    4. Extract and keep the EXACT original 'url' intact.
+    
+    You must reply STRICTLY with a JSON object in this exact format:
+    {{
+        "recipes":[
+            {{"title": "Translated Catchy Title", "summary": "Translated 2-line description", "url": "https://original-link.com"}}
+        ]
+    }}
+    """
+    
+    user_prompt = "REAL RSS RECIPES:\n" + json.dumps(raw_results)
     
     try:
-        # Extraemos hasta 6 resultados para darle variedad a la IA
-        raw_results = list(DDGS().text(query, max_results=6))
-        
-        if not raw_results:
-            return[]
-            
-        # PROMPT BLINDADO: Instrucciones hiper-claras para Groq
-        sys_prompt = f"""
-        You are a Michelin-star Chef and an expert culinary copywriter.
-        I will provide you with raw internet search results (URLs, titles, and snippets) about healthy food.
-        
-        Your task:
-        1. Select EXACTLY 4 of the most delicious and healthy recipes/articles from the provided list.
-        2. Rewrite the 'title' to make it sound irresistible, premium, and highly nutritious.
-        3. Rewrite the snippet into a mouth-watering 2-line 'summary' highlighting its health benefits.
-        4. TRANSLATE both the title and the summary entirely into {lang_code.upper()}. This is mandatory.
-        5. Extract and keep the EXACT original URL from the data.
-        
-        You must reply STRICTLY with a JSON object in this exact format:
-        {{
-            "recipes":[
-                {{"title": "Translated Catchy Title", "summary": "Translated 2-line description", "url": "https://original-link.com"}}
-            ]
-        }}
-        """
-        
-        user_prompt = "RAW RESULTS TO PROCESS:\n" + json.dumps(raw_results)
-        
-        # Llamada a nuestra función Groq JSON
+        # Llamamos a Groq con los resultados reales
         parsed = groq_generic_json(sys_prompt, user_prompt)
-        
         if parsed and "recipes" in parsed and len(parsed["recipes"]) > 0:
             return parsed["recipes"]
-            
-        # Si la IA falla por algún motivo, devolvemos los resultados crudos de DuckDuckGo como plan B
-        return raw_results
-    except Exception as e:
-        return[]
-
+    except Exception:
+        pass
+        
+    # Sistema de seguridad: Si la IA tarda o falla, muestra las recetas originales en español.
+    return raw_results
 # ==========================================
 # SISTEMA MULTIDIOMA Y TEXTOS
 # ==========================================
@@ -651,22 +680,16 @@ with st.sidebar:
     else: st.info(t["no_favs"])
 
     st.divider()
-    with st.expander(t.get("news_title", "📰 Tendencias Nutricionales"), expanded=False):
-        # Llamamos a la función con el idioma seleccionado
+    with st.expander(t.get("news_title", "📰 Tendencias Nutricionales"), expanded=True):
+        
+        # Llamamos a nuestra nueva función infalible
         news_items = fetch_daily_healthy_recipes(lang_code)
         
         if news_items:
             for news in news_items:
-                # Extracción segura: Soporta tanto el formato de la IA como el de DuckDuckGo (fallback)
-                r_title = news.get('title', news.get('title', 'Receta Saludable del Día'))
-                
-                # Resumen: buscamos 'summary' (de la IA) o 'body' (de DuckDuckGo)
-                r_summary = news.get('summary', news.get('body', 'Descubre esta deliciosa y saludable opción para tu día a día.'))
-                # Limitamos a 120 caracteres para que no rompa el diseño
-                r_summary = r_summary[:120] + "..." if len(r_summary) > 120 else r_summary
-                
-                # URL: buscamos 'url' (IA) o 'href' (DuckDuckGo)
-                r_url = news.get('url', news.get('href', '#'))
+                r_title = news.get('title', 'Receta Saludable')
+                r_summary = news.get('summary', '')[:120] + "..."
+                r_url = news.get('url', '#')
                 
                 st.markdown(f"""
                 <div style="background: #FFFFFF; padding:12px; border-radius:10px; margin-bottom:12px; border:1px solid #E2E8F0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s;">
@@ -676,11 +699,12 @@ with st.sidebar:
                 </div>
                 """, unsafe_allow_html=True)
         else: 
-            st.write("Cargando nuevas recetas del chef... Vuelve a intentarlo en unos segundos.")
-            # Un pequeño botón por si el caché se quedó atascado en un error
-            if st.button("🔄 Refrescar recetas"):
-                fetch_daily_healthy_recipes.clear()
-                st.rerun()
+            st.warning("No se pudieron cargar las noticias hoy.")
+            
+        # Un botón para forzar la actualización si fuera necesario
+        if st.button("🔄 Actualizar Recetas", use_container_width=True):
+            fetch_daily_healthy_recipes.clear()
+            st.rerun()
 
 # ==========================================
 # HEADER PRINCIPAL
