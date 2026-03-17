@@ -262,10 +262,12 @@ def append_to_daily_log(username, entry_data):
 # ==========================================
 # SISTEMA MULTIDIOMA Y TEXTOS
 # ==========================================
+# ==========================================
+# SISTEMA MULTIDIOMA Y TEXTOS
+# ==========================================
 TRANSLATIONS = {
     "🇪🇸 Español": {
-        "lang_code": "Spanish",
-        "title": "¡Hola {name}! ¿Qué cocinamos hoy? 🍲", "subtitle": "Tu ecosistema inteligente de nutrición y cocina.",
+        "lang_code": "Spanish", "title": "¡Hola {name}! ¿Qué cocinamos hoy? 🍲", "subtitle": "Tu ecosistema inteligente de nutrición y cocina.",
         "dash_mod1": "Cocina Mágica", "dash_mod2": "Mi Compra", "dash_mod3": "Mis Menús", "dash_mod4": "Mi Salud",
         "assistant_msg": "¿Qué hay en la despensa? ¡Hagamos magia!", "avail_ing_label": "Ingredientes disponibles hoy", "avoid_today_label": "¿Algo que evitar hoy?", "find_btn": "Buscar Recetas Mágicas",
         "analyzing": "El Chef está analizando...", "here_options": "Opciones para ti:", "diff": "Dificultad", "time": "Tiempo", "health": "Salud",
@@ -284,7 +286,8 @@ TRANSLATIONS = {
         "account_created": "¡Cuenta creada!", "fill_required": "Rellena los campos.", "forgot_pin_text": "¿Olvidaste tu PIN?", "search_user_label": "Introduce tu Usuario",
         "search_user_btn": "Buscar", "user_found": "Usuario encontrado.", "user_not_found": "Usuario no encontrado.", "recover_question_prefix": "Pregunta:", "your_answer_label": "Respuesta", "new_pin_label": "Nuevo PIN",
         "change_pin_btn": "Cambiar PIN", "pin_changed_success": "¡PIN cambiado!", "wrong_answer": "Incorrecta.", "current_weight_label": "Peso Actual (kg)",
-        "profile_goals_label": "Objetivos", "profile_restrictions_label": "Restricciones", "macro_protein": "Proteínas", "macro_fat": "Grasas", "macro_carbs": "Carbohidratos",
+        "profile_goals_label": "Objetivos", "profile_restrictions_label": "Restricciones", "macro_calories": "Calorías", "macro_protein": "Proteínas", "macro_fat": "Grasas", "macro_carbs": "Carbohidratos",
+        "nutrition_facts": "Información Nutricional", "total_fat": "Grasas Totales", "sat_fat": "Grasas Saturadas", "sodium": "Sodio", "total_carbs": "Carbohidratos Totales", "fiber": "Fibra", "sugars": "Azúcares",
         "back_home": "🏠 Volver al Menú", "add_to_log": "📝 Añadir al registro de hoy", "log_success": "¡Añadido al registro de hoy!",
         "shop_title": "Lista de la Compra Dinámica", "search_web_label": "¿Qué te gustaría preparar?", "search_web_btn": "🔍 Buscar y Extraer Ingredientes",
         "shop_list_title": "Tu Inventario de Compra", "add_item_btn": "Añadir Item", "clear_list": "🗑️ Vaciar Lista",
@@ -314,7 +317,8 @@ TRANSLATIONS = {
         "username_taken": "Taken.", "account_created": "Created!", "fill_required": "Fill all.", "forgot_pin_text": "Forgot PIN?", "search_user_label": "Username",
         "search_user_btn": "Search", "user_found": "Found.", "user_not_found": "Not found.", "recover_question_prefix": "Q:", "your_answer_label": "Answer", 
         "new_pin_label": "New PIN", "change_pin_btn": "Change", "pin_changed_success": "Changed!", "wrong_answer": "Wrong.", "current_weight_label": "Weight",
-        "profile_goals_label": "Goals", "profile_restrictions_label": "Restrictions", "macro_protein": "Protein", "macro_fat": "Fat", "macro_carbs": "Carbs",
+        "profile_goals_label": "Goals", "profile_restrictions_label": "Restrictions", "macro_calories": "Calories", "macro_protein": "Protein", "macro_fat": "Fat", "macro_carbs": "Carbs",
+        "nutrition_facts": "Nutrition Facts", "total_fat": "Total Fat", "sat_fat": "Saturated Fat", "sodium": "Sodium", "total_carbs": "Total Carbohydrate", "fiber": "Dietary Fiber", "sugars": "Total Sugars",
         "back_home": "🏠 Back to Home", "add_to_log": "📝 Add to today's log", "log_success": "Added to log!",
         "shop_title": "Dynamic Shopping List", "search_web_label": "What do you want to cook?", "search_web_btn": "🔍 Search & Extract",
         "shop_list_title": "Your Groceries", "add_item_btn": "Add Item", "clear_list": "🗑️ Clear List",
@@ -344,7 +348,8 @@ TRANSLATIONS = {
         "username_taken": "Pris.", "account_created": "Créé !", "fill_required": "Remplir.", "forgot_pin_text": "PIN oublié ?", "search_user_label": "Utilisateur",
         "search_user_btn": "Chercher", "user_found": "Trouvé.", "user_not_found": "Non trouvé.", "recover_question_prefix": "Q :", "your_answer_label": "Réponse",
         "new_pin_label": "Nouveau PIN", "change_pin_btn": "Changer", "pin_changed_success": "Changé !", "wrong_answer": "Faux.", "current_weight_label": "Poids",
-        "profile_goals_label": "Objectifs", "profile_restrictions_label": "Restrictions", "macro_protein": "Protéines", "macro_fat": "Graisses", "macro_carbs": "Glucides",
+        "profile_goals_label": "Objectifs", "profile_restrictions_label": "Restrictions", "macro_calories": "Calories", "macro_protein": "Protéines", "macro_fat": "Graisses", "macro_carbs": "Glucides",
+        "nutrition_facts": "Valeurs Nutritionnelles", "total_fat": "Graisses Totales", "sat_fat": "Graisses Saturées", "sodium": "Sodium", "total_carbs": "Glucides Totaux", "fiber": "Fibres", "sugars": "Sucres",
         "back_home": "🏠 Retour", "add_to_log": "📝 Ajouter au journal", "log_success": "Ajouté !", "shop_title": "Liste de Courses", "search_web_label": "Que voulez-vous cuisiner ?", "search_web_btn": "🔍 Extraire",
         "shop_list_title": "Inventaire", "add_item_btn": "Ajouter", "clear_list": "🗑️ Vider", "plan_title": "Planificateur", "save_plan": "💾 Sauvegarder", "plan_saved": "Sauvegardé !",
         "nutri_title": "Résumé Nutritionnel", "manual_log_label": "Mangé dehors ?", "manual_log_btn": "➕ Ajouter", "eval_btn": "🩺 Évaluer", "total_today": "Total", "analyzing_nutri": "Évaluation...",
@@ -371,7 +376,8 @@ TRANSLATIONS = {
         "username_taken": "In uso.", "account_created": "Creato!", "fill_required": "Compila tutto.", "forgot_pin_text": "Dimenticato PIN?", "search_user_label": "Utente",
         "search_user_btn": "Cerca", "user_found": "Trovato.", "user_not_found": "Non trovato.", "recover_question_prefix": "D:", "your_answer_label": "Risposta",
         "new_pin_label": "Nuovo PIN", "change_pin_btn": "Cambia", "pin_changed_success": "Cambiato!", "wrong_answer": "Errato.", "current_weight_label": "Peso",
-        "profile_goals_label": "Obiettivi", "profile_restrictions_label": "Restrizioni", "macro_protein": "Proteine", "macro_fat": "Grassi", "macro_carbs": "Carboidrati",
+        "profile_goals_label": "Obiettivi", "profile_restrictions_label": "Restrizioni", "macro_calories": "Calorie", "macro_protein": "Proteine", "macro_fat": "Grassi", "macro_carbs": "Carboidrati",
+        "nutrition_facts": "Valori Nutrizionali", "total_fat": "Grassi Totali", "sat_fat": "Grassi Saturi", "sodium": "Sodio", "total_carbs": "Carboidrati Totali", "fiber": "Fibra", "sugars": "Zuccheri",
         "back_home": "🏠 Torna alla Home", "add_to_log": "📝 Aggiungi al diario", "log_success": "Aggiunto!", "shop_title": "Lista della Spesa", "search_web_label": "Cosa vuoi cucinare?", "search_web_btn": "🔍 Estrai",
         "shop_list_title": "La tua spesa", "add_item_btn": "Aggiungi", "clear_list": "🗑️ Svuota lista", "plan_title": "Pianificatore", "save_plan": "💾 Salva", "plan_saved": "Salvato!",
         "nutri_title": "Riassunto Nutrizionale", "manual_log_label": "Mangiato fuori?", "manual_log_btn": "➕ Aggiungi", "eval_btn": "🩺 Valuta la mia giornata", "total_today": "Totale di oggi", "analyzing_nutri": "Valutazione...",
@@ -381,12 +387,22 @@ TRANSLATIONS = {
     }
 }
 
-if "selected_lang" not in st.session_state: st.session_state.selected_lang = "🇪🇸 Español"
+# Función para limpiar la IA si el usuario cambia de idioma de golpe
+def reset_ai_on_lang_change():
+    if "options" in st.session_state: st.session_state.options = None
+    if "full_recipe" in st.session_state: st.session_state.full_recipe = None
+    if "step" in st.session_state: st.session_state.step = "input"
+
+if "selected_lang" not in st.session_state: 
+    st.session_state.selected_lang = "🇪🇸 Español"
+
 cols_top = st.columns([1, 6, 1])
-with cols_top[2]: st.selectbox("", options=list(TRANSLATIONS.keys()), key="selected_lang", label_visibility="collapsed")
+with cols_top[2]: 
+    # Añadimos on_change para que se reinicie al cambiar
+    st.selectbox("", options=list(TRANSLATIONS.keys()), key="selected_lang", label_visibility="collapsed", on_change=reset_ai_on_lang_change)
+
 t = TRANSLATIONS[st.session_state.selected_lang]
 lang_code = t["lang_code"]
-
 # ==========================================
 # PANTALLA DE AUTENTICACIÓN
 # ==========================================
@@ -824,15 +840,15 @@ elif st.session_state.current_page == "mod1":
         with col_label:
             st.markdown(f"""
             <div class="nutrition-label">
-                <h2>Nutrition Facts</h2>
-                <div class="nut-row thick"><span class="nut-bold">Calories</span> <span class="nut-bold">{m.get('calories', '0')}</span></div>
-                <div class="nut-row"><span class="nut-bold">Total Fat</span> {m.get('total_fat', '0g')}</div>
-                <div class="nut-row" style="padding-left: 1.5rem;">Saturated Fat {m.get('saturated_fat', '0g')}</div>
-                <div class="nut-row"><span class="nut-bold">Sodium</span> {m.get('sodium', '0mg')}</div>
-                <div class="nut-row"><span class="nut-bold">Total Carbohydrate</span> {m.get('total_carbs', '0g')}</div>
-                <div class="nut-row" style="padding-left: 1.5rem;">Dietary Fiber {m.get('fiber', '0g')}</div>
-                <div class="nut-row" style="padding-left: 1.5rem;">Total Sugars {m.get('sugars', '0g')}</div>
-                <div class="nut-row thick"><span class="nut-bold">Protein</span> <span class="nut-bold">{m.get('protein', '0g')}</span></div>
+                <h2>{t.get('nutrition_facts', 'Nutrition Facts')}</h2>
+                <div class="nut-row thick"><span class="nut-bold">{t.get('macro_calories', 'Calories')}</span> <span class="nut-bold">{m.get('calories', '0')}</span></div>
+                <div class="nut-row"><span class="nut-bold">{t.get('total_fat', 'Total Fat')}</span> {m.get('total_fat', '0g')}</div>
+                <div class="nut-row" style="padding-left: 1.5rem;">{t.get('sat_fat', 'Saturated Fat')} {m.get('saturated_fat', '0g')}</div>
+                <div class="nut-row"><span class="nut-bold">{t.get('sodium', 'Sodium')}</span> {m.get('sodium', '0mg')}</div>
+                <div class="nut-row"><span class="nut-bold">{t.get('total_carbs', 'Total Carbohydrate')}</span> {m.get('total_carbs', '0g')}</div>
+                <div class="nut-row" style="padding-left: 1.5rem;">{t.get('fiber', 'Dietary Fiber')} {m.get('fiber', '0g')}</div>
+                <div class="nut-row" style="padding-left: 1.5rem;">{t.get('sugars', 'Total Sugars')} {m.get('sugars', '0g')}</div>
+                <div class="nut-row thick"><span class="nut-bold">{t.get('macro_protein', 'Protein')}</span> <span class="nut-bold">{m.get('protein', '0g')}</span></div>
             </div>
             """, unsafe_allow_html=True)
             
@@ -995,10 +1011,10 @@ elif st.session_state.current_page == "mod4":
     t_car = sum(item.get("carbs", 0) for item in today_data)
     
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("🔥 Calorías", f"{t_cal} kcal")
-    c2.metric("🍗 Proteínas", f"{t_pro} g")
-    c3.metric("🥑 Grasas", f"{t_fat} g")
-    c4.metric("🍞 Carbos", f"{t_car} g")
+    c1.metric(f"🔥 {t.get('macro_calories', 'Calorías')}", f"{t_cal} kcal")
+    c2.metric(f"🍗 {t.get('macro_protein', 'Proteínas')}", f"{t_pro} g")
+    c3.metric(f"🥑 {t.get('macro_fat', 'Grasas')}", f"{t_fat} g")
+    c4.metric(f"🍞 {t.get('macro_carbs', 'Carbohidratos')}", f"{t_car} g")
     
     with st.expander("Ver detalle de hoy", expanded=True):
         if not today_data: st.write("No has registrado nada hoy.")
