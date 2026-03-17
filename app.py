@@ -1081,7 +1081,9 @@ elif st.session_state.current_page == "mod3":
             st.rerun()
 
     st.write("")
-    user_cal = user_profile.get("meal_calendar", {})
+    user_cal = user_profile.get("meal_calendar") or {}
+    if not isinstance(user_cal, dict): 
+        user_cal = {}
 
     # RENDER: VISTA SEMANAL
     if st.session_state.cal_view == "Semanal":
@@ -1180,6 +1182,12 @@ elif st.session_state.current_page == "mod4":
         start_date = today.replace(day=1)
         next_month = start_date.replace(day=28) + timedelta(days=4)
         end_date = next_month - timedelta(days=next_month.day)
+        
+    user_cal = user_profile.get("meal_calendar") or {}
+    if not isinstance(user_cal, dict): 
+        user_cal = {}
+        
+    t_cal = t_pro = t_fat = t_car = 0
         
     user_cal = user_profile.get("meal_calendar", {})
     t_cal = t_pro = t_fat = t_car = 0
