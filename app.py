@@ -1031,4 +1031,31 @@ elif st.session_state.current_page == "mod4":
     t_car = sum(item.get("carbs", 0) for item in today_data)
     
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric(f"🔥 {t.get('mac_cal', 'Calorías
+    c1.metric(f"🔥 {t.get('mac_cal', 'Calorías')}", f"{t_cal} kcal")
+    c2.metric(f"🍗 {t.get('mac_pro', 'Proteínas')}", f"{t_pro} g")
+    c3.metric(f"🥑 {t.get('mac_fat', 'Grasas')}", f"{t_fat} g")
+    c4.metric(f"🍞 {t.get('mac_car', 'Carbos')}", f"{t_car} g")
+    
+    with st.expander("Ver detalle de hoy", expanded=True):
+        if not today_data: st.write("No has registrado nada hoy.")
+        for d in today_data: st.write(f"- **{d['name']}**: {d['calories']} kcal (P:{d['protein']}g | G:{d['fat']}g | C:{d['carbs']}g)")
+
+    st.divider()
+    manual_input = st.text_input(t["manual_log_label"])
+    if st.button(t["manual_log_btn"]):
+        if manual_input:
+            with st.spinner("Calculando macros..."):
+                sys = "Estima los macros de este alimento. Devuelve un JSON: {'calories': 100, 'protein': 2, 'fat': 0, 'carbs': 20}"
+                parsed = groq_generic_json(sys, f"Alimento: {manual_input}")
+                if parsed:
+                    entry = {"name": manual_input.title(), "calories": parsed.get('calories',0), "protein": parsed.get('protein',0), "fat": parsed.get('fat',0), "carbs": parsed.get('carbs',0)}
+                    append_to_daily_log(user_profile["username"], entry)
+                    st.rerun()
+    
+    st.divider()
+    if st.button(t["eval_btn"], type="primary", use_container_width=True):
+        with st.spinner(t["analyzing_nutri"]):
+            sys_eval = f"Eres un médico nutricionista evaluando a {user_profile['name']} ({user_profile['weight']}kg, Objetivo: {user_profile['goals']}). Hoy ha consumido {t_cal} kcal, {t_pro}g proteína, {t_fat}g grasa, {t_car}g carbos. Genera un breve feedback médico constructivo, realista, de 3 líneas. Devuelve JSON: {{'feedback': 'tu texto aquí'}} en {lang_code}."
+            eval_res = groq_generic_json(sys_eval, "Evalúa mi día.")
+            if eval_res and "feedback" in eval_res:
+                st.info(f"🩺 **Evaluación Médica:**\n\n{eval_res['feedback']}")
