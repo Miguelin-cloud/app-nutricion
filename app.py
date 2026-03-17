@@ -351,7 +351,7 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", 
 def groq_generic_json(system_prompt, user_prompt):
     # Usa nuestro nuevo motor blindado
     return execute_groq_with_fallback(system_prompt, user_prompt, temperature=0.3)
-    except: return None
+    
 
 def extract_number(val_str):
     match = re.search(r'\d+', str(val_str))
