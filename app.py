@@ -272,11 +272,10 @@ def add_to_meal_calendar(username, date_str, meal_data):
 # FUNCIONES IA (GROQ) Y EXTRACCIÓN (CON FALLBACK 3 NIVELES)
 # ==========================================
 
-def execute_groq_with_fallback(system_prompt, user_prompt, temperature=0.3):
+def execute_groq_with_fallback(system_prompt, user_prompt, temperature=0.3, show_ui=True):
     """Motor central de peticiones IA con cascada de 3 niveles ante error 429."""
     client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
     
-    # NUESTRA CASCADA DE 3 NIVELES
     models_hierarchy =[
         {"name": "llama-3.3-70b-versatile", "alias": "Chef Ejecutivo (Plan A)"},
         {"name": "llama-3.1-8b-instant", "alias": "Chef Ayudante Rápido (Plan B)"},
@@ -296,61 +295,35 @@ def execute_groq_with_fallback(system_prompt, user_prompt, temperature=0.3):
         except Exception as e:
             err_msg = str(e).lower()
             
-            # Comprobamos si es un error 429 (Límite de tokens/velocidad)
             if "429" in err_msg or "rate limit" in err_msg or "tokens" in err_msg:
                 if idx < len(models_hierarchy) - 1:
                     next_model = models_hierarchy[idx+1]
-                    
-                    # 1. Crear el mensaje de alerta
                     time_str = datetime.datetime.now().strftime("%H:%M:%S")
                     alert_msg = f"⚠️ Tokens agotados en {model_info['alias']}. Usando {next_model['alias']}..."
                     
-                    # 2. Mostrar el Toast efímero (5 segundos)
-                    st.toast(alert_msg, icon="👨‍🍳")
+                    if show_ui:  # Solo muestra Toast si está permitido
+                        st.toast(alert_msg, icon="👨‍🍳")
                     
-                    # 3. Guardar en el log de la barra lateral
                     log_entry = f"<b>{time_str}</b>: {alert_msg}"
                     if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
-                    st.session_state.app_alerts.insert(0, log_entry) # Lo pone el primero
-                    
-                    continue # Continúa el bucle y prueba el siguiente modelo
+                    st.session_state.app_alerts.insert(0, log_entry) 
+                    continue 
                 else:
-                    st.error("❌ Todos los Chefs de la Inteligencia Artificial están ocupados. Por favor, espera unos minutos e inténtalo de nuevo.")
+                    if show_ui: st.error("❌ Todos los Chefs de la IA están ocupados.")
                     return None
             else:
-                # Si el error NO es por tokens (ej. un fallo del sistema), mostramos el error original
-                st.error(f"Error técnico de IA ({model_info['name']}): {e}")
+                if show_ui: st.error(f"Error técnico de IA ({model_info['name']}): {e}")
                 return None
 
-
 def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", avoid_tdy="", num_recipes=3):
-    system_prompt = f"""
-    You are a Michelin-star Executive Chef and Clinical Nutritionist.
-    Your client is {u_prof['name']}. Profile: {u_prof['age']} y/o, {u_prof['weight']} kg, {u_prof['height']} cm, Gender: {u_prof['gender']}.
-    Main goal: "{u_prof['goals']}". Restrictions: "{u_prof['restrictions']}".
-    [DYNAMIC GENERATION] Generate exactly {num_recipes} recipe options.
-    [CHEF'S RECOMMENDATION] Tag exactly ONE recipe with `"is_chefs_recommendation": true`.
-    [COHERENCE FILTER] Formulate ONLY realistic, delicious, and culturally sensible dishes. Do not invent bizarre combinations.
-    """
-    if avail_ing: system_prompt += f"\n[GOLDEN RULE] Recipes MUST be based EXCLUSIVELY on: {avail_ing}."
-    if avoid_tdy: system_prompt += f"\n[STRICT PROHIBITION] Under NO circumstances include: {avoid_tdy}."
+    # (El interior de esta función déjalo exactamente como lo tienes, hasta llegar al return)
+    # ... tu system_prompt ...
+    # Usa nuestro nuevo motor blindado, por defecto show_ui es True
+    return execute_groq_with_fallback(final_system_prompt, prompt, temperature=0.4, show_ui=True)
 
-    final_system_prompt = system_prompt + f"""
-    \nEXPECTED JSON FORMAT:
-    {expected_format_hint}
-    
-    🔴[CRITICAL LANGUAGE DIRECTIVE] 🔴
-    CRITICAL LANGUAGE RULE: The JSON KEYS MUST ALWAYS BE IN ENGLISH. 
-    However, the JSON VALUES MUST BE STRICTLY, COMPLETELY, AND NATURALLY TRANSLATED TO {lang_code.upper()}. 
-    """
-    
-    # Usa nuestro nuevo motor blindado
-    return execute_groq_with_fallback(final_system_prompt, prompt, temperature=0.4)
-
-
-def groq_generic_json(system_prompt, user_prompt):
-    # Usa nuestro nuevo motor blindado
-    return execute_groq_with_fallback(system_prompt, user_prompt, temperature=0.3)
+def groq_generic_json(system_prompt, user_prompt, show_ui=True):
+    # Hemos añadido el parámetro show_ui
+    return execute_groq_with_fallback(system_prompt, user_prompt, temperature=0.3, show_ui=show_ui)
     
 
 def extract_number(val_str):
@@ -391,7 +364,7 @@ def fetch_daily_healthy_recipes(lang_code, category_key="trend_sweets"):
         random.shuffle(raw_results)
         raw_results = raw_results[:3]
     except Exception:
-        return []
+        return[]
 
     if not raw_results: return[]
         
@@ -404,12 +377,12 @@ def fetch_daily_healthy_recipes(lang_code, category_key="trend_sweets"):
     user_prompt = "REAL GOOGLE NEWS RECIPES:\n" + json.dumps(raw_results)
     
     try:
-        parsed = groq_generic_json(sys_prompt, user_prompt)
+        # AQUÍ ESTÁ LA MAGIA: show_ui=False evita el error rojo de Caché
+        parsed = groq_generic_json(sys_prompt, user_prompt, show_ui=False)
         if parsed and "recipes" in parsed and len(parsed["recipes"]) > 0: return parsed["recipes"]
     except Exception:
         pass
     return raw_results
-
 # ==========================================
 # SISTEMA MULTIDIOMA Y TEXTOS (Actualizado Mod 3 y 4)
 # ==========================================
@@ -883,7 +856,9 @@ if st.session_state.current_page == "home":
 
     st.markdown(f"""
     <style>
-    div[data-testid="stColumn"] button, div[data-testid="column"] button {{
+    /* Diseño Base para los 4 botones (Restringido SOLO a la parte central "section.main") */
+    section.main div[data-testid="stColumn"] button, 
+    section.main div[data-testid="column"] button {
         background: #FFFFFF !important;
         background-image: none !important; 
         border-radius: 20px !important;
@@ -904,38 +879,40 @@ if st.session_state.current_page == "home":
         background-repeat: no-repeat !important;
         background-position: center top 35px !important;
         padding-top: 110px !important;
-    }}
+    }
 
-    div[data-testid="stColumn"] button p, div[data-testid="column"] button p {{
+    section.main div[data-testid="stColumn"] button p, 
+    section.main div[data-testid="column"] button p {
         margin: 0 !important;
         transition: transform 0.4s ease, color 0.4s ease !important;
         z-index: 2;
-    }}
+    }
 
-    div[data-testid="stColumn"] button:hover, div[data-testid="column"] button:hover {{
+    section.main div[data-testid="stColumn"] button:hover, 
+    section.main div[data-testid="column"] button:hover {
         transform: translateY(-8px) scale(1.02) !important;
         box-shadow: 16px 16px 32px rgba(16,185,129,0.15), -16px -16px 32px #ffffff !important;
         border-color: #10B981 !important;
         background-position: center top 20px !important;
-    }}
+    }
 
-    /* CAMBIO: El título se vuelve NEGRO/GRIS MUY OSCURO para contraste total */
-    div[data-testid="stColumn"] button:hover p, div[data-testid="column"] button:hover p {{
+    section.main div[data-testid="stColumn"] button:hover p, 
+    section.main div[data-testid="column"] button:hover p {
         transform: translateY(-15px) !important;
         color: #0F172A !important; 
         font-weight: 900 !important;
-    }}
+    }
 
-    /* CAMBIO: Descripción con gris muy oscuro y fondo de soporte semitransparente por si se cruza con el icono */
-    div[data-testid="stColumn"] button::after, div[data-testid="column"] button::after {{
+    section.main div[data-testid="stColumn"] button::after, 
+    section.main div[data-testid="column"] button::after {
         position: absolute !important;
         bottom: 20px !important;
         left: 10px !important;
         right: 10px !important;
         text-align: center !important;
         font-size: 14.5px !important;
-        color: #1E293B !important; /* Gris super oscuro */
-        font-weight: 700 !important; /* Letra más gruesa */
+        color: #1E293B !important; 
+        font-weight: 700 !important; 
         opacity: 0 !important;
         transform: translateY(20px) !important;
         transition: all 0.4s ease 0.1s !important;
@@ -943,49 +920,50 @@ if st.session_state.current_page == "home":
         line-height: 1.4 !important;
         padding: 5px !important;
         border-radius: 8px !important;
-        background: rgba(255, 255, 255, 0.6) !important; /* Ligero halo para que siempre sea legible */
-    }}
+        background: rgba(255, 255, 255, 0.6) !important; 
+    }
 
-    div[data-testid="stColumn"] button:hover::after, div[data-testid="column"] button:hover::after {{
+    section.main div[data-testid="stColumn"] button:hover::after, 
+    section.main div[data-testid="column"] button:hover::after {
         opacity: 1 !important;
         transform: translateY(0) !important;
-    }}
+    }
 
     /* COLUMNA 1, BOTÓN 1 (Cocina Mágica) */
-    div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(1) button,
-    div[data-testid="column"]:nth-child(1) div.element-container:nth-child(1) button {{
+    section.main div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(1) button,
+    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(1) button {
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z'/><line x1='6' y1='17' x2='18' y2='17'/><g><animateTransform attributeName='transform' type='rotate' values='-10 12 12; 10 12 12; -10 12 12' dur='2s' repeatCount='indefinite'/><circle cx='12' cy='3' r='1' fill='%2310b981'><animate attributeName='opacity' values='0;1;0' dur='1.5s' repeatCount='indefinite'/></circle></g></svg>") !important;
         background-size: 80px !important;
-    }}
-    div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(1) button::after,
-    div[data-testid="column"]:nth-child(1) div.element-container:nth-child(1) button::after {{ content: "{d_m1}" !important; }}
+    }
+    section.main div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(1) button::after,
+    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(1) button::after { content: "{d_m1}" !important; }
 
     /* COLUMNA 1, BOTÓN 2 (Mis Menús) */
-    div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(2) button,
-    div[data-testid="column"]:nth-child(1) div.element-container:nth-child(2) button {{
+    section.main div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(2) button,
+    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(2) button {
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/><path d='M8 15 l2 2 l4 -4'><animate attributeName='stroke-dasharray' values='0,20; 20,0; 20,0' dur='2s' repeatCount='indefinite'/></path></svg>") !important;
         background-size: 80px !important;
-    }}
-    div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(2) button::after,
-    div[data-testid="column"]:nth-child(1) div.element-container:nth-child(2) button::after {{ content: "{d_m3}" !important; }}
+    }
+    section.main div[data-testid="stColumn"]:nth-child(1) div.element-container:nth-child(2) button::after,
+    section.main div[data-testid="column"]:nth-child(1) div.element-container:nth-child(2) button::after { content: "{d_m3}" !important; }
 
     /* COLUMNA 2, BOTÓN 1 (Mi Compra - Stickman) */
-    div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(1) button,
-    div[data-testid="column"]:nth-child(2) div.element-container:nth-child(1) button {{
+    section.main div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(1) button,
+    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(1) button {
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'><g><animateTransform attributeName='transform' type='translate' values='-3,0; 3,0; -3,0' dur='1.2s' repeatCount='indefinite'/><path d='M28 15 h6 l4 10 h12'/><line x1='32' y1='25' x2='48' y2='25'/><circle cx='36' cy='30' r='2' fill='%233b82f6'/><circle cx='46' cy='30' r='2' fill='%233b82f6'/><circle cx='18' cy='8' r='3'/><path d='M18 11 v10'/><path d='M18 21 l-4 8'><animate attributeName='d' values='M18 21 l-4 8; M18 21 l4 8; M18 21 l-4 8' dur='0.4s' repeatCount='indefinite'/></path><path d='M18 21 l6 7'><animate attributeName='d' values='M18 21 l6 7; M18 21 l-2 8; M18 21 l6 7' dur='0.4s' repeatCount='indefinite'/></path><path d='M18 14 l10 3'/></g></svg>") !important;
         background-size: 110px !important;
-    }}
-    div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(1) button::after,
-    div[data-testid="column"]:nth-child(2) div.element-container:nth-child(1) button::after {{ content: "{d_m2}" !important; }}
+    }
+    section.main div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(1) button::after,
+    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(1) button::after { content: "{d_m2}" !important; }
 
     /* COLUMNA 2, BOTÓN 2 (Mi Salud) */
-    div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(2) button,
-    div[data-testid="column"]:nth-child(2) div.element-container:nth-child(2) button {{
+    section.main div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(2) button,
+    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(2) button {
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444' stroke='%23ef4444' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'><animate attributeName='transform' type='scale' values='1;1.15;1;1;1' dur='1.2s' repeatCount='indefinite' transform-origin='12 12'/></path><polyline points='9 12 11 12 12 9 13 15 14 12 16 12' stroke='white' stroke-width='1' fill='none'><animate attributeName='stroke-dasharray' values='0,20; 20,0; 20,0' dur='2s' repeatCount='indefinite'/></polyline></svg>") !important;
         background-size: 80px !important;
-    }}
-    div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(2) button::after,
-    div[data-testid="column"]:nth-child(2) div.element-container:nth-child(2) button::after {{ content: "{d_m4}" !important; }}
+    }
+    section.main div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-child(2) button::after,
+    section.main div[data-testid="column"]:nth-child(2) div.element-container:nth-child(2) button::after { content: "{d_m4}" !important; }
     </style>
     """, unsafe_allow_html=True)
 
