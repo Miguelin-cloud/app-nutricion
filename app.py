@@ -693,7 +693,7 @@ elif st.session_state.current_page == "mod1":
                     st.rerun()
             else: st.warning(t["fill_required"])
 
-            if st.session_state.step == "options" and st.session_state.options:
+    if st.session_state.step == "options" and st.session_state.options:
         st.divider()
         st.subheader(t["here_options"])
         
@@ -779,8 +779,6 @@ elif st.session_state.current_page == "mod1":
         
         col_btn1, col_btn2 = st.columns(2)
         with col_btn1:
-
-
             if st.button(t["start_over"], use_container_width=True):
                 st.session_state.step, st.session_state.options, st.session_state.full_recipe, st.session_state.avail_ing, st.session_state.avoid_tdy = "input", None, None, "", ""
                 st.rerun()
