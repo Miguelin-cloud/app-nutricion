@@ -693,11 +693,18 @@ elif st.session_state.current_page == "mod1":
                     st.rerun()
             else: st.warning(t["fill_required"])
 
-    if st.session_state.step == "options" and st.session_state.options:
+if st.session_state.step == "options" and st.session_state.options:
         st.divider()
         st.subheader(t["here_options"])
         
         for i, opt in enumerate(st.session_state.options):
+            # EXTRAER VARIABLES DE FORMA SEGURA (Evita el KeyError)
+            recipe_name = opt.get('name', opt.get('recipe_name', 'Receta Mágica'))
+            difficulty = opt.get('difficulty', 'Media')
+            time_prep = opt.get('time', '20 mins')
+            health_score = opt.get('health_score', 8)
+            description = opt.get('description', '')
+
             with st.container():
                 if opt.get("is_chefs_recommendation", False):
                     st.markdown(f"""
@@ -705,16 +712,16 @@ elif st.session_state.current_page == "mod1":
                         <div class="golden-card-content">
                             <span style="color:#B45309; font-weight:900; letter-spacing:2px; font-size:14px;">{t['chef_recom']}</span>
                             <h1 style="font-size: 55px; margin: 5px 0;">{opt.get('hero_emoji', '🍽️')}</h1>
-                            <h2 style="margin: 0; color: #1E293B;">{opt['name']}</h2>
+                            <h2 style="margin: 0; color: #1E293B;">{recipe_name}</h2>
                             <p style="color:#64748B; font-style:italic; margin-top:5px;">Alineado 100% con tu perfil de salud</p>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<h1 style='text-align:center; font-size:40px; margin:0;'>{opt.get('hero_emoji', '🍽️')}</h1><h3 style='text-align:center;'>{opt['name']}</h3>", unsafe_allow_html=True)
+                    st.markdown(f"<h1 style='text-align:center; font-size:40px; margin:0;'>{opt.get('hero_emoji', '🍽️')}</h1><h3 style='text-align:center;'>{recipe_name}</h3>", unsafe_allow_html=True)
                 
-                st.caption(f"**{t['diff']}:** {opt['difficulty']} | **{t['time']}:** {opt['time']} | **{t['health']}:** {opt['health_score']}/10")
-                st.write(opt['description'])
+                st.caption(f"**{t['diff']}:** {difficulty} | **{t['time']}:** {time_prep} | **{t['health']}:** {health_score}/10")
+                st.write(description)
                 
                 if st.button(t["cook_btn"].format(""), key=f"btn_cook_{i}", use_container_width=True):
                     st.session_state.selected_option = opt
@@ -729,7 +736,10 @@ elif st.session_state.current_page == "mod1":
             if lottie_cooking: st_lottie(lottie_cooking, height=200, key="loading_anim_2")
             st.markdown(f"<h3 style='text-align:center;'>{t['loading_recipe']}</h3>", unsafe_allow_html=True)
         
-        prompt = f"Genera la receta completa para '{st.session_state.selected_option['name']}'. Explica cada paso."
+        # También usamos la extracción segura aquí
+        safe_name = st.session_state.selected_option.get('name', st.session_state.selected_option.get('recipe_name', 'la receta seleccionada'))
+        prompt = f"Genera la receta completa para '{safe_name}'. Explica cada paso."
+        
         # Incorporación de Health Badges en el prompt
         format_hint = """{ 
             "recipe_name": "Name", 
@@ -764,6 +774,9 @@ elif st.session_state.current_page == "mod1":
 
     if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
         recipe = st.session_state.full_recipe
+        # Blindamos también el nombre final por si la IA se despista
+        recipe['recipe_name'] = recipe.get('recipe_name', recipe.get('name', 'Receta Mágica'))
+        
         col_btn1, col_btn2 = st.columns(2)
         with col_btn1:
             if st.button(t["start_over"], use_container_width=True):
