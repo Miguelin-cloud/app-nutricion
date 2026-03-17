@@ -331,16 +331,15 @@ def format_recipe_for_download(recipe, t_dict):
     return text
 
 @st.cache_data(ttl=timedelta(days=1), show_spinner=False)
-def fetch_daily_healthy_recipes(lang_code, category="recetas+saludables"):
-    # Mapeo interno de búsqueda para Google News
+def fetch_daily_healthy_recipes(lang_code, category_key="trend_sweets"):
     query_map = {
-        "🍰 Dulces": "recetas+postres+dulces+saludables",
-        "🥨 Salados": "recetas+saladas+cenas+saludables",
-        "🥪 Snacks Rápidos": "recetas+snacks+aperitivos+saludables",
-        "🥣 Desayunos": "recetas+desayunos+saludables",
-        "🥤 Bebidas/Smoothies": "recetas+smoothies+batidos+saludables"
+        "trend_sweets": "recetas+postres+dulces+saludables",
+        "trend_salty": "recetas+saladas+cenas+saludables",
+        "trend_snacks": "recetas+snacks+aperitivos+saludables",
+        "trend_breakfast": "recetas+desayunos+saludables",
+        "trend_drinks": "recetas+smoothies+batidos+saludables"
     }
-    search_query = query_map.get(category, "recetas+saludables")
+    search_query = query_map.get(category_key, "recetas+saludables")
     url = f"https://news.google.com/rss/search?q={search_query}&hl=es&gl=ES&ceid=ES:es"
     
     raw_results =[]
@@ -354,7 +353,7 @@ def fetch_daily_healthy_recipes(lang_code, category="recetas+saludables"):
             raw_results.append({"title": clean_title, "url": link, "summary": clean_title})
             if len(raw_results) >= 10: break
         random.shuffle(raw_results)
-        raw_results = raw_results[:3] # Mostramos 3 por categoría para no saturar
+        raw_results = raw_results[:3]
     except Exception:
         return []
 
@@ -421,6 +420,11 @@ TRANSLATIONS = {
         "mod4_period_today": "Hoy", "mod4_period_week": "Esta Semana", "mod4_period_month": "Este Mes",
         "mod4_total_cal": "Calorías Totales", "mod4_gen_btn": "🩺 Generar Análisis Clínico Profundo por IA",
         "mod4_analyzing": "La IA médica está analizando tu nutrición..."
+        "ptr_default": "🖱️ Predeterminado", "ptr_drumstick": "🍗 Muslito", "ptr_avocado": "🥑 Aguacate", "ptr_pan": "🥘 Sartén", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Varita", "ptr_apple": "🍎 Manzana",
+        "magic_pointer": "🪄 Puntero Mágico", "choose_pointer": "Elige tu puntero:",
+        "trend_sweets": "🍰 Dulces", "trend_salty": "🥨 Salados", "trend_snacks": "🥪 Snacks Rápidos", "trend_breakfast": "🥣 Desayunos", "trend_drinks": "🥤 Bebidas/Smoothies",
+        "btn_delete": "🗑️ Eliminar", "btn_edit": "✏️ Editar", "btn_save": "💾 Guardar",
+        "manage_meals": "⚙️ Gestionar Comidas del Día", "no_meals": "No hay comidas registradas para este día.", "manage_date": "Selecciona la fecha a editar"
     },
     "🇬🇧 English": {
         "lang_code": "English", "title": "Hi {name}! What are we cooking today? 🍲", "subtitle": "Your smart nutrition ecosystem.",
@@ -462,6 +466,11 @@ TRANSLATIONS = {
         "mod4_period_today": "Today", "mod4_period_week": "This Week", "mod4_period_month": "This Month",
         "mod4_total_cal": "Total Calories", "mod4_gen_btn": "🩺 Generate Deep Clinical AI Analysis",
         "mod4_analyzing": "Medical AI is analyzing your nutrition..."
+        "ptr_default": "🖱️ Default", "ptr_drumstick": "🍗 Drumstick", "ptr_avocado": "🥑 Avocado", "ptr_pan": "🥘 Pan", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Wand", "ptr_apple": "🍎 Apple",
+        "magic_pointer": "🪄 Magic Pointer", "choose_pointer": "Choose your pointer:",
+        "trend_sweets": "🍰 Sweets", "trend_salty": "🥨 Salty", "trend_snacks": "🥪 Quick Snacks", "trend_breakfast": "🥣 Breakfasts", "trend_drinks": "🥤 Drinks/Smoothies",
+        "btn_delete": "🗑️ Delete", "btn_edit": "✏️ Edit", "btn_save": "💾 Save",
+        "manage_meals": "⚙️ Manage Daily Meals", "no_meals": "No meals logged for this day.", "manage_date": "Select date to edit"
     },
     "🇫🇷 Français": {
         "lang_code": "French", "title": "Bonjour {name} !", "subtitle": "Votre écosystème nutritionnel.",
@@ -500,6 +509,11 @@ TRANSLATIONS = {
         "mod4_period_today": "Aujourd'hui", "mod4_period_week": "Cette Semaine", "mod4_period_month": "Ce Mois",
         "mod4_total_cal": "Calories Totales", "mod4_gen_btn": "🩺 Générer une analyse clinique IA",
         "mod4_analyzing": "L'IA médicale analyse votre nutrition..."
+        "ptr_default": "🖱️ Par défaut", "ptr_drumstick": "🍗 Pilon", "ptr_avocado": "🥑 Avocat", "ptr_pan": "🥘 Poêle", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Baguette", "ptr_apple": "🍎 Pomme",
+        "magic_pointer": "🪄 Pointeur Magique", "choose_pointer": "Choisissez votre pointeur :",
+        "trend_sweets": "🍰 Sucreries", "trend_salty": "🥨 Salé", "trend_snacks": "🥪 En-cas", "trend_breakfast": "🥣 Petit-déj", "trend_drinks": "🥤 Boissons",
+        "btn_delete": "🗑️ Supprimer", "btn_edit": "✏️ Modifier", "btn_save": "💾 Enregistrer",
+        "manage_meals": "⚙️ Gérer les repas du jour", "no_meals": "Aucun repas enregistré ce jour.", "manage_date": "Sélectionner la date"
     },
     "🇮🇹 Italiano": {
         "lang_code": "Italian", "title": "Ciao {name}!", "subtitle": "Il tuo ecosistema nutrizionale.",
@@ -538,6 +552,11 @@ TRANSLATIONS = {
         "mod4_period_today": "Oggi", "mod4_period_week": "Questa Settimana", "mod4_period_month": "Questo Mese",
         "mod4_total_cal": "Calorie Totali", "mod4_gen_btn": "🩺 Genera Analisi Clinica Profonda IA",
         "mod4_analyzing": "L'IA medica sta analizzando la tua nutrizione..."
+        "ptr_default": "🖱️ Predefinito", "ptr_drumstick": "🍗 Cosciotto", "ptr_avocado": "🥑 Avocado", "ptr_pan": "🥘 Padella", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Bacchetta", "ptr_apple": "🍎 Mela",
+        "magic_pointer": "🪄 Puntatore Magico", "choose_pointer": "Scegli il puntatore:",
+        "trend_sweets": "🍰 Dolci", "trend_salty": "🥨 Salati", "trend_snacks": "🥪 Spuntini", "trend_breakfast": "🥣 Colazioni", "trend_drinks": "🥤 Bevande",
+        "btn_delete": "🗑️ Elimina", "btn_edit": "✏️ Modifica", "btn_save": "💾 Salva",
+        "manage_meals": "⚙️ Gestisci i Pasti del Giorno", "no_meals": "Nessun pasto registrato.", "manage_date": "Seleziona la data"
     }
 }
 
@@ -666,22 +685,28 @@ for key in["step", "options", "selected_option", "full_recipe", "avail_ing", "av
 with st.sidebar:
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
-    # 1. EXPANDER: PUNTERO MÁGICO (Lag solucionado)
-    with st.expander("🪄 Puntero Mágico", expanded=False):
-        cursor_opts = {"🖱️ Predeterminado": "default", "🍗 Muslito": "🍗", "🥑 Aguacate": "🥑", "🥘 Sartén": "🥘", "🍕 Pizza": "🍕", "🪄 Varita": "🪄", "🍎 Manzana": "🍎"}
-        if "custom_cursor" not in st.session_state: 
-            st.session_state.custom_cursor = "🖱️ Predeterminado"
+    # 1. EXPANDER: PUNTERO MÁGICO (Multilingüe y Sin Lag)
+    with st.expander(t["magic_pointer"], expanded=False):
+        cursor_mapping = {
+            "default": t["ptr_default"], "🍗": t["ptr_drumstick"], "🥑": t["ptr_avocado"],
+            "🥘": t["ptr_pan"], "🍕": t["ptr_pizza"], "🪄": t["ptr_wand"], "🍎": t["ptr_apple"]
+        }
+        inv_cursor = {v: k for k, v in cursor_mapping.items()}
         
-        # Al usar key="custom_cursor" directamente, Streamlit gestiona el estado sin lag ni doble clic.
-        st.selectbox("Elige tu puntero:", list(cursor_opts.keys()), key="custom_cursor")
+        if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
         
-        selected_val = cursor_opts[st.session_state.custom_cursor]
-        if selected_val != "default":
+        # Obtenemos el índice actual para que el selectbox mantenga el estado correcto al cambiar de idioma
+        options_list = list(cursor_mapping.values())
+        try: current_idx = list(cursor_mapping.keys()).index(st.session_state.cursor_val)
+        except ValueError: current_idx = 0
+            
+        selected_label = st.selectbox(t["choose_pointer"], options_list, index=current_idx)
+        st.session_state.cursor_val = inv_cursor[selected_label]
+        
+        if st.session_state.cursor_val != "default":
             st.markdown(f"""
             <style>
-            * {{
-                cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{selected_val}</text></svg>"), auto !important;
-            }}
+            * {{ cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{st.session_state.cursor_val}</text></svg>"), auto !important; }}
             </style>
             """, unsafe_allow_html=True)
 
@@ -695,7 +720,7 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    # 3. EXPANDER: RECETAS FAVORITAS (Con redirección al Módulo 1)
+    # 3. EXPANDER: RECETAS FAVORITAS (Con opción de eliminar)
     with st.expander("⭐ " + t["favs"], expanded=False):
         favs = user_profile.get("favorites",[])
         if favs:
@@ -703,44 +728,48 @@ with st.sidebar:
                 r_name = f.get('recipe_name', f.get('name', 'Receta'))
                 st.markdown(f"<p style='font-size:14px; font-weight:bold; margin-bottom:5px;'>{r_name}</p>", unsafe_allow_html=True)
                 
-                if st.button(f"🍳 Cocinar", key=f"load_fav_{idx}", use_container_width=True):
-                    if "ingredients" in f: # Verificamos que sea una receta completa (nuevo formato)
-                        st.session_state.full_recipe = f
-                        st.session_state.current_page = "mod1"
-                        st.session_state.step = "recipe_view"
+                col_c, col_d = st.columns([3, 1])
+                with col_c:
+                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar"):
+                        if "ingredients" in f:
+                            st.session_state.full_recipe = f
+                            st.session_state.current_page = "mod1"
+                            st.session_state.step = "recipe_view"
+                            st.rerun()
+                        else:
+                            st.warning("Receta de versión antigua. Faltan pasos.")
+                with col_d:
+                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help=t["btn_delete"]):
+                        favs.pop(idx)
+                        update_user_data(user_profile["username"], {"favorites": favs})
                         st.rerun()
-                    else:
-                        st.warning("Esta receta guardada es de una versión anterior y no tiene los pasos completos.")
                 st.divider()
         else: 
             st.info(t["no_favs"])
 
-    # 4. EXPANDER: TENDENCIAS NUTRICIONALES (Carrusel interactivo)
+    # 4. EXPANDER: TENDENCIAS NUTRICIONALES (Multilingüe)
     with st.expander("📰 " + t.get("news_title", "Tendencias"), expanded=True):
-        trend_categories =["🍰 Dulces", "🥨 Salados", "🥪 Snacks Rápidos", "🥣 Desayunos", "🥤 Bebidas/Smoothies"]
-        
+        trend_keys =["trend_sweets", "trend_salty", "trend_snacks", "trend_breakfast", "trend_drinks"]
         if "trend_idx" not in st.session_state: st.session_state.trend_idx = 0
         
-        # Botones del Carrusel
         col_l, col_c, col_r = st.columns([1, 4, 1])
         with col_l:
             if st.button("◀", key="btn_prev_trend"): 
-                st.session_state.trend_idx = (st.session_state.trend_idx - 1) % len(trend_categories)
+                st.session_state.trend_idx = (st.session_state.trend_idx - 1) % len(trend_keys)
                 st.rerun()
         with col_c:
-            st.markdown(f"<div style='text-align:center; font-weight:800; color:#10B981; font-size:13px; margin-top:8px;'>{trend_categories[st.session_state.trend_idx]}</div>", unsafe_allow_html=True)
+            current_key = trend_keys[st.session_state.trend_idx]
+            st.markdown(f"<div style='text-align:center; font-weight:800; color:#10B981; font-size:13px; margin-top:8px;'>{t[current_key]}</div>", unsafe_allow_html=True)
         with col_r:
             if st.button("▶", key="btn_next_trend"): 
-                st.session_state.trend_idx = (st.session_state.trend_idx + 1) % len(trend_categories)
+                st.session_state.trend_idx = (st.session_state.trend_idx + 1) % len(trend_keys)
                 st.rerun()
                 
-        current_trend_cat = trend_categories[st.session_state.trend_idx]
-        
-        # Cargar noticias por categoría
-        news_items = fetch_daily_healthy_recipes(lang_code, current_trend_cat)
+        # Cargar noticias por clave interna (independiente del idioma)
+        news_items = fetch_daily_healthy_recipes(lang_code, current_key)
         if news_items:
             for news in news_items:
-                r_title = news.get('title', 'Receta Saludable')
+                r_title = news.get('title', 'Receta')
                 r_summary = news.get('summary', '')[:90] + "..."
                 r_url = news.get('url', '#')
                 st.markdown(f"""
@@ -751,16 +780,14 @@ with st.sidebar:
                 </div>
                 """, unsafe_allow_html=True)
         else: 
-            st.warning("No hay tendencias para esta categoría hoy.")
+            st.warning("No hay tendencias hoy.")
             
         if st.button("🔄 Actualizar", key="btn_refresh_news", use_container_width=True):
             fetch_daily_healthy_recipes.clear()
             st.rerun()
 
-    # Botón Salir al final de la barra
     st.divider()
     if st.button("🚪 " + t["logout"], type="secondary", use_container_width=True): logout()
-
 # ==========================================
 # HEADER PRINCIPAL
 # ==========================================
@@ -1255,6 +1282,44 @@ elif st.session_state.current_page == "mod3":
                             "color": m_col
                         }
                         add_to_meal_calendar(user_profile["username"], input_date.strftime("%Y-%m-%d"), entry)
+                        st.rerun()
+                        # GESTIÓN DE COMIDAS (Editar / Eliminar)
+    st.divider()
+    st.markdown(f"<h3 style='text-align:center;'>{t['manage_meals']}</h3>", unsafe_allow_html=True)
+    
+    col_md1, col_md2 = st.columns([1, 2])
+    with col_md1:
+        manage_date = st.date_input(t["manage_date"], value=datetime.date.today(), key="manage_cal_date")
+        manage_date_str = manage_date.strftime("%Y-%m-%d")
+    
+    with col_md2:
+        day_meals = user_cal.get(manage_date_str,[])
+        if not day_meals:
+            st.info(t["no_meals"])
+        else:
+            for idx, m in enumerate(day_meals):
+                with st.expander(f"{m.get('type', 'Comida')} - {m.get('food')} ({m.get('calories')} kcal)"):
+                    # Formulario de edición
+                    e_food = st.text_input("Nombre de la comida", value=m.get('food'), key=f"e_food_{idx}")
+                    c_m1, c_m2, c_m3, c_m4 = st.columns(4)
+                    e_cal = c_m1.number_input("Calorías", value=int(m.get('calories', 0)), key=f"e_cal_{idx}")
+                    e_pro = c_m2.number_input("Prot. (g)", value=int(m.get('protein', 0)), key=f"e_pro_{idx}")
+                    e_fat = c_m3.number_input("Grasa (g)", value=int(m.get('fat', 0)), key=f"e_fat_{idx}")
+                    e_car = c_m4.number_input("Carb. (g)", value=int(m.get('carbs', 0)), key=f"e_car_{idx}")
+                    
+                    col_sav, col_del = st.columns(2)
+                    if col_sav.button(t["btn_save"], key=f"save_m_{idx}", use_container_width=True, type="primary"):
+                        day_meals[idx].update({"food": e_food, "calories": e_cal, "protein": e_pro, "fat": e_fat, "carbs": e_car})
+                        user_cal[manage_date_str] = day_meals
+                        update_user_data(user_profile["username"], {"meal_calendar": user_cal})
+                        st.toast("¡Comida actualizada!")
+                        st.rerun()
+                        
+                    if col_del.button(t["btn_delete"], key=f"del_m_{idx}", use_container_width=True):
+                        day_meals.pop(idx)
+                        user_cal[manage_date_str] = day_meals
+                        update_user_data(user_profile["username"], {"meal_calendar": user_cal})
+                        st.toast("¡Comida eliminada!")
                         st.rerun()
 
 # ==========================================
