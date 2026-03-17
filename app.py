@@ -1213,6 +1213,9 @@ elif st.session_state.current_page == "mod3":
 # ==========================================
 # MÓDULO 4: DASHBOARD DE ANÁLISIS PROFUNDO MÉDICO
 # ==========================================
+# ==========================================
+# MÓDULO 4: DASHBOARD DE ANÁLISIS PROFUNDO MÉDICO
+# ==========================================
 elif st.session_state.current_page == "mod4":
     if st.button(t["back_home"], type="secondary"): go_home()
     st.divider()
@@ -1237,57 +1240,178 @@ elif st.session_state.current_page == "mod4":
     user_cal = user_profile.get("meal_calendar") or {}
     if not isinstance(user_cal, dict): user_cal = {}
     
+    # Acumuladores generales y por tipo de comida
     t_cal = t_pro = t_fat = t_car = 0
     consumed_foods =[]
+    meals_breakdown = {}
     
     curr = start_date
     while curr <= end_date:
         d_str = curr.strftime("%Y-%m-%d")
         meals = user_cal.get(d_str,[])
         for m in meals:
+            m_type = m.get("type", "Otro")
+            
+            # Suma general
             t_cal += m.get("calories", 0)
             t_pro += m.get("protein", 0)
             t_fat += m.get("fat", 0)
             t_car += m.get("carbs", 0)
             consumed_foods.append(f"{m.get('food')} ({m.get('calories')} kcal)")
+            
+            # Suma por tipo de comida
+            if m_type not in meals_breakdown:
+                meals_breakdown[m_type] = {"Calorías": 0, "Proteínas (g)": 0, "Grasas (g)": 0, "Carbos (g)": 0}
+            meals_breakdown[m_type]["Calorías"] += m.get("calories", 0)
+            meals_breakdown[m_type]["Proteínas (g)"] += m.get("protein", 0)
+            meals_breakdown[m_type]["Grasas (g)"] += m.get("fat", 0)
+            meals_breakdown[m_type]["Carbos (g)"] += m.get("carbs", 0)
+            
         curr += timedelta(days=1)
         
     st.markdown("<br>", unsafe_allow_html=True)
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric(f"🔥 {t['mod4_total_cal']}", f"{t_cal} kcal")
-    c2.metric(f"🍗 {t['mac_pro']}", f"{t_pro} g")
-    c3.metric(f"🥑 {t['mac_fat']}", f"{t_fat} g")
-    c4.metric(f"🍞 {t['mac_car']}", f"{t_car} g")
-    st.divider()
+    
+    # LAYOUT DIVIDIDO: 70% Izquierda (Datos), 30% Derecha (Tarjeta Flip)
+    col_left, col_right = st.columns([7, 3], gap="large")
+    
+    with col_left:
+        # Totales generales
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric(f"🔥 {t['mod4_total_cal']}", f"{t_cal} kcal")
+        c2.metric(f"🍗 {t['mac_pro']}", f"{t_pro} g")
+        c3.metric(f"🥑 {t['mac_fat']}", f"{t_fat} g")
+        c4.metric(f"🍞 {t['mac_car']}", f"{t_car} g")
+        st.divider()
+        
+        # Tabla de desglose por comidas
+        st.markdown("### 📊 Desglose por Comidas")
+        if meals_breakdown:
+            df_meals = pd.DataFrame.from_dict(meals_breakdown, orient='index')
+            st.dataframe(df_meals.style.format("{:.0f}"), use_container_width=True)
+        else:
+            st.info("No hay comidas registradas en este período.")
+            
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Botón de Generación IA
+        if st.button(t["mod4_gen_btn"], type="primary", use_container_width=True):
+            with st.spinner(t["mod4_analyzing"]):
+                food_list_str = ', '.join(consumed_foods[:50]) if consumed_foods else 'Ninguno registrado'
+                sys_eval = f"""
+                Eres un Médico Nutricionista de élite evaluando a {user_profile['name']} ({user_profile['weight']}kg, Objetivo: {user_profile['goals']}).
+                Datos del período ({period_map[periodo_key]}): {t_cal} kcal totales, {t_pro}g proteína, {t_fat}g grasa, {t_car}g carbos.
+                Alimentos consumidos: {food_list_str}.
+                
+                Genera un JSON ESTRICTO con la siguiente estructura:
+                {{
+                    "score": <entero del 0 al 100 evaluando la nutrición global>,
+                    "funny_comment": "<Comentario médico ingenioso y divertido sobre su nota (max 15 palabras)>",
+                    "strengths": ["<Punto fuerte 1>", "<Punto fuerte 2>"],
+                    "weaknesses":["<Debilidad a mejorar 1>", "<Debilidad a mejorar 2>"],
+                    "markdown_report": "<Un informe médico profundo en Markdown detallando el equilibrio de macros, calidad de ingredientes y prescripción para mañana.>"
+                }}
+                Traduce TODO el contenido del JSON al {lang_code}.
+                """
+                
+                eval_res = groq_generic_json(sys_eval, "Genera el reporte médico y la tarjeta ahora.")
+                if eval_res:
+                    st.session_state.mod4_eval_res = eval_res
+                else:
+                    st.error("Error al generar el análisis. Reintenta.")
 
-    if st.button(t["mod4_gen_btn"], type="primary", use_container_width=True):
-        with st.spinner(t["mod4_analyzing"]):
-            food_list_str = ', '.join(consumed_foods[:50]) if consumed_foods else 'Ninguno registrado'
-            sys_eval = f"""
-            Eres un Médico Nutricionista de élite evaluando a {user_profile['name']} ({user_profile['weight']}kg, Objetivo: {user_profile['goals']}).
-            Datos del período ({period_map[periodo_key]}): {t_cal} kcal totales, {t_pro}g proteína, {t_fat}g grasa, {t_car}g carbos.
-            Alimentos consumidos: {food_list_str}.
+    with col_right:
+        # LÓGICA DE LA TARJETA ANIMADA (FLIP CARD)
+        if "mod4_eval_res" in st.session_state:
+            res = st.session_state.mod4_eval_res
+            score = res.get("score", 0)
             
-            Genera un informe PROFUNDO en formato Markdown. 
-            ESTRUCTURA OBLIGATORIA:
-            1. 💯 **Puntuación de nutrición (0-100)** y justificación breve.
-            2. ⚖️ **Equilibrio de macros**: Evaluación clínica de las proporciones actuales.
-            3. 🌿 **Calidad de ingredientes**: Análisis de la pureza de lo consumido.
-            4. 🚀 **Puntos fuertes**: Qué está haciendo bien el paciente.
-            5. ⚠️ **Advertencias médicas**: Picos de azúcar, déficits, grasas saturadas detectadas.
-            6. 💡 **Recomendación clave para mañana**: Prescripción práctica y exacta.
+            # Determinar color según puntuación
+            if score >= 90: bg, text_col = "linear-gradient(135deg, #FFD700, #F59E0B)", "#000000" # Oro
+            elif score >= 80: bg, text_col = "linear-gradient(135deg, #A855F7, #7E22CE)", "#FFFFFF" # Morado
+            elif score >= 70: bg, text_col = "linear-gradient(135deg, #3B82F6, #1D4ED8)", "#FFFFFF" # Azul
+            elif score >= 60: bg, text_col = "linear-gradient(135deg, #84CC16, #4D7C0F)", "#000000" # Verde Claro
+            elif score >= 50: bg, text_col = "linear-gradient(135deg, #22C55E, #15803D)", "#FFFFFF" # Verde Oscuro
+            elif score >= 40: bg, text_col = "linear-gradient(135deg, #F97316, #C2410C)", "#FFFFFF" # Naranja
+            elif score >= 30: bg, text_col = "linear-gradient(135deg, #EF4444, #B91C1C)", "#FFFFFF" # Rojo
+            elif score >= 20: bg, text_col = "linear-gradient(135deg, #92400E, #78350F)", "#FFFFFF" # Marrón
+            else: bg, text_col = "linear-gradient(135deg, #334155, #0F172A)", "#FFFFFF" # Negro
             
-            Traduce ABSOLUTAMENTE TODO al {lang_code}.
-            CRÍTICO: Devuelve UN JSON ESTRICTO con la clave 'markdown_report' que contenga todo el texto en Markdown.
-            """
+            str_html = "".join([f"<li style='margin-bottom:4px;'>✅ {s}</li>" for s in res.get("strengths", [])])
+            weak_html = "".join([f"<li style='margin-bottom:4px;'>⚠️ {w}</li>" for w in res.get("weaknesses", [])])
             
-            eval_res = groq_generic_json(sys_eval, "Genera el reporte médico ahora.")
+            card_html = f"""
+            <style>
+            body {{ margin:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: transparent; }}
+            .flip-container {{ width: 100%; height: 420px; perspective: 1000px; cursor: pointer; }}
+            .flip-card {{ width: 100%; height: 100%; position: relative; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }}
+            .flip-container.flipped .flip-card {{ transform: rotateY(180deg); }}
+            .front, .back {{ width: 100%; height: 100%; position: absolute; backface-visibility: hidden; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 25px; box-sizing: border-box; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.15); }}
             
-            if eval_res and "markdown_report" in eval_res:
-                st.markdown(f"""
-                <div style="background-color:#F8FAFC; padding: 30px; border-radius:15px; border:1px solid #E2E8F0; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
-                    {eval_res['markdown_report']}
+            /* Front (Misterio/Brillante) */
+            .front {{ background: linear-gradient(135deg, #1E293B, #0F172A); color: white; border: 2px solid #38BDF8; animation: glow 2.5s infinite alternate; }}
+            .front h3 {{ font-size: 24px; margin: 0 0 15px 0; }}
+            .front p {{ color: #94A3B8; font-size: 14px; margin:0; line-height:1.5; }}
+            .pulse-icon {{ font-size: 50px; margin-bottom: 20px; animation: bounce 2s infinite; }}
+            
+            /* Back (Resultados) */
+            .back {{ background: {bg}; color: {text_col}; transform: rotateY(180deg); border: 2px solid rgba(255,255,255,0.2); }}
+            .score {{ font-size: 70px; font-weight: 900; margin: 0; line-height: 1; text-shadow: 2px 2px 10px rgba(0,0,0,0.2); }}
+            .comment {{ font-size: 15px; font-style: italic; margin: 15px 0; font-weight: 600; opacity: 0.9; }}
+            .lists-container {{ text-align: left; width: 100%; font-size: 13px; font-weight: 500; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 12px; }}
+            .lists-container ul {{ padding-left: 0; list-style: none; margin: 0 0 10px 0; }}
+            
+            @keyframes glow {{ 0% {{ box-shadow: 0 0 10px #38BDF820; }} 100% {{ box-shadow: 0 0 30px #38BDF880; }} }}
+            @keyframes bounce {{ 0%, 100% {{ transform: translateY(0); }} 50% {{ transform: translateY(-10px); }} }}
+            </style>
+
+            <div class="flip-container" id="card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card">
+                    <div class="front">
+                        <div class="pulse-icon">✨</div>
+                        <h3>¡Análisis Listo!</h3>
+                        <p>Toca la carta para revelar<br>tu puntuación y desglose.</p>
+                    </div>
+                    <div class="back">
+                        <h1 class="score">{score}</h1>
+                        <p class="comment">"{res.get('funny_comment', '')}"</p>
+                        <div class="lists-container">
+                            <strong>💪 Puntos Fuertes:</strong>
+                            <ul>{str_html}</ul>
+                            <strong>🎯 A Mejorar:</strong>
+                            <ul style="margin:0;">{weak_html}</ul>
+                        </div>
+                    </div>
                 </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.error("No se pudo generar el análisis en este momento. Inténtalo de nuevo.")
+            </div>
+            """
+            # Renderizar la tarjeta clickeable
+            st.components.v1.html(card_html, height=440)
+            
+        else:
+            # Estado "Misterioso" antes de darle a generar
+            placeholder_html = """
+            <style>
+            body { margin:0; background: transparent; }
+            .mystery-card { width: 100%; height: 420px; border-radius: 20px; background: linear-gradient(135deg, #F8FAFC, #E2E8F0); border: 2px dashed #CBD5E1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; color: #64748B; transition: all 0.3s ease; }
+            .mystery-card:hover { border-color: #3B82F6; background: #F1F5F9; transform: translateY(-5px); box-shadow: 0 10px 25px rgba(59,130,246,0.1); }
+            .mystery-icon { font-size: 60px; margin-bottom: 20px; filter: grayscale(100%); opacity: 0.5; }
+            </style>
+            <div class="mystery-card">
+                <div class="mystery-icon">🔮</div>
+                <h3 style="margin:0 0 10px 0; color: #334155;">Tarjeta Desactivada</h3>
+                <p style="margin:0; font-size:14px; line-height:1.5;">Haz clic en el botón de la izquierda para que la IA escanee tu perfil clínico y active esta tarjeta.</p>
+            </div>
+            """
+            st.components.v1.html(placeholder_html, height=440)
+
+    # REPORTE DETALLADO (Full Width)
+    if "mod4_eval_res" in st.session_state:
+        st.divider()
+        st.markdown(f"""
+        <div style="background-color:#FFFFFF; padding: 40px; border-radius:20px; border:1px solid #E2E8F0; box-shadow: 0 15px 40px rgba(0,0,0,0.04);">
+            <h3 style="color:#1E293B; margin-top:0; border-bottom: 2px solid #F1F5F9; padding-bottom: 15px;">🩺 Informe Clínico Detallado</h3>
+            <div style="color: #475569; line-height: 1.8; font-size: 1.05rem;">
+                {st.session_state.mod4_eval_res.get('markdown_report', '')}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
