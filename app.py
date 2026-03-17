@@ -7,6 +7,7 @@ import random
 import requests
 import pandas as pd
 import plotly.express as px
+import xml.etree.ElementTree as ET
 from groq import Groq
 from supabase import create_client, Client
 from streamlit_lottie import st_lottie
@@ -327,55 +328,50 @@ def format_recipe_for_download(recipe, t_dict):
 
 @st.cache_data(ttl=timedelta(days=1), show_spinner=False)
 def fetch_daily_healthy_recipes(lang_code):
-    # 1. Conexión DIRECTA a las revistas de cocina (Infalible, sin bloqueos de buscador)
-    rss_feeds =[
-        "https://www.vitonica.com/categoria/recetas-saludables/feed",
-        "https://www.directoalpaladar.com/categoria/recetas-saludables/feed"
-    ]
+    # Conexión infalible a Google News (Nunca bloquea peticiones de servidor)
+    url = "https://news.google.com/rss/search?q=recetas+saludables+faciles+rapidas&hl=es&gl=ES&ceid=ES:es"
     
     raw_results =[]
-    for url in rss_feeds:
-        try:
-            # Nos conectamos como si fuéramos un navegador para extraer el XML de las noticias
-            res = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}, timeout=5)
-            
-            # Separamos cada noticia de la revista
-            items = res.text.split('<item>')
-            
-            # Cogemos las 3 recetas más recientes de cada revista
-            for item in items[1:4]: 
-                # Extraemos el Título
-                t_match = re.search(r'<title>(.*?)</title>', item, re.IGNORECASE | re.DOTALL)
-                title = t_match.group(1).replace('<![CDATA[', '').replace(']]>', '').strip() if t_match else "Receta Saludable"
-                
-                # Extraemos el Enlace Real de la página
-                l_match = re.search(r'<link>(.*?)</link>', item, re.IGNORECASE | re.DOTALL)
-                link = l_match.group(1).replace('<![CDATA[', '').replace(']]>', '').strip() if l_match else "#"
-                
-                # Extraemos la descripción y le borramos las etiquetas de HTML o imágenes
-                d_match = re.search(r'<description>(.*?)</description>', item, re.IGNORECASE | re.DOTALL)
-                desc = d_match.group(1).replace('<![CDATA[', '').replace(']]>', '').strip() if d_match else "Deliciosa opción sana."
-                desc_clean = re.sub(r'<[^>]+>', '', desc)[:150] # Limpia todo y corta a 150 caracteres
-                
-                raw_results.append({"title": title, "url": link, "summary": desc_clean})
-        except Exception as e:
-            continue
-            
-    # Mezclamos las recetas de ambas revistas y nos quedamos con las 4 mejores
-    random.shuffle(raw_results)
-    raw_results = raw_results[:4]
-    
-    if not raw_results:
-        return[] # Solo se devolverá vacío si el servidor web se queda sin internet
+    try:
+        # Extraemos el XML oficial de Google News
+        res = requests.get(url, timeout=10)
+        root = ET.fromstring(res.text)
         
-    # 2. PROMPT DE LA IA (Traduce y mejora los textos obtenidos directamente de las revistas)
+        # Buscamos todas las noticias/recetas en el XML
+        for item in root.findall('./channel/item'):
+            title = item.find('title').text
+            link = item.find('link').text
+            
+            # Limpiamos el título base para la IA
+            clean_title = title.split(" - ")[0] 
+            
+            raw_results.append({
+                "title": clean_title,
+                "url": link,
+                "summary": clean_title
+            })
+            
+            if len(raw_results) >= 15: # Cogemos unas cuantas para tener variedad
+                break
+                
+        # Mezclamos y nos quedamos con las 4 mejores
+        random.shuffle(raw_results)
+        raw_results = raw_results[:4]
+        
+    except Exception as e:
+        return[]
+
+    if not raw_results:
+        return[]
+        
+    # PROMPT DE LA IA (Transforma los titulares aburridos en platos de lujo en el idioma del usuario)
     sys_prompt = f"""
     You are a Michelin-star Chef and an expert culinary copywriter.
-    I am providing you with a JSON list of REAL daily recipes extracted directly from famous culinary websites.
+    I am providing you with a JSON list of REAL daily recipes extracted from Google News.
     
     Your task:
     1. Rewrite the 'title' to make it sound irresistible, premium, and highly nutritious.
-    2. Rewrite the 'summary' into a mouth-watering 2-line description highlighting its health benefits.
+    2. Write a mouth-watering 2-line 'summary' highlighting its health benefits and why they should cook it today.
     3. TRANSLATE both the title and the summary entirely into {lang_code.upper()}. This is mandatory.
     4. Extract and keep the EXACT original 'url' intact.
     
@@ -387,17 +383,15 @@ def fetch_daily_healthy_recipes(lang_code):
     }}
     """
     
-    user_prompt = "REAL RSS RECIPES:\n" + json.dumps(raw_results)
+    user_prompt = "REAL GOOGLE NEWS RECIPES:\n" + json.dumps(raw_results)
     
     try:
-        # Llamamos a Groq con los resultados reales
         parsed = groq_generic_json(sys_prompt, user_prompt)
         if parsed and "recipes" in parsed and len(parsed["recipes"]) > 0:
             return parsed["recipes"]
     except Exception:
         pass
         
-    # Sistema de seguridad: Si la IA tarda o falla, muestra las recetas originales en español.
     return raw_results
 # ==========================================
 # SISTEMA MULTIDIOMA Y TEXTOS
