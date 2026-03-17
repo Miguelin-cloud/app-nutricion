@@ -787,7 +787,7 @@ with st.sidebar:
             st.info(t["no_favs"])
 
     # 4. EXPANDER: TENDENCIAS NUTRICIONALES (Multilingüe)
-    with st.expander("📰 " + t.get("news_title", "Tendencias"), expanded=True):
+    with st.expander(t.get("news_title", "Tendencias"), expanded=True):
         trend_keys =["trend_sweets", "trend_salty", "trend_snacks", "trend_breakfast", "trend_drinks"]
         if "trend_idx" not in st.session_state: st.session_state.trend_idx = 0
         
