@@ -327,45 +327,46 @@ def format_recipe_for_download(recipe, t_dict):
 
 @st.cache_data(ttl=timedelta(days=1), show_spinner=False)
 def fetch_daily_healthy_recipes(lang_code):
-    """
-    1. Busca recetas sanas en sitios web de alta calidad.
-    2. Usa Groq (IA) para traducir y hacer los textos muy atractivos.
-    3. Se actualiza automáticamente cada 24 horas.
-    """
-    # Añadimos la fecha de hoy a la búsqueda para forzar contenido fresco cada día
-    today_str = datetime.datetime.now().strftime("%Y-%m")
-    query = f"recetas saludables y deliciosas {today_str} site:directoalpaladar.com OR site:vitonica.com"
+    # Consulta más amplia y natural para evitar que el buscador bloquee la petición
+    query = "mejores recetas saludables fáciles rápidas nutrición blog"
     
     try:
-        raw_results = list(DDGS().text(query, max_results=4))
-        if not raw_results: return[]
+        # Extraemos hasta 6 resultados para darle variedad a la IA
+        raw_results = list(DDGS().text(query, max_results=6))
+        
+        if not raw_results:
+            return[]
             
-        # PROMPT MAESTRO PARA LA IA: Copywriting y Traducción Estricta
+        # PROMPT BLINDADO: Instrucciones hiper-claras para Groq
         sys_prompt = f"""
         You are a Michelin-star Chef and an expert culinary copywriter.
-        I will provide you with raw internet search results for 4 healthy recipes.
+        I will provide you with raw internet search results (URLs, titles, and snippets) about healthy food.
         
         Your task:
-        1. Rewrite the 'title' to make it sound irresistible, premium, and delicious.
-        2. Rewrite the snippet into a mouth-watering 2-line 'summary' focusing on its health benefits and amazing taste.
-        3. CRITICAL RULE: You MUST translate both the title and the summary entirely into {lang_code.upper()}. Never leave them in the original language if it differs from {lang_code.upper()}.
-        4. Keep the exact original 'url' intact.
+        1. Select EXACTLY 4 of the most delicious and healthy recipes/articles from the provided list.
+        2. Rewrite the 'title' to make it sound irresistible, premium, and highly nutritious.
+        3. Rewrite the snippet into a mouth-watering 2-line 'summary' highlighting its health benefits.
+        4. TRANSLATE both the title and the summary entirely into {lang_code.upper()}. This is mandatory.
+        5. Extract and keep the EXACT original URL from the data.
         
-        Return STRICTLY a JSON object with this exact format:
+        You must reply STRICTLY with a JSON object in this exact format:
         {{
             "recipes":[
-                {{"title": "Translated Catchy Title", "summary": "Translated 2-line description", "url": "original_url"}}
+                {{"title": "Translated Catchy Title", "summary": "Translated 2-line description", "url": "https://original-link.com"}}
             ]
         }}
         """
         
-        user_prompt = "RAW RESULTS:\n" + json.dumps(raw_results)
+        user_prompt = "RAW RESULTS TO PROCESS:\n" + json.dumps(raw_results)
+        
+        # Llamada a nuestra función Groq JSON
         parsed = groq_generic_json(sys_prompt, user_prompt)
         
-        if parsed and "recipes" in parsed:
+        if parsed and "recipes" in parsed and len(parsed["recipes"]) > 0:
             return parsed["recipes"]
             
-        return raw_results # Fallback de seguridad por si la IA falla
+        # Si la IA falla por algún motivo, devolvemos los resultados crudos de DuckDuckGo como plan B
+        return raw_results
     except Exception as e:
         return[]
 
@@ -651,28 +652,35 @@ with st.sidebar:
 
     st.divider()
     with st.expander(t.get("news_title", "📰 Tendencias Nutricionales"), expanded=False):
-        # Usamos la nueva función pasándole el idioma actual
+        # Llamamos a la función con el idioma seleccionado
         news_items = fetch_daily_healthy_recipes(lang_code)
         
         if news_items:
             for news in news_items:
-                # Extraemos con fallback seguro por si devuelve el RAW format
-                r_title = news.get('title', news.get('title', ''))
-                r_summary = news.get('summary', news.get('body', ''))[:120]
+                # Extracción segura: Soporta tanto el formato de la IA como el de DuckDuckGo (fallback)
+                r_title = news.get('title', news.get('title', 'Receta Saludable del Día'))
+                
+                # Resumen: buscamos 'summary' (de la IA) o 'body' (de DuckDuckGo)
+                r_summary = news.get('summary', news.get('body', 'Descubre esta deliciosa y saludable opción para tu día a día.'))
+                # Limitamos a 120 caracteres para que no rompa el diseño
+                r_summary = r_summary[:120] + "..." if len(r_summary) > 120 else r_summary
+                
+                # URL: buscamos 'url' (IA) o 'href' (DuckDuckGo)
                 r_url = news.get('url', news.get('href', '#'))
                 
                 st.markdown(f"""
                 <div style="background: #FFFFFF; padding:12px; border-radius:10px; margin-bottom:12px; border:1px solid #E2E8F0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s;">
                     <h4 style="margin:0;font-size:14px;font-weight:700;color:#1E293B;line-height:1.2;">{r_title}</h4>
-                    <p style="font-size:12px;margin-top:6px;margin-bottom:8px;line-height:1.4;color:#475569;">{r_summary}...</p>
+                    <p style="font-size:12px;margin-top:6px;margin-bottom:8px;line-height:1.4;color:#475569;">{r_summary}</p>
                     <a href="{r_url}" target="_blank" style="display:inline-block; padding:4px 0px; font-size:12px;color:#10B981;font-weight:800;text-decoration:none;">{t.get("cook_this", "Ver receta 🍳")} →</a>
                 </div>
                 """, unsafe_allow_html=True)
         else: 
-            st.write("No hay tendencias disponibles hoy.")
-
-    st.divider()
-    if st.button(t["logout"], type="secondary", use_container_width=True): logout()
+            st.write("Cargando nuevas recetas del chef... Vuelve a intentarlo en unos segundos.")
+            # Un pequeño botón por si el caché se quedó atascado en un error
+            if st.button("🔄 Refrescar recetas"):
+                fetch_daily_healthy_recipes.clear()
+                st.rerun()
 
 # ==========================================
 # HEADER PRINCIPAL
