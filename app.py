@@ -797,106 +797,66 @@ with st.sidebar:
 st.markdown(f"<h1 class='brand-logo'>NutriAI</h1>", unsafe_allow_html=True)
 
 # ==========================================
-# RUTEO DE PÁGINAS (DASHBOARD REDISEÑADO - NEUMORFISMO + MAGIA)
+# RUTEO DE PÁGINAS (DASHBOARD REDISEÑADO)
 # ==========================================
 if st.session_state.current_page == "home":
-    
-    st.markdown(f"""
+    # CSS con EFECTO LUPA MODERNO para las cajetillas
+    st.markdown("""
     <style>
-    /* 1. CONTENEDOR NEUMÓRFICO BASE */[data-testid="column"] div.stButton > button {{
-        background: #FDFBF7 !important;
+    /* Diseño Masivo, SVGs y EFECTO LUPA para los 4 Módulos */[data-testid="column"] div.stButton > button {
+        min-height: 220px !important;
         border-radius: 24px !important;
-        font-size: 24px !important;
+        font-size: 26px !important;
         font-weight: 800 !important;
         color: #1E293B !important;
-        border: none !important;
-        /* Efecto 3D Neumórfico suave */
-        box-shadow: 8px 8px 16px #EAE5D9, -8px -8px 16px #FFFFFF !important;
+        background-color: #FFFFFF !important;
+        background-image: none !important; 
+        box-shadow: 0 10px 40px rgba(0,0,0,0.06) !important;
+        border: 2px solid #E2E8F0 !important;
+        /* Transición hiper suave para el efecto lupa */
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-        height: 250px !important;
+        background-repeat: no-repeat !important;
+        background-position: center top 35px !important;
+        background-size: 70px !important;
+        padding-top: 100px !important; 
+    }
+    
+    /* Efecto Lupa Hover 3D Magnífico */
+    [data-testid="column"] div.stButton > button:hover {
+        transform: scale(1.05) translateY(-8px) !important;
+        box-shadow: 0 25px 60px rgba(16,185,129,0.2) !important;
+        border: 2px solid #10B981 !important;
+        z-index: 10 !important;
         position: relative !important;
-        overflow: hidden !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-    }}
+    }
     
-    /* 2. EFECTO HOVER (Hundimiento/Resplandor) */
-    [data-testid="column"] div.stButton > button:hover {{
-        transform: scale(1.02) translateY(-5px) !important;
-        /* Neumorfismo presionado + brillo verde suave */
-        box-shadow: inset 4px 4px 10px #EAE5D9, inset -4px -4px 10px #FFFFFF, 10px 10px 25px rgba(16,185,129,0.15) !important;
-    }}
+    /* 1: Cocina Mágica (Wand/Chef Hat) */
+    [data-testid="column"]:nth-of-type(1) div.stButton:nth-of-type(1) button {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z'/%3E%3C/svg%3E") !important;
+    }
     
-    /* 3. ICONOS SVG ANIMADOS (Lottie-style) */
-    [data-testid="column"] div.stButton > button::before {{
-        content: ''; position: absolute; top: 35px; width: 100px; height: 100px;
-        background-repeat: no-repeat; background-position: center; background-size: contain;
-        transition: all 0.4s ease;
-    }}
-    
-    /* 4. POSICIÓN DEL TÍTULO */
-    [data-testid="column"] div.stButton > button p {{
-        position: absolute !important; top: 150px !important; margin: 0 !important;
-        transition: all 0.4s ease !important;
-    }}
-    
-    /* 5. MAGIA AL HACER HOVER (Todo sube) */[data-testid="column"] div.stButton > button:hover::before {{ transform: translateY(-20px) scale(1.1); }}
-    [data-testid="column"] div.stButton > button:hover p {{ transform: translateY(-40px); color: #10B981 !important; }}
-    
-    /* 6. DESCRIPCIONES (Aparecen mágicamente) */
-    [data-testid="column"] div.stButton > button::after {{
-        position: absolute; bottom: -50px; opacity: 0; width: 85%;
-        font-size: 14px; font-weight: 600; color: #64748B; text-align: center;
-        transition: all 0.4s ease; white-space: normal; line-height: 1.4;
-    }}
-    [data-testid="column"] div.stButton > button:hover::after {{ bottom: 30px; opacity: 1; }}
+    /* 3: Mis Menús (Calendar) */[data-testid="column"]:nth-of-type(1) div.stButton:nth-of-type(2) button {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") !important;
+    }
 
-    /* Textos inyectados dinámicamente con las traducciones */
-    [data-testid="column"]:nth-of-type(1) div.stButton:nth-of-type(1) button::after {{ content: "{t.get('desc_mod1', 'Descubre recetas mágicas con tus ingredientes')}"; }}
-    [data-testid="column"]:nth-of-type(2) div.stButton:nth-of-type(1) button::after {{ content: "{t.get('desc_mod2', 'Gestiona y genera tu lista inteligentemente')}"; }}[data-testid="column"]:nth-of-type(1) div.stButton:nth-of-type(2) button::after {{ content: "{t.get('desc_mod3', 'Planifica comidas y controla tus macros')}"; }}
-    [data-testid="column"]:nth-of-type(2) div.stButton:nth-of-type(2) button::after {{ content: "{t.get('desc_mod4', 'Análisis clínico profundo y evaluación IA')}"; }}
+    /* 2: Mi Compra (Cart) */
+    [data-testid="column"]:nth-of-type(2) div.stButton:nth-of-type(1) button {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='21' r='1'/%3E%3Ccircle cx='20' cy='21' r='1'/%3E%3Cpath d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/%3E%3C/svg%3E") !important;
+    }
 
-    /* ========================================================= */
-    /* INYECCIÓN DE ANIMACIONES SVG PURO (No consumen recursos)  */
-    /* ========================================================= */
+    /* 4: Mi Salud (Heart) */[data-testid="column"]:nth-of-type(2) div.stButton:nth-of-type(2) button {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'/%3E%3C/svg%3E") !important;
+    }
     
-    /* MOD 1: Olla Hirviendo */
-    [data-testid="column"]:nth-of-type(1) div.stButton:nth-of-type(1) button::before {{
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>@keyframes boil{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-4px)}}}}@keyframes float{{0%,100%{{opacity:0;transform:translateY(0) scale(0.5)}}50%{{opacity:1;transform:translateY(-20px) scale(1.2)}}}}.bubble{{animation:float 2s infinite ease-in-out}}.pot{{animation:boil 3s infinite ease-in-out}}</style><g class='pot'><path d='M20 50 Q20 85 50 85 Q80 85 80 50 Z' fill='%2310B981'/><rect x='15' y='45' width='70' height='6' rx='3' fill='%23047857'/></g><circle cx='40' cy='40' r='6' fill='%233B82F6' class='bubble'/><circle cx='60' cy='45' r='5' fill='%23F59E0B' class='bubble' style='animation-delay:1s'/><circle cx='50' cy='35' r='7' fill='%23EF4444' class='bubble' style='animation-delay:0.5s'/></svg>");
-    }}
-    
-    /* MOD 2: Stickman Corriendo con Carrito (Tu petición especial) */
-    [data-testid="column"]:nth-of-type(2) div.stButton:nth-of-type(1) button::before {{
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>@keyframes run{{0%,100%{{transform:rotate(-15deg)}}50%{{transform:rotate(25deg)}}}}@keyframes move{{0%,100%{{transform:translateX(-5px)}}50%{{transform:translateX(15px)}}}}@keyframes wheel{{0%{{transform:rotate(0deg)}}100%{{transform:rotate(360deg)}}}}.leg1{{animation:run 0.4s infinite linear;transform-origin: 30px 60px}}.leg2{{animation:run 0.4s infinite linear reverse;transform-origin: 30px 60px}}.scene{{animation:move 2s infinite ease-in-out}}.wheel{{animation:wheel 0.4s infinite linear;transform-origin: 60px 85px}}.wheel2{{animation:wheel 0.4s infinite linear;transform-origin: 75px 85px}}</style><g class='scene'><circle cx='30' cy='35' r='8' fill='none' stroke='%233B82F6' stroke-width='4'/><path d='M30 43 v17' stroke='%233B82F6' stroke-width='4' stroke-linecap='round'/><path d='M30 48 l15 -5' stroke='%233B82F6' stroke-width='4' stroke-linecap='round'/><path d='M30 60 l-10 20' stroke='%233B82F6' stroke-width='4' stroke-linecap='round' class='leg1'/><path d='M30 60 l10 20' stroke='%233B82F6' stroke-width='4' stroke-linecap='round' class='leg2'/><path d='M45 43 l10 0 l15 35 M50 53 l30 0 l5 -20 l-30 0 Z' stroke='%231E293B' stroke-width='4' fill='none' stroke-linejoin='round'/><circle cx='60' cy='85' r='4' fill='%231E293B' class='wheel'/><circle cx='75' cy='85' r='4' fill='%231E293B' class='wheel2'/><circle cx='65' cy='45' r='4' fill='%23F59E0B'/><rect x='70' y='45' width='8' height='8' fill='%2310B981'/></g></svg>");
-    }}
-    
-    /* MOD 3: Calendario Animado */
-    [data-testid="column"]:nth-of-type(1) div.stButton:nth-of-type(2) button::before {{
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>@keyframes bounce{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-6px)}}}}@keyframes check{{0%,100%{{stroke-dashoffset: 20}}50%{{stroke-dashoffset: 0}}}}.cal{{animation:bounce 3s infinite ease-in-out}}.tick{{stroke-dasharray: 20; animation:check 3s infinite}}</style><g class='cal'><rect x='20' y='30' width='60' height='55' rx='6' fill='%23FFFFFF' stroke='%23F59E0B' stroke-width='4'/><rect x='20' y='30' width='60' height='18' rx='4' fill='%23F59E0B'/><path d='M35 20 v20 M65 20 v20' stroke='%231E293B' stroke-width='6' stroke-linecap='round'/><path d='M40 60 l10 10 l20 -20' stroke='%2310B981' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round' class='tick'/><rect x='30' y='55' width='10' height='4' fill='%23CBD5E1'/><rect x='30' y='65' width='20' height='4' fill='%23CBD5E1'/></g></svg>");
-    }}
-    
-    /* MOD 4: Corazón Latiendo y ECG */
-    [data-testid="column"]:nth-of-type(2) div.stButton:nth-of-type(2) button::before {{
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>@keyframes beat{{0%,100%{{transform:scale(1)}}15%{{transform:scale(1.2)}}30%{{transform:scale(1)}}}}@keyframes dash{{0%{{stroke-dashoffset:80}}100%{{stroke-dashoffset:0}}}}.heart{{animation:beat 1.5s infinite;transform-origin:center}}.line{{stroke-dasharray:80;animation:dash 1.5s infinite linear}}</style><path d='M50 75 L28 53 C22 47 22 37 28 31 C34 25 44 25 50 32 C56 25 66 25 72 31 C78 37 78 47 72 53 Z' fill='%23EF4444' class='heart'/><path d='M15 50 l15 0 l10 -20 l15 40 l10 -20 l15 0' stroke='%23FFFFFF' stroke-width='4' fill='none' class='line' stroke-linejoin='round'/></svg>");
-    }}
-    
-    /* 7. ADAPTACIÓN PARA MÓVILES (Layout Perfecto en Teléfonos) */
-    @media (max-width: 768px) {{
-        [data-testid="column"] div.stButton > button {{ height: 210px !important; font-size: 20px !important; margin-bottom:15px; }}
-        [data-testid="column"] div.stButton > button::before {{ top: 25px; width: 75px; height: 75px; }}
-        [data-testid="column"] div.stButton > button p {{ top: 120px !important; }}[data-testid="column"] div.stButton > button:hover p {{ transform: translateY(-20px); }}
-        [data-testid="column"] div.stButton > button:hover::after {{ bottom: 15px; font-size: 12px; }}
-    }}
+    /* Layout Móvil */
+    @media (max-width: 768px) {[data-testid="column"] div.stButton > button { min-height: 180px !important; font-size: 22px !important; margin-bottom: 10px; }
+    }
     </style>
     """, unsafe_allow_html=True)
 
-    # Cabecera
     st.markdown(f"<h2 style='text-align:center;'>{t['title'].format(name=user_profile['name'])}</h2>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align:center; font-size:1.2rem; color:#64748B;'>{t['subtitle']}</p><br>", unsafe_allow_html=True)
     
-    # Cuadrícula 2x2
     c1, c2 = st.columns(2)
     with c1:
         if st.button(t["dash_mod1"], use_container_width=True):
