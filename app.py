@@ -760,7 +760,7 @@ with st.sidebar:
             st.rerun()
 
     # 3. EXPANDER: RECETAS FAVORITAS (Con opción de eliminar)
-    with st.expander("⭐ " + t["favs"], expanded=False):
+    with st.expander(t["favs"], expanded=False):
         favs = user_profile.get("favorites",[])
         if favs:
             for idx, f in enumerate(favs):
