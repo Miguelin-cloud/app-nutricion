@@ -102,8 +102,7 @@ st.markdown("""
         border: 1px solid #E2E8F0 !important;
         border-radius: 12px !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.02) !important;
-    }
-    [data-testid="stExpander"] summary {
+    }[data-testid="stExpander"] summary {
         background-color: #F8F9FA !important;
         border-radius: 12px !important;
         color: #1E293B !important;
@@ -260,6 +259,81 @@ def append_to_daily_log(username, entry_data):
     update_user_data(username, {"daily_logs": logs})
 
 # ==========================================
+# FUNCIONES IA (GROQ) Y EXTRACCIÓN
+# ==========================================
+def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", avoid_tdy="", num_recipes=3):
+    client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
+    system_prompt = f"""
+    You are a Michelin-star Executive Chef and Clinical Nutritionist.
+    Your client is {u_prof['name']}. Profile: {u_prof['age']} y/o, {u_prof['weight']} kg, {u_prof['height']} cm, Gender: {u_prof['gender']}.
+    Main goal: "{u_prof['goals']}". Restrictions: "{u_prof['restrictions']}".
+    [DYNAMIC GENERATION] Generate exactly {num_recipes} recipe options.
+    [CHEF'S RECOMMENDATION] Tag exactly ONE recipe with `"is_chefs_recommendation": true`.
+    [COHERENCE FILTER] Formulate ONLY realistic, delicious, and culturally sensible dishes. Do not invent bizarre combinations.
+    """
+    if avail_ing: system_prompt += f"\n[GOLDEN RULE] Recipes MUST be based EXCLUSIVELY on: {avail_ing}."
+    if avoid_tdy: system_prompt += f"\n[STRICT PROHIBITION] Under NO circumstances include: {avoid_tdy}."
+
+    # Directriz CRÍTICA Modificada: Llaves en Inglés siempre, Valores 100% Traducidos.
+    final_prompt = system_prompt + f"""
+    \nEXPECTED JSON FORMAT:
+    {expected_format_hint}
+    
+    🔴[CRITICAL LANGUAGE DIRECTIVE] 🔴
+    CRITICAL LANGUAGE RULE: The JSON KEYS MUST ALWAYS BE IN ENGLISH (e.g., 'recipe_name', 'nutritionist_note', 'region', 'instructions', 'name', 'description', 'time', 'difficulty'). 
+    However, the JSON VALUES MUST BE STRICTLY, COMPLETELY, AND NATURALLY TRANSLATED TO {lang_code.upper()}. 
+    Do NOT leave any value in English if the requested language is different. Pay special attention to translating the 'region' (e.g., 'Mediterranean' to 'Mediterránea'), the 'nutritionist_note', the 'ingredients', and every step in 'instructions'. NEVER MIX LANGUAGES IN VALUES.
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile", 
+            messages=[
+                {"role": "system", "content": final_prompt}, 
+                {"role": "user", "content": prompt}
+            ], 
+            response_format={"type": "json_object"}, 
+            temperature=0.4
+        )
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        st.error(f"AI Error: {e}")
+        return None
+
+def groq_generic_json(system_prompt, user_prompt):
+    client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile", 
+            messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], 
+            response_format={"type": "json_object"}, 
+            temperature=0.3
+        )
+        return json.loads(response.choices[0].message.content)
+    except: return None
+
+def extract_number(val_str):
+    match = re.search(r'\d+', str(val_str))
+    return int(match.group()) if match else 0
+
+def format_recipe_for_download(recipe, t_dict):
+    text = f"=== {recipe.get('recipe_name', recipe.get('name', '')).upper()} ===\n🌍 Origen/Estilo: {recipe.get('region', 'Global')}\n\n--- {t_dict['ingredients'].upper()} ---\n"
+    for ing in recipe.get("ingredients",[]): text += f"• {ing.get('qty', '')} de {ing.get('item', '')}\n"
+    text += f"\n--- {t_dict['instructions'].upper()} ---\n"
+    for i, step in enumerate(recipe.get("instructions",[])): text += f"{i+1}. {step}\n"
+    m = recipe.get('macros', {})
+    text += f"\n--- MACROS ---\nCalorías: {m.get('calories', '0')} | Proteína: {m.get('protein', '0g')} | Grasas: {m.get('total_fat', '0g')} | Carbohidratos: {m.get('total_carbs', '0g')}\n"
+    return text
+
+@st.cache_data(ttl=timedelta(days=3))
+def fetch_food_trends():
+    query = "famous recipes food trends popular dishes gastronomy news"
+    try:
+        results = list(DDGS().text(query, max_results=4))
+        return results
+    except Exception: return[]
+
+# ==========================================
 # SISTEMA MULTIDIOMA Y TEXTOS
 # ==========================================
 TRANSLATIONS = {
@@ -284,7 +358,7 @@ TRANSLATIONS = {
         "account_created": "¡Cuenta creada!", "fill_required": "Rellena los campos.", "forgot_pin_text": "¿Olvidaste tu PIN?", "search_user_label": "Introduce tu Usuario",
         "search_user_btn": "Buscar", "user_found": "Usuario encontrado.", "user_not_found": "Usuario no encontrado.", "recover_question_prefix": "Pregunta:", "your_answer_label": "Respuesta", "new_pin_label": "Nuevo PIN",
         "change_pin_btn": "Cambiar PIN", "pin_changed_success": "¡PIN cambiado!", "wrong_answer": "Incorrecta.", "current_weight_label": "Peso Actual (kg)",
-        "profile_goals_label": "Objetivos", "profile_restrictions_label": "Restricciones", "macro_protein": "Proteínas", "macro_fat": "Grasas", "macro_carbs": "Carbohidratos",
+        "profile_goals_label": "Objetivos", "profile_restrictions_label": "Restricciones", 
         "back_home": "🏠 Volver al Menú", "add_to_log": "📝 Añadir al registro de hoy", "log_success": "¡Añadido al registro de hoy!",
         "shop_title": "Lista de la Compra Dinámica", "search_web_label": "¿Qué te gustaría preparar?", "search_web_btn": "🔍 Buscar y Extraer Ingredientes",
         "shop_list_title": "Tu Inventario de Compra", "add_item_btn": "Añadir Item", "clear_list": "🗑️ Vaciar Lista",
@@ -293,7 +367,10 @@ TRANSLATIONS = {
         "eval_btn": "🩺 Evaluar mi día", "total_today": "Total de hoy", "analyzing_nutri": "Evaluando datos médicos...",
         "cat_produce": "🥦 Frutas y Verduras", "cat_dairy": "🥛 Lácteos y Huevos", "cat_white_meat": "🍗 Carnes Blancas", 
         "cat_red_meat": "🥩 Carnes Rojas", "cat_seafood": "🐟 Pescados y Mariscos", "cat_pantry": "🥫 Despensa y Granos", "cat_other": "🛒 Otros",
-        "add_to_list": "Añadir a la lista", "delete_item": "Eliminar", "type_food": "Escribe un alimento suelto..."
+        "add_to_list": "Añadir a la lista", "delete_item": "Eliminar", "type_food": "Escribe un alimento suelto...",
+        "day_1": "Lunes", "day_2": "Martes", "day_3": "Miércoles", "day_4": "Jueves", "day_5": "Viernes", "day_6": "Sábado", "day_7": "Domingo",
+        "mac_cal": "Calorías", "mac_pro": "Proteínas", "mac_fat": "Grasas", "mac_car": "Carbohidratos",
+        "nut_facts": "Información Nutricional", "nut_cal": "Calorías", "nut_tfat": "Grasa Total", "nut_sfat": "Grasa Saturada", "nut_sod": "Sodio", "nut_tcarb": "Carbohidratos Totales", "nut_fib": "Fibra Dietética", "nut_sug": "Azúcares Totales", "nut_pro": "Proteína"
     },
     "🇬🇧 English": {
         "lang_code": "English", "title": "Hi {name}! What are we cooking today? 🍲", "subtitle": "Your smart nutrition ecosystem.",
@@ -314,7 +391,7 @@ TRANSLATIONS = {
         "username_taken": "Taken.", "account_created": "Created!", "fill_required": "Fill all.", "forgot_pin_text": "Forgot PIN?", "search_user_label": "Username",
         "search_user_btn": "Search", "user_found": "Found.", "user_not_found": "Not found.", "recover_question_prefix": "Q:", "your_answer_label": "Answer", 
         "new_pin_label": "New PIN", "change_pin_btn": "Change", "pin_changed_success": "Changed!", "wrong_answer": "Wrong.", "current_weight_label": "Weight",
-        "profile_goals_label": "Goals", "profile_restrictions_label": "Restrictions", "macro_protein": "Protein", "macro_fat": "Fat", "macro_carbs": "Carbs",
+        "profile_goals_label": "Goals", "profile_restrictions_label": "Restrictions",
         "back_home": "🏠 Back to Home", "add_to_log": "📝 Add to today's log", "log_success": "Added to log!",
         "shop_title": "Dynamic Shopping List", "search_web_label": "What do you want to cook?", "search_web_btn": "🔍 Search & Extract",
         "shop_list_title": "Your Groceries", "add_item_btn": "Add Item", "clear_list": "🗑️ Clear List",
@@ -323,7 +400,10 @@ TRANSLATIONS = {
         "eval_btn": "🩺 Evaluate my day", "total_today": "Total today", "analyzing_nutri": "Evaluating medical data...",
         "cat_produce": "🥦 Fruits & Vegetables", "cat_dairy": "🥛 Dairy & Eggs", "cat_white_meat": "🍗 White Meat", 
         "cat_red_meat": "🥩 Red Meat", "cat_seafood": "🐟 Seafood", "cat_pantry": "🥫 Pantry & Grains", "cat_other": "🛒 Other",
-        "add_to_list": "Add to list", "delete_item": "Delete", "type_food": "Type a food item..."
+        "add_to_list": "Add to list", "delete_item": "Delete", "type_food": "Type a food item...",
+        "day_1": "Monday", "day_2": "Tuesday", "day_3": "Wednesday", "day_4": "Thursday", "day_5": "Friday", "day_6": "Saturday", "day_7": "Sunday",
+        "mac_cal": "Calories", "mac_pro": "Protein", "mac_fat": "Fats", "mac_car": "Carbs",
+        "nut_facts": "Nutrition Facts", "nut_cal": "Calories", "nut_tfat": "Total Fat", "nut_sfat": "Saturated Fat", "nut_sod": "Sodium", "nut_tcarb": "Total Carbohydrate", "nut_fib": "Dietary Fiber", "nut_sug": "Total Sugars", "nut_pro": "Protein"
     },
     "🇫🇷 Français": {
         "lang_code": "French", "title": "Bonjour {name} !", "subtitle": "Votre écosystème nutritionnel.",
@@ -344,13 +424,16 @@ TRANSLATIONS = {
         "username_taken": "Pris.", "account_created": "Créé !", "fill_required": "Remplir.", "forgot_pin_text": "PIN oublié ?", "search_user_label": "Utilisateur",
         "search_user_btn": "Chercher", "user_found": "Trouvé.", "user_not_found": "Non trouvé.", "recover_question_prefix": "Q :", "your_answer_label": "Réponse",
         "new_pin_label": "Nouveau PIN", "change_pin_btn": "Changer", "pin_changed_success": "Changé !", "wrong_answer": "Faux.", "current_weight_label": "Poids",
-        "profile_goals_label": "Objectifs", "profile_restrictions_label": "Restrictions", "macro_protein": "Protéines", "macro_fat": "Graisses", "macro_carbs": "Glucides",
+        "profile_goals_label": "Objectifs", "profile_restrictions_label": "Restrictions", 
         "back_home": "🏠 Retour", "add_to_log": "📝 Ajouter au journal", "log_success": "Ajouté !", "shop_title": "Liste de Courses", "search_web_label": "Que voulez-vous cuisiner ?", "search_web_btn": "🔍 Extraire",
         "shop_list_title": "Inventaire", "add_item_btn": "Ajouter", "clear_list": "🗑️ Vider", "plan_title": "Planificateur", "save_plan": "💾 Sauvegarder", "plan_saved": "Sauvegardé !",
         "nutri_title": "Résumé Nutritionnel", "manual_log_label": "Mangé dehors ?", "manual_log_btn": "➕ Ajouter", "eval_btn": "🩺 Évaluer", "total_today": "Total", "analyzing_nutri": "Évaluation...",
         "cat_produce": "🥦 Fruits et Légumes", "cat_dairy": "🥛 Produits Laitiers", "cat_white_meat": "🍗 Viande Blanche", 
         "cat_red_meat": "🥩 Viande Rouge", "cat_seafood": "🐟 Poissons et Fruits de Mer", "cat_pantry": "🥫 Garde-manger", "cat_other": "🛒 Autre",
-        "add_to_list": "Ajouter", "delete_item": "Supprimer", "type_food": "Écrivez un aliment..."
+        "add_to_list": "Ajouter", "delete_item": "Supprimer", "type_food": "Écrivez un aliment...",
+        "day_1": "Lundi", "day_2": "Mardi", "day_3": "Mercredi", "day_4": "Jeudi", "day_5": "Vendredi", "day_6": "Samedi", "day_7": "Dimanche",
+        "mac_cal": "Calories", "mac_pro": "Protéines", "mac_fat": "Graisses", "mac_car": "Glucides",
+        "nut_facts": "Valeurs Nutritionnelles", "nut_cal": "Calories", "nut_tfat": "Graisses Totales", "nut_sfat": "Graisses Saturées", "nut_sod": "Sodium", "nut_tcarb": "Glucides Totaux", "nut_fib": "Fibres Alimentaires", "nut_sug": "Sucres Totaux", "nut_pro": "Protéines"
     },
     "🇮🇹 Italiano": {
         "lang_code": "Italian", "title": "Ciao {name}!", "subtitle": "Il tuo ecosistema nutrizionale.",
@@ -371,19 +454,47 @@ TRANSLATIONS = {
         "username_taken": "In uso.", "account_created": "Creato!", "fill_required": "Compila tutto.", "forgot_pin_text": "Dimenticato PIN?", "search_user_label": "Utente",
         "search_user_btn": "Cerca", "user_found": "Trovato.", "user_not_found": "Non trovato.", "recover_question_prefix": "D:", "your_answer_label": "Risposta",
         "new_pin_label": "Nuovo PIN", "change_pin_btn": "Cambia", "pin_changed_success": "Cambiato!", "wrong_answer": "Errato.", "current_weight_label": "Peso",
-        "profile_goals_label": "Obiettivi", "profile_restrictions_label": "Restrizioni", "macro_protein": "Proteine", "macro_fat": "Grassi", "macro_carbs": "Carboidrati",
+        "profile_goals_label": "Obiettivi", "profile_restrictions_label": "Restrizioni", 
         "back_home": "🏠 Torna alla Home", "add_to_log": "📝 Aggiungi al diario", "log_success": "Aggiunto!", "shop_title": "Lista della Spesa", "search_web_label": "Cosa vuoi cucinare?", "search_web_btn": "🔍 Estrai",
         "shop_list_title": "La tua spesa", "add_item_btn": "Aggiungi", "clear_list": "🗑️ Svuota lista", "plan_title": "Pianificatore", "save_plan": "💾 Salva", "plan_saved": "Salvato!",
         "nutri_title": "Riassunto Nutrizionale", "manual_log_label": "Mangiato fuori?", "manual_log_btn": "➕ Aggiungi", "eval_btn": "🩺 Valuta la mia giornata", "total_today": "Totale di oggi", "analyzing_nutri": "Valutazione...",
         "cat_produce": "🥦 Frutta e Verdura", "cat_dairy": "🥛 Latticini e Uova", "cat_white_meat": "🍗 Carne Bianca", 
         "cat_red_meat": "🥩 Carne Rossa", "cat_seafood": "🐟 Pesce e Frutti di Mare", "cat_pantry": "🥫 Dispensa e Cereali", "cat_other": "🛒 Altro",
-        "add_to_list": "Aggiungi alla lista", "delete_item": "Elimina", "type_food": "Scrivi un alimento..."
+        "add_to_list": "Aggiungi alla lista", "delete_item": "Elimina", "type_food": "Scrivi un alimento...",
+        "day_1": "Lunedì", "day_2": "Martedì", "day_3": "Mercoledì", "day_4": "Giovedì", "day_5": "Venerdì", "day_6": "Sabato", "day_7": "Domenica",
+        "mac_cal": "Calorie", "mac_pro": "Proteine", "mac_fat": "Grassi", "mac_car": "Carboidrati",
+        "nut_facts": "Valori Nutrizionali", "nut_cal": "Calorie", "nut_tfat": "Grassi Totali", "nut_sfat": "Grassi Saturi", "nut_sod": "Sodio", "nut_tcarb": "Carboidrati Totali", "nut_fib": "Fibra Alimentare", "nut_sug": "Zuccheri Totali", "nut_pro": "Proteine"
     }
 }
 
 if "selected_lang" not in st.session_state: st.session_state.selected_lang = "🇪🇸 Español"
+
+# CALLBACK DE AUTO-TRADUCCIÓN (State Translation)
+def handle_language_change():
+    new_lang = st.session_state.selected_lang
+    new_lang_code = TRANSLATIONS[new_lang]["lang_code"]
+    
+    with st.spinner(f"Traduciendo al {new_lang_code}... / Translating..."):
+        # Traducir opciones listadas si existen
+        if st.session_state.get("options"):
+            sys_p = f"Translate all the VALUES of this JSON array into {new_lang_code.upper()}, keeping the exact same English KEYS. Return ONLY the JSON object with an 'options' key containing the translated array."
+            user_p = json.dumps({"options": st.session_state.options})
+            res = groq_generic_json(sys_p, user_p)
+            if res and "options" in res:
+                st.session_state.options = res["options"]
+                
+        # Traducir receta detallada si existe
+        if st.session_state.get("full_recipe"):
+            sys_p = f"Translate all the VALUES of this JSON object into {new_lang_code.upper()}, keeping the exact same English KEYS. Return ONLY the translated JSON object."
+            user_p = json.dumps(st.session_state.full_recipe)
+            res = groq_generic_json(sys_p, user_p)
+            if res:
+                st.session_state.full_recipe = res
+
 cols_top = st.columns([1, 6, 1])
-with cols_top[2]: st.selectbox("", options=list(TRANSLATIONS.keys()), key="selected_lang", label_visibility="collapsed")
+with cols_top[2]: 
+    st.selectbox("", options=list(TRANSLATIONS.keys()), key="selected_lang", label_visibility="collapsed", on_change=handle_language_change)
+    
 t = TRANSLATIONS[st.session_state.selected_lang]
 lang_code = t["lang_code"]
 
@@ -479,74 +590,6 @@ for key in["step", "options", "selected_option", "full_recipe", "avail_ing", "av
     if key not in st.session_state: st.session_state[key] = None if key in["options", "selected_option", "full_recipe"] else ("input" if key == "step" else "")
 
 # ==========================================
-# FUNCIONES IA (GROQ) Y EXTRACCIÓN
-# ==========================================
-def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", avoid_tdy="", num_recipes=3):
-    client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
-    system_prompt = f"""
-    You are a Michelin-star Executive Chef and Clinical Nutritionist.
-    Your client is {u_prof['name']}. Profile: {u_prof['age']} y/o, {u_prof['weight']} kg, {u_prof['height']} cm, Gender: {u_prof['gender']}.
-    Main goal: "{u_prof['goals']}". Restrictions: "{u_prof['restrictions']}".
-    [DYNAMIC GENERATION] Generate exactly {num_recipes} recipe options.
-    [CHEF'S RECOMMENDATION] Tag exactly ONE recipe with `"is_chefs_recommendation": true`.
-    [COHERENCE FILTER] Formulate ONLY realistic, delicious, and culturally sensible dishes. Do not invent bizarre combinations.
-    """
-    if avail_ing: system_prompt += f"\n[GOLDEN RULE] Recipes MUST be based EXCLUSIVELY on: {avail_ing}."
-    if avoid_tdy: system_prompt += f"\n[STRICT PROHIBITION] Under NO circumstances include: {avoid_tdy}."
-
-    # Inyección final CRÍTICA para el multidioma
-    final_prompt = system_prompt + f"""
-    \nEXPECTED JSON FORMAT:
-    {expected_format_hint}
-    
-    🔴 [CRITICAL LANGUAGE DIRECTIVE] 🔴
-    THE ENTIRE OUTPUT (titles, descriptions, difficulty, time, ingredients, instructions, notes, badges) MUST BE WRITTEN EXCLUSIVELY IN {lang_code.upper()}. 
-    IF THE USER SELECTED FRENCH, WRITE FRENCH. IF SPANISH, WRITE SPANISH. NEVER MIX LANGUAGES.
-    """
-
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile", 
-            messages=[
-                {"role": "system", "content": final_prompt}, 
-                {"role": "user", "content": prompt}
-            ], 
-            response_format={"type": "json_object"}, 
-            temperature=0.4  # Bajamos a 0.4 para hacerla más obediente y menos errática
-        )
-        return json.loads(response.choices[0].message.content)
-    except Exception as e:
-        st.error(f"AI Error: {e}")
-        return None
-def groq_generic_json(system_prompt, user_prompt):
-    client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
-    try:
-        response = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], response_format={"type": "json_object"}, temperature=0.3)
-        return json.loads(response.choices[0].message.content)
-    except: return None
-
-def extract_number(val_str):
-    match = re.search(r'\d+', str(val_str))
-    return int(match.group()) if match else 0
-
-def format_recipe_for_download(recipe, t_dict):
-    text = f"=== {recipe['recipe_name'].upper()} ===\n🌍 Origen/Estilo: {recipe.get('region', 'Global')}\n\n--- {t_dict['ingredients'].upper()} ---\n"
-    for ing in recipe["ingredients"]: text += f"• {ing['qty']} de {ing['item']}\n"
-    text += f"\n--- {t_dict['instructions'].upper()} ---\n"
-    for i, step in enumerate(recipe["instructions"]): text += f"{i+1}. {step}\n"
-    m = recipe['macros']
-    text += f"\n--- MACROS ---\nCalorías: {m.get('calories', '0')} | Proteína: {m.get('protein', '0g')} | Grasas: {m.get('total_fat', '0g')} | Carbohidratos: {m.get('total_carbs', '0g')}\n"
-    return text
-
-@st.cache_data(ttl=timedelta(days=3))
-def fetch_food_trends():
-    query = "famous recipes food trends popular dishes gastronomy news"
-    try:
-        results = list(DDGS().text(query, max_results=4))
-        return results
-    except Exception: return[]
-
-# ==========================================
 # SIDEBAR REDISEÑADA
 # ==========================================
 with st.sidebar:
@@ -566,7 +609,8 @@ with st.sidebar:
     favs = user_profile.get("favorites",[])
     if favs:
         for f in favs:
-            with st.expander(f["name"]): st.write(f"🔥 {f['calories']} | 💪 {f['protein']}")
+            with st.expander(f.get("name", "Favorito")): 
+                st.write(f"🔥 {f.get('calories', 0)} | 💪 {f.get('protein', '0g')}")
     else: st.info(t["no_favs"])
 
     st.divider()
@@ -595,7 +639,6 @@ st.markdown(f"<h1 class='brand-logo'>NutriAI</h1>", unsafe_allow_html=True)
 # RUTEO DE PÁGINAS (DASHBOARD REDISEÑADO)
 # ==========================================
 if st.session_state.current_page == "home":
-    # CSS Específico Inyectado para los Botones Masivos con SVGs (Layout Dinámico y Accesible)
     st.markdown("""
     <style>
     /* Diseño Masivo y SVGs para los 4 Módulos */
@@ -606,7 +649,7 @@ if st.session_state.current_page == "home":
         font-weight: 800 !important;
         color: #1E293B !important;
         background-color: #FFFFFF !important;
-        background-image: none !important; /* Reseteamos el gradiente base */
+        background-image: none !important; 
         box-shadow: 0 10px 40px rgba(0,0,0,0.06) !important;
         border: 2px solid #E2E8F0 !important;
         transition: all 0.3s ease !important;
@@ -650,7 +693,6 @@ if st.session_state.current_page == "home":
     st.markdown(f"<h2 style='text-align:center;'>{t['title'].format(name=user_profile['name'])}</h2>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align:center; font-size:1.2rem; color:#64748B;'>{t['subtitle']}</p><br>", unsafe_allow_html=True)
     
-    # 2x2 en Escritorio / 1x4 en Móvil Automático vía st.columns
     c1, c2 = st.columns(2)
     with c1:
         if st.button(t["dash_mod1"], use_container_width=True):
@@ -685,7 +727,6 @@ elif st.session_state.current_page == "mod1":
                 st.session_state.avail_ing = available_ingredients
                 st.session_state.avoid_tdy = avoid_today
                 
-                # Lógica dinámica estricta de cantidad
                 ing_count = len([x for x in re.split(r',|\sy\s|\sand\s|\set\s|\n', available_ingredients) if x.strip()])
                 if ing_count <= 4: n_recipes = 2
                 elif ing_count <= 8: n_recipes = 3
@@ -697,7 +738,7 @@ elif st.session_state.current_page == "mod1":
                     if lottie_cooking: st_lottie(lottie_cooking, height=200, key="loading_anim_1")
                     st.markdown(f"<h3 style='text-align:center;'>{t['analyzing']}</h3>", unsafe_allow_html=True)
                 
-                prompt = f"Generate {n_recipes} recipe options strictly using the available ingredients provided. ALL TEXT MUST BE IN {lang_code.upper()}."
+                prompt = f"Generate {n_recipes} recipe options strictly using the available ingredients provided."
                 format_hint = """{ "options":[ { "name": "Nombre de receta", "hero_emoji": "🥘", "difficulty": "Media/Fácil", "time": "20 min", "health_score": 9, "description": "Breve descripción", "is_chefs_recommendation": true } ] }"""
                 res = call_ai_json(prompt, format_hint, lang_code, user_profile, available_ingredients, avoid_today, num_recipes=n_recipes)
                 lottie_placeholder.empty()
@@ -714,7 +755,6 @@ elif st.session_state.current_page == "mod1":
         st.subheader(t["here_options"])
         
         for i, opt in enumerate(st.session_state.options):
-            # EXTRAER VARIABLES DE FORMA SEGURA (Evita el KeyError)
             recipe_name = opt.get('name', opt.get('recipe_name', 'Receta Mágica'))
             difficulty = opt.get('difficulty', 'Media')
             time_prep = opt.get('time', '20 mins')
@@ -752,13 +792,9 @@ elif st.session_state.current_page == "mod1":
             if lottie_cooking: st_lottie(lottie_cooking, height=200, key="loading_anim_2")
             st.markdown(f"<h3 style='text-align:center;'>{t['loading_recipe']}</h3>", unsafe_allow_html=True)
         
-        # También usamos la extracción segura aquí
         safe_name = st.session_state.selected_option.get('name', st.session_state.selected_option.get('recipe_name', 'la receta seleccionada'))
+        prompt = f"Write the complete and detailed recipe for '{safe_name}'. Explain each step carefully."
         
-        # PROMPT BLINDADO CON EL IDIOMA
-        prompt = f"Write the complete and detailed recipe for '{safe_name}'. Explain each step carefully. IT IS MANDATORY THAT ALL YOUR RESPONSE IS IN {lang_code.upper()}."
-        
-        # Incorporación de Health Badges en el prompt
         format_hint = """{ 
             "recipe_name": "Nombre de la receta", 
             "region": "Estilo", 
@@ -792,7 +828,6 @@ elif st.session_state.current_page == "mod1":
 
     if st.session_state.step == "recipe_view" and st.session_state.full_recipe:
         recipe = st.session_state.full_recipe
-        # Blindamos también el nombre final por si la IA se despista
         recipe['recipe_name'] = recipe.get('recipe_name', recipe.get('name', 'Receta Mágica'))
         
         col_btn1, col_btn2 = st.columns(2)
@@ -802,13 +837,12 @@ elif st.session_state.current_page == "mod1":
                 st.rerun()
         with col_btn2:
             txt_data = format_recipe_for_download(recipe, t)
-            st.download_button(label=t["download_btn"], data=txt_data, file_name=f"{recipe['recipe_name'].replace(' ', '_')}.txt", mime="text/plain", use_container_width=True)
+            st.download_button(label=t["download_btn"], data=txt_data, file_name=f"{recipe.get('recipe_name', 'receta').replace(' ', '_')}.txt", mime="text/plain", use_container_width=True)
 
-        st.markdown(f"<p class='hero-emoji'>{recipe.get('hero_emoji', '🍽️')}</p><h2 style='text-align:center;'>{recipe['recipe_name']}</h2><h4 style='text-align:center; color:#64748B;'>🌍 {recipe.get('region', 'Global')}</h4><h3 style='text-align:center; letter-spacing: 5px;'>{recipe.get('ingredients_emojis', '')}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<p class='hero-emoji'>{recipe.get('hero_emoji', '🍽️')}</p><h2 style='text-align:center;'>{recipe.get('recipe_name', '')}</h2><h4 style='text-align:center; color:#64748B;'>🌍 {recipe.get('region', 'Global')}</h4><h3 style='text-align:center; letter-spacing: 5px;'>{recipe.get('ingredients_emojis', '')}</h3>", unsafe_allow_html=True)
         st.info(f"**{t['note']}** {recipe.get('nutritionist_note', '')}")
         st.divider()
         
-        # Renderización de SEMÁFOROS (Health Badges)
         badges = recipe.get('health_badges',[])
         if badges:
             html_b = "<div style='display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:20px;'>"
@@ -819,27 +853,26 @@ elif st.session_state.current_page == "mod1":
             st.markdown(html_b, unsafe_allow_html=True)
         
         col_label, col_chart = st.columns(2)
-        m = recipe['macros']
+        m = recipe.get('macros', {})
         
         with col_label:
             st.markdown(f"""
             <div class="nutrition-label">
-                <h2>Nutrition Facts</h2>
-                <div class="nut-row thick"><span class="nut-bold">Calories</span> <span class="nut-bold">{m.get('calories', '0')}</span></div>
-                <div class="nut-row"><span class="nut-bold">Total Fat</span> {m.get('total_fat', '0g')}</div>
-                <div class="nut-row" style="padding-left: 1.5rem;">Saturated Fat {m.get('saturated_fat', '0g')}</div>
-                <div class="nut-row"><span class="nut-bold">Sodium</span> {m.get('sodium', '0mg')}</div>
-                <div class="nut-row"><span class="nut-bold">Total Carbohydrate</span> {m.get('total_carbs', '0g')}</div>
-                <div class="nut-row" style="padding-left: 1.5rem;">Dietary Fiber {m.get('fiber', '0g')}</div>
-                <div class="nut-row" style="padding-left: 1.5rem;">Total Sugars {m.get('sugars', '0g')}</div>
-                <div class="nut-row thick"><span class="nut-bold">Protein</span> <span class="nut-bold">{m.get('protein', '0g')}</span></div>
+                <h2>{t.get('nut_facts', 'Nutrition Facts')}</h2>
+                <div class="nut-row thick"><span class="nut-bold">{t.get('nut_cal', 'Calories')}</span> <span class="nut-bold">{m.get('calories', '0')}</span></div>
+                <div class="nut-row"><span class="nut-bold">{t.get('nut_tfat', 'Total Fat')}</span> {m.get('total_fat', '0g')}</div>
+                <div class="nut-row" style="padding-left: 1.5rem;">{t.get('nut_sfat', 'Saturated Fat')} {m.get('saturated_fat', '0g')}</div>
+                <div class="nut-row"><span class="nut-bold">{t.get('nut_sod', 'Sodium')}</span> {m.get('sodium', '0mg')}</div>
+                <div class="nut-row"><span class="nut-bold">{t.get('nut_tcarb', 'Total Carbohydrate')}</span> {m.get('total_carbs', '0g')}</div>
+                <div class="nut-row" style="padding-left: 1.5rem;">{t.get('nut_fib', 'Dietary Fiber')} {m.get('fiber', '0g')}</div>
+                <div class="nut-row" style="padding-left: 1.5rem;">{t.get('nut_sug', 'Total Sugars')} {m.get('sugars', '0g')}</div>
+                <div class="nut-row thick"><span class="nut-bold">{t.get('nut_pro', 'Protein')}</span> <span class="nut-bold">{m.get('protein', '0g')}</span></div>
             </div>
             """, unsafe_allow_html=True)
             
         with col_chart:
-            # Gráfico de Plotly optimizado para Light Theme
             macro_df = pd.DataFrame({
-                "Macro":[t.get("macro_protein", "Protein"), t.get("macro_fat", "Fat"), t.get("macro_carbs", "Carbs")], 
+                "Macro":[t.get("mac_pro", "Proteínas"), t.get("mac_fat", "Grasas"), t.get("mac_car", "Carbohidratos")], 
                 "Gramos":[extract_number(m.get('protein', '0g')), extract_number(m.get('total_fat', '0g')), extract_number(m.get('total_carbs', '0g'))]
             })
             if macro_df['Gramos'].sum() > 0:
@@ -856,20 +889,20 @@ elif st.session_state.current_page == "mod1":
         with c_act1:
             if st.button(t["save_fav"], use_container_width=True):
                 favs = user_profile.get("favorites",[])
-                favs.append({"name": recipe["recipe_name"], "calories": m.get('calories', '0'), "protein": m.get('protein', '0g')})
+                favs.append({"name": recipe.get("recipe_name", ""), "calories": m.get('calories', '0'), "protein": m.get('protein', '0g')})
                 update_user_data(user_profile["username"], {"favorites": favs})
                 st.toast(t["saved"])
         with c_act2:
             if st.button(t["add_to_log"], type="primary", use_container_width=True):
-                entry = {"name": recipe["recipe_name"], "calories": extract_number(m.get('calories', '0')), "protein": extract_number(m.get('protein', '0')), "fat": extract_number(m.get('total_fat', '0')), "carbs": extract_number(m.get('total_carbs', '0'))}
+                entry = {"name": recipe.get("recipe_name", ""), "calories": extract_number(m.get('calories', '0')), "protein": extract_number(m.get('protein', '0')), "fat": extract_number(m.get('total_fat', '0')), "carbs": extract_number(m.get('total_carbs', '0'))}
                 append_to_daily_log(user_profile["username"], entry)
                 st.toast(t["log_success"], icon="✅")
                 
         with st.expander("🛒 " + t["ingredients"], expanded=True):
-            for ing in recipe["ingredients"]: st.markdown(f"- **{ing['qty']}** {ing['item']}")
+            for ing in recipe.get("ingredients",[]): st.markdown(f"- **{ing.get('qty', '')}** {ing.get('item', '')}")
                 
         with st.expander("👨‍🍳 " + t["instructions"], expanded=True):
-            for i, step in enumerate(recipe["instructions"]): st.write(f"{step}")
+            for step in recipe.get("instructions",[]): st.write(f"{step}")
 
         st.divider()
         st.subheader(t["adjust_title"])
@@ -902,7 +935,6 @@ elif st.session_state.current_page == "mod2":
 
     if add_pressed and new_item:
         with st.spinner("Organizando alimento..."):
-            # Ahora la IA traduce automáticamente el alimento al idioma del usuario
             sys_prompt = f"""
             Clasifica el alimento del usuario en UNA sola categoría y TRADÚCELO al {lang_code}.
             Categorías válidas: cat_produce, cat_dairy, cat_white_meat, cat_red_meat, cat_seafood, cat_pantry, cat_other.
@@ -967,11 +999,15 @@ elif st.session_state.current_page == "mod3":
     st.markdown(f"<h2>{t['plan_title']}</h2>", unsafe_allow_html=True)
     
     planner = user_profile.get("weekly_planner") or {}
-    days =["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+    db_days =["day_1", "day_2", "day_3", "day_4", "day_5", "day_6", "day_7"]
+    ui_days = [t["day_1"], t["day_2"], t["day_3"], t["day_4"], t["day_5"], t["day_6"], t["day_7"]]
     
     new_plan = {}
-    for day in days:
-        new_plan[day] = st.text_input(f"📅 {day}", value=planner.get(day, ""), placeholder="Ej: Pollo a la plancha / Descanso")
+    for db_d, ui_d in zip(db_days, ui_days):
+        # Permite retrocompatibilidad con bases de datos que guardaron 'Lunes' textualmente
+        old_val = planner.get(ui_d, "")
+        current_val = planner.get(db_d, old_val)
+        new_plan[db_d] = st.text_input(f"📅 {ui_d}", value=current_val, placeholder="Ej: Pollo a la plancha / Descanso")
         
     if st.button(t["save_plan"], type="primary", use_container_width=True):
         update_user_data(user_profile["username"], {"weekly_planner": new_plan})
@@ -995,31 +1031,4 @@ elif st.session_state.current_page == "mod4":
     t_car = sum(item.get("carbs", 0) for item in today_data)
     
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("🔥 Calorías", f"{t_cal} kcal")
-    c2.metric("🍗 Proteínas", f"{t_pro} g")
-    c3.metric("🥑 Grasas", f"{t_fat} g")
-    c4.metric("🍞 Carbos", f"{t_car} g")
-    
-    with st.expander("Ver detalle de hoy", expanded=True):
-        if not today_data: st.write("No has registrado nada hoy.")
-        for d in today_data: st.write(f"- **{d['name']}**: {d['calories']} kcal (P:{d['protein']}g | G:{d['fat']}g | C:{d['carbs']}g)")
-
-    st.divider()
-    manual_input = st.text_input(t["manual_log_label"])
-    if st.button(t["manual_log_btn"]):
-        if manual_input:
-            with st.spinner("Calculando macros..."):
-                sys = "Estima los macros de este alimento. Devuelve un JSON: {'calories': 100, 'protein': 2, 'fat': 0, 'carbs': 20}"
-                parsed = groq_generic_json(sys, f"Alimento: {manual_input}")
-                if parsed:
-                    entry = {"name": manual_input.title(), "calories": parsed.get('calories',0), "protein": parsed.get('protein',0), "fat": parsed.get('fat',0), "carbs": parsed.get('carbs',0)}
-                    append_to_daily_log(user_profile["username"], entry)
-                    st.rerun()
-    
-    st.divider()
-    if st.button(t["eval_btn"], type="primary", use_container_width=True):
-        with st.spinner(t["analyzing_nutri"]):
-            sys_eval = f"Eres un médico nutricionista evaluando a {user_profile['name']} ({user_profile['weight']}kg, Objetivo: {user_profile['goals']}). Hoy ha consumido {t_cal} kcal, {t_pro}g proteína, {t_fat}g grasa, {t_car}g carbos. Genera un breve feedback médico constructivo, realista, de 3 líneas. Devuelve JSON: {{'feedback': 'tu texto aquí'}} en {lang_code}."
-            eval_res = groq_generic_json(sys_eval, "Evalúa mi día.")
-            if eval_res and "feedback" in eval_res:
-                st.info(f"🩺 **Evaluación Médica:**\n\n{eval_res['feedback']}")
+    c1.metric(f"🔥 {t.get('mac_cal', 'Calorías
