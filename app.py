@@ -695,142 +695,68 @@ if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 # SIDEBAR REDISEÑADA & PUNTERO MÁGICO
 # ==========================================
 with st.sidebar:
-    # ESCUDO CSS: Evita que las tarjetas gigantes del Home afecten a la barra lateral
+    # ESCUDO CSS MEJORADO: Aísla la sidebar y estiliza el menú de Tendencias
     st.markdown("""
-    <style>[data-testid="stSidebar"] button {
+    <style>
+    /* 1. ESCUDO GLOBAL PARA LA SIDEBAR (Bloquea herencia del Home) */
+    [data-testid="stSidebar"] button {
         min-height: 0px !important;
-        padding-top: 5px !important;
-        padding-bottom: 5px !important;
         background-image: none !important;
         box-shadow: none !important;
-    }[data-testid="stSidebar"] button::after { display: none !important; content: none !important; }[data-testid="stSidebar"] button p { transform: none !important; color: inherit !important; margin: 0 !important; font-weight: normal !important; }
-    [data-testid="stSidebar"] button:hover { transform: translateY(-2px) scale(1.05) !important; }
+    }
+    [data-testid="stSidebar"] button::after { display: none !important; content: none !important; }
+    
+    /* 2. ESTILO TARJETAS MODERNAS PARA EL CARRUSEL (Apunta al 4º Expander) */
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"] button {
+        height: 48px !important;
+        padding: 0 !important;
+        border-radius: 12px !important; /* Tarjetas modernas con bordes redondeados */
+        border: 2px solid transparent !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        font-size: 24px !important;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    }
+
+    /* 🍰 Dulces (Columna 1) - Rosa */
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(1) button { background-color: #FDF2F8 !important; border-color: #FCE7F3 !important; }
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(1) button:hover,
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(1) button[kind="primary"] {
+        border-color: #F472B6 !important; box-shadow: 0 0 12px rgba(244,114,182,0.6) !important; background-color: #FBCFE8 !important; transform: translateY(-3px) scale(1.05) !important;
+    }
+
+    /* 🥨 Salados (Columna 2) - Naranja */
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(2) button { background-color: #FFF7ED !important; border-color: #FFEDD5 !important; }
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(2) button:hover,
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(2) button[kind="primary"] {
+        border-color: #FB923C !important; box-shadow: 0 0 12px rgba(251,146,60,0.6) !important; background-color: #FED7AA !important; transform: translateY(-3px) scale(1.05) !important;
+    }
+
+    /* 🥪 Snacks (Columna 3) - Verde Limón */
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(3) button { background-color: #ECFCCB !important; border-color: #D9F99D !important; }
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(3) button:hover,
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(3) button[kind="primary"] {
+        border-color: #A3E635 !important; box-shadow: 0 0 12px rgba(163,230,53,0.6) !important; background-color: #BEF264 !important; transform: translateY(-3px) scale(1.05) !important;
+    }
+
+    /* 🥣 Desayunos (Columna 4) - Azul */
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(4) button { background-color: #EFF6FF !important; border-color: #DBEAFE !important; }
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(4) button:hover,
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(4) button[kind="primary"] {
+        border-color: #3B82F6 !important; box-shadow: 0 0 12px rgba(59,130,246,0.6) !important; background-color: #BFDBFE !important; transform: translateY(-3px) scale(1.05) !important;
+    }
+
+    /* 🥤 Bebidas (Columna 5) - Morado */
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(5) button { background-color: #F5F3FF !important; border-color: #EDE9FE !important; }
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(5) button:hover,
+    [data-testid="stSidebar"] div[data-testid="stExpander"]:nth-of-type(4) div[data-testid="column"]:nth-child(5) button[kind="primary"] {
+        border-color: #A78BFA !important; box-shadow: 0 0 12px rgba(167,139,250,0.6) !important; background-color: #DDD6FE !important; transform: translateY(-3px) scale(1.05) !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
-
-    # 1. EXPANDER: PUNTERO MÁGICO (Multilingüe y Sin Lag)
-    with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
-        cursor_mapping = {
-            "default": t["ptr_default"], "🍗": t["ptr_drumstick"], "🥑": t["ptr_avocado"],
-            "🥘": t["ptr_pan"], "🍕": t["ptr_pizza"], "🪄": t["ptr_wand"], "🍎": t["ptr_apple"]
-        }
-        inv_cursor = {v: k for k, v in cursor_mapping.items()}
-        
-        if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
-        
-        options_list = list(cursor_mapping.values())
-        try: current_idx = list(cursor_mapping.keys()).index(st.session_state.cursor_val)
-        except ValueError: current_idx = 0
-            
-        selected_label = st.selectbox(t.get("choose_pointer", "Elige:"), options_list, index=current_idx)
-        st.session_state.cursor_val = inv_cursor[selected_label]
-        
-        if st.session_state.cursor_val != "default":
-            st.markdown(f"""
-            <style>
-            * {{ cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{st.session_state.cursor_val}</text></svg>"), auto !important; }}
-            </style>
-            """, unsafe_allow_html=True)
-
-    # 2. EXPANDER: PERFIL
-    with st.expander("👤 " + t["profile"], expanded=False):
-        upd_weight = st.number_input(t["current_weight_label"], value=float(user_profile.get("weight",70)))
-        upd_goals = st.text_area(t["profile_goals_label"], value=user_profile.get("goals",""))
-        upd_rest = st.text_input(t["profile_restrictions_label"], value=user_profile.get("restrictions",""))
-        if st.button(t["update_prof"], use_container_width=True):
-            update_user_data(user_profile["username"], {"weight":upd_weight,"goals":upd_goals,"restrictions":upd_rest})
-            st.success(t["prof_updated"])
-            st.rerun()
-
-    # 3. EXPANDER: RECETAS FAVORITAS
-    with st.expander(t["favs"], expanded=False):
-        favs = user_profile.get("favorites",[])
-        if favs:
-            for idx, f in enumerate(favs):
-                r_name = f.get('recipe_name', f.get('name', 'Receta'))
-                st.markdown(f"<p style='font-size:14px; font-weight:bold; margin-bottom:5px;'>{r_name}</p>", unsafe_allow_html=True)
-                
-                col_c, col_d = st.columns([3, 1])
-                with col_c:
-                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar esta receta"):
-                        if "ingredients" in f:
-                            st.session_state.full_recipe = f
-                            st.session_state.current_page = "mod1"
-                            st.session_state.step = "recipe_view"
-                            st.rerun()
-                        else:
-                            st.warning("Receta antigua. Faltan pasos.")
-                with col_d:
-                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help=t["btn_delete"]):
-                        favs.pop(idx)
-                        update_user_data(user_profile["username"], {"favorites": favs})
-                        st.rerun()
-                st.divider()
-        else: 
-            st.info(t["no_favs"])
-
-    # 4. EXPANDER: TENDENCIAS NUTRICIONALES (CARRUSEL DE EMOJIS)
-    with st.expander(t.get("news_title", "Tendencias"), expanded=True):
-        trend_keys =["trend_sweets", "trend_salty", "trend_snacks", "trend_breakfast", "trend_drinks"]
-        trend_emojis =["🍰", "🥨", "🥪", "🥣", "🥤"]
-        if "trend_idx" not in st.session_state: st.session_state.trend_idx = 0
-        
-        # Generar el Carrusel de Emojis interactivo
-        cols = st.columns(5)
-        for i, (key, emoji) in enumerate(zip(trend_keys, trend_emojis)):
-            with cols[i]:
-                # Usamos el parámetro 'help' para que salga la cajetilla flotante al pasar el ratón
-                is_selected = (st.session_state.trend_idx == i)
-                btn_type = "primary" if is_selected else "secondary"
-                if st.button(emoji, key=f"trend_btn_{i}", help=t.get(key, key), use_container_width=True, type=btn_type):
-                    st.session_state.trend_idx = i
-                    st.rerun()
-                    
-        # Mostrar el título de la categoría seleccionada
-        current_key = trend_keys[st.session_state.trend_idx]
-        st.markdown(f"<div style='text-align:center; font-weight:800; color:#10B981; font-size:14px; margin:10px 0;'>{t.get(current_key, current_key)}</div>", unsafe_allow_html=True)
-                
-        # Cargar noticias
-        news_items = fetch_daily_healthy_recipes(lang_code, current_key)
-        if news_items:
-            for news in news_items:
-                r_title = news.get('title', 'Receta')
-                r_summary = news.get('summary', '')[:90] + "..."
-                r_url = news.get('url', '#')
-                st.markdown(f"""
-                <div style="background: #F8FAFC; padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid #E2E8F0;">
-                    <h4 style="margin:0;font-size:13px;font-weight:700;color:#1E293B;line-height:1.2;">{r_title}</h4>
-                    <p style="font-size:11px;margin-top:4px;margin-bottom:6px;line-height:1.3;color:#475569;">{r_summary}</p>
-                    <a href="{r_url}" target="_blank" style="font-size:11px;color:#10B981;font-weight:800;text-decoration:none;">Ver receta →</a>
-                </div>
-                """, unsafe_allow_html=True)
-        else: 
-            st.warning("No hay tendencias hoy.")
-            
-        if st.button("🔄 Actualizar Noticias", key="btn_refresh_news", use_container_width=True):
-            fetch_daily_healthy_recipes.clear()
-            st.rerun()
-
-    # 5. EXPANDER: ALERTAS Y NOTIFICACIONES (Sistema de Respaldo IA)
-    with st.expander("🔔 Alertas del Sistema", expanded=False):
-        if not st.session_state.app_alerts:
-            st.info("No hay alertas recientes. ¡Todos los sistemas funcionan perfectamente!")
-        else:
-            if st.button("🧹 Limpiar historial", use_container_width=True):
-                st.session_state.app_alerts =[]
-                st.rerun()
-            for alerta in st.session_state.app_alerts:
-                st.markdown(f"""
-                <div style="background: #FFFBEB; border-left: 4px solid #F59E0B; padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 12px; color: #475569;">
-                    {alerta}
-                </div>
-                """, unsafe_allow_html=True)
-
-    st.divider()
-    if st.button("🚪 " + t["logout"], type="secondary", use_container_width=True): 
-        logout()
 # ==========================================
 # HEADER PRINCIPAL
 # ==========================================
