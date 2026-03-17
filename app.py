@@ -251,20 +251,19 @@ def get_user_data(username):
 def update_user_data(username, data_dict):
     if username: supabase.table("app_users_2").update(data_dict).eq("username", username).execute()
 
-# Módulo 1 y 3 (Nueva arquitectura Calendar)
 def get_current_meal_info():
-    """Detecta automáticamente el tipo de comida y color basado en la hora actual."""
+    """Detecta automáticamente el tipo de comida y color basado en la hora actual (Solo para Módulo 1)."""
     now = datetime.datetime.now()
     hour = now.hour + now.minute / 60.0
-    if 6 <= hour < 11.5: return "Desayuno", "#F97316" # Naranja
-    elif 11.5 <= hour < 16: return "Almuerzo", "#10B981" # Verde
-    elif 16 <= hour < 19.5: return "Merienda", "#8B5CF6" # Morado
-    else: return "Cena", "#3B82F6" # Azul
+    if 6 <= hour < 11.5: return "Desayuno", "#F97316"
+    elif 11.5 <= hour < 16: return "Almuerzo", "#10B981"
+    elif 16 <= hour < 19.5: return "Merienda", "#8B5CF6"
+    else: return "Cena", "#3B82F6"
 
 def add_to_meal_calendar(username, date_str, meal_data):
-    """Guarda silenciosamente las comidas y macros en la base de datos (Supabase)"""
     user = get_user_data(username)
     cal = user.get("meal_calendar") or {}
+    if not isinstance(cal, dict): cal = {}
     if date_str not in cal: cal[date_str] = []
     cal[date_str].append(meal_data)
     update_user_data(username, {"meal_calendar": cal})
@@ -285,24 +284,19 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", 
     if avail_ing: system_prompt += f"\n[GOLDEN RULE] Recipes MUST be based EXCLUSIVELY on: {avail_ing}."
     if avoid_tdy: system_prompt += f"\n[STRICT PROHIBITION] Under NO circumstances include: {avoid_tdy}."
 
-    # Directriz CRÍTICA Modificada: Llaves en Inglés siempre, Valores 100% Traducidos.
     final_prompt = system_prompt + f"""
     \nEXPECTED JSON FORMAT:
     {expected_format_hint}
     
     🔴[CRITICAL LANGUAGE DIRECTIVE] 🔴
-    CRITICAL LANGUAGE RULE: The JSON KEYS MUST ALWAYS BE IN ENGLISH (e.g., 'recipe_name', 'nutritionist_note', 'region', 'instructions', 'name', 'description', 'time', 'difficulty'). 
+    CRITICAL LANGUAGE RULE: The JSON KEYS MUST ALWAYS BE IN ENGLISH. 
     However, the JSON VALUES MUST BE STRICTLY, COMPLETELY, AND NATURALLY TRANSLATED TO {lang_code.upper()}. 
-    Do NOT leave any value in English if the requested language is different. Pay special attention to translating the 'region' (e.g., 'Mediterranean' to 'Mediterránea'), the 'nutritionist_note', the 'ingredients', and every step in 'instructions'. NEVER MIX LANGUAGES IN VALUES.
     """
 
     try:
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile", 
-            messages=[
-                {"role": "system", "content": final_prompt}, 
-                {"role": "user", "content": prompt}
-            ], 
+            messages=[{"role": "system", "content": final_prompt}, {"role": "user", "content": prompt}], 
             response_format={"type": "json_object"}, 
             temperature=0.4
         )
@@ -351,7 +345,7 @@ def fetch_daily_healthy_recipes(lang_code):
             if len(raw_results) >= 15: break
         random.shuffle(raw_results)
         raw_results = raw_results[:4]
-    except Exception as e:
+    except Exception:
         return[]
 
     if not raw_results: return[]
@@ -359,30 +353,20 @@ def fetch_daily_healthy_recipes(lang_code):
     sys_prompt = f"""
     You are a Michelin-star Chef and an expert culinary copywriter.
     I am providing you with a JSON list of REAL daily recipes extracted from Google News.
-    Your task:
-    1. Rewrite the 'title' to make it sound irresistible, premium, and highly nutritious.
-    2. Write a mouth-watering 2-line 'summary' highlighting its health benefits and why they should cook it today.
-    3. TRANSLATE both the title and the summary entirely into {lang_code.upper()}. This is mandatory.
-    4. Extract and keep the EXACT original 'url' intact.
-    You must reply STRICTLY with a JSON object in this exact format:
-    {{
-        "recipes":[
-            {{"title": "Translated Catchy Title", "summary": "Translated 2-line description", "url": "https://original-link.com"}}
-        ]
-    }}
+    Rewrite the 'title' to sound premium, write a 2-line 'summary'. TRANSLATE EVERYTHING TO {lang_code.upper()}.
+    Keep 'url' intact. Return JSON format: {{"recipes": [{{"title": "...", "summary": "...", "url": "..."}}]}}
     """
     user_prompt = "REAL GOOGLE NEWS RECIPES:\n" + json.dumps(raw_results)
     
     try:
         parsed = groq_generic_json(sys_prompt, user_prompt)
-        if parsed and "recipes" in parsed and len(parsed["recipes"]) > 0:
-            return parsed["recipes"]
+        if parsed and "recipes" in parsed and len(parsed["recipes"]) > 0: return parsed["recipes"]
     except Exception:
         pass
     return raw_results
 
 # ==========================================
-# SISTEMA MULTIDIOMA Y TEXTOS
+# SISTEMA MULTIDIOMA Y TEXTOS (Actualizado Mod 3 y 4)
 # ==========================================
 TRANSLATIONS = {
     "🇪🇸 Español": {
@@ -418,7 +402,15 @@ TRANSLATIONS = {
         "add_to_list": "Añadir a la lista", "delete_item": "Eliminar", "type_food": "Escribe un alimento suelto...",
         "day_1": "Lunes", "day_2": "Martes", "day_3": "Miércoles", "day_4": "Jueves", "day_5": "Viernes", "day_6": "Sábado", "day_7": "Domingo",
         "mac_cal": "Calorías", "mac_pro": "Proteínas", "mac_fat": "Grasas", "mac_car": "Carbohidratos",
-        "nut_facts": "Información Nutricional", "nut_cal": "Calorías", "nut_tfat": "Grasa Total", "nut_sfat": "Grasa Saturada", "nut_sod": "Sodio", "nut_tcarb": "Carbohidratos Totales", "nut_fib": "Fibra Dietética", "nut_sug": "Azúcares Totales", "nut_pro": "Proteína"
+        "nut_facts": "Información Nutricional", "nut_cal": "Calorías", "nut_tfat": "Grasa Total", "nut_sfat": "Grasa Saturada", "nut_sod": "Sodio", "nut_tcarb": "Carbohidratos Totales", "nut_fib": "Fibra Dietética", "nut_sug": "Azúcares Totales", "nut_pro": "Proteína",
+        "cal_prev": "◀ Anterior", "cal_next": "Siguiente ▶", "cal_weekly": "Semanal", "cal_monthly": "Mensual",
+        "cal_add_meal_title": "➕ Añadir Comida al Calendario", "cal_ph_food": "Ej: 1 Manzana, café y tostada",
+        "cal_add_btn": "Añadir", "cal_analyzing": "Analizando macros silenciosamente...",
+        "meal_breakfast": "Desayuno", "meal_lunch": "Almuerzo", "meal_snack": "Merienda", "meal_dinner": "Cena",
+        "mod4_title": "🩺 Dashboard de Salud y Análisis Médico", "mod4_period_label": "Selecciona el Período a Analizar",
+        "mod4_period_today": "Hoy", "mod4_period_week": "Esta Semana", "mod4_period_month": "Este Mes",
+        "mod4_total_cal": "Calorías Totales", "mod4_gen_btn": "🩺 Generar Análisis Clínico Profundo por IA",
+        "mod4_analyzing": "La IA médica está analizando tu nutrición..."
     },
     "🇬🇧 English": {
         "lang_code": "English", "title": "Hi {name}! What are we cooking today? 🍲", "subtitle": "Your smart nutrition ecosystem.",
@@ -451,7 +443,15 @@ TRANSLATIONS = {
         "add_to_list": "Add to list", "delete_item": "Delete", "type_food": "Type a food item...",
         "day_1": "Monday", "day_2": "Tuesday", "day_3": "Wednesday", "day_4": "Thursday", "day_5": "Friday", "day_6": "Saturday", "day_7": "Sunday",
         "mac_cal": "Calories", "mac_pro": "Protein", "mac_fat": "Fats", "mac_car": "Carbs",
-        "nut_facts": "Nutrition Facts", "nut_cal": "Calories", "nut_tfat": "Total Fat", "nut_sfat": "Saturated Fat", "nut_sod": "Sodium", "nut_tcarb": "Total Carbohydrate", "nut_fib": "Dietary Fiber", "nut_sug": "Total Sugars", "nut_pro": "Protein"
+        "nut_facts": "Nutrition Facts", "nut_cal": "Calories", "nut_tfat": "Total Fat", "nut_sfat": "Saturated Fat", "nut_sod": "Sodium", "nut_tcarb": "Total Carbohydrate", "nut_fib": "Dietary Fiber", "nut_sug": "Total Sugars", "nut_pro": "Protein",
+        "cal_prev": "◀ Prev", "cal_next": "Next ▶", "cal_weekly": "Weekly", "cal_monthly": "Monthly",
+        "cal_add_meal_title": "➕ Add Meal to Calendar", "cal_ph_food": "e.g., 1 Apple, coffee, and toast",
+        "cal_add_btn": "Add", "cal_analyzing": "Analyzing macros silently...",
+        "meal_breakfast": "Breakfast", "meal_lunch": "Lunch", "meal_snack": "Snack", "meal_dinner": "Dinner",
+        "mod4_title": "🩺 Health Dashboard & Medical Analysis", "mod4_period_label": "Select Period to Analyze",
+        "mod4_period_today": "Today", "mod4_period_week": "This Week", "mod4_period_month": "This Month",
+        "mod4_total_cal": "Total Calories", "mod4_gen_btn": "🩺 Generate Deep Clinical AI Analysis",
+        "mod4_analyzing": "Medical AI is analyzing your nutrition..."
     },
     "🇫🇷 Français": {
         "lang_code": "French", "title": "Bonjour {name} !", "subtitle": "Votre écosystème nutritionnel.",
@@ -481,7 +481,15 @@ TRANSLATIONS = {
         "add_to_list": "Ajouter", "delete_item": "Supprimer", "type_food": "Écrivez un aliment...",
         "day_1": "Lundi", "day_2": "Mardi", "day_3": "Mercredi", "day_4": "Jeudi", "day_5": "Vendredi", "day_6": "Samedi", "day_7": "Dimanche",
         "mac_cal": "Calories", "mac_pro": "Protéines", "mac_fat": "Graisses", "mac_car": "Glucides",
-        "nut_facts": "Valeurs Nutritionnelles", "nut_cal": "Calories", "nut_tfat": "Graisses Totales", "nut_sfat": "Graisses Saturées", "nut_sod": "Sodium", "nut_tcarb": "Glucides Totaux", "nut_fib": "Fibres Alimentaires", "nut_sug": "Sucres Totaux", "nut_pro": "Protéines"
+        "nut_facts": "Valeurs Nutritionnelles", "nut_cal": "Calories", "nut_tfat": "Graisses Totales", "nut_sfat": "Graisses Saturées", "nut_sod": "Sodium", "nut_tcarb": "Glucides Totaux", "nut_fib": "Fibres Alimentaires", "nut_sug": "Sucres Totaux", "nut_pro": "Protéines",
+        "cal_prev": "◀ Précédent", "cal_next": "Suivant ▶", "cal_weekly": "Hebdomadaire", "cal_monthly": "Mensuel",
+        "cal_add_meal_title": "➕ Ajouter un repas au calendrier", "cal_ph_food": "Ex : 1 Pomme, café et toast",
+        "cal_add_btn": "Ajouter", "cal_analyzing": "Analyse silencieuse des macros...",
+        "meal_breakfast": "Petit-déjeuner", "meal_lunch": "Déjeuner", "meal_snack": "Goûter", "meal_dinner": "Dîner",
+        "mod4_title": "🩺 Tableau de bord Santé et Analyse", "mod4_period_label": "Sélectionner la période à analyser",
+        "mod4_period_today": "Aujourd'hui", "mod4_period_week": "Cette Semaine", "mod4_period_month": "Ce Mois",
+        "mod4_total_cal": "Calories Totales", "mod4_gen_btn": "🩺 Générer une analyse clinique IA",
+        "mod4_analyzing": "L'IA médicale analyse votre nutrition..."
     },
     "🇮🇹 Italiano": {
         "lang_code": "Italian", "title": "Ciao {name}!", "subtitle": "Il tuo ecosistema nutrizionale.",
@@ -511,7 +519,15 @@ TRANSLATIONS = {
         "add_to_list": "Aggiungi alla lista", "delete_item": "Elimina", "type_food": "Scrivi un alimento...",
         "day_1": "Lunedì", "day_2": "Martedì", "day_3": "Mercoledì", "day_4": "Giovedì", "day_5": "Venerdì", "day_6": "Sabato", "day_7": "Domenica",
         "mac_cal": "Calorie", "mac_pro": "Proteine", "mac_fat": "Grassi", "mac_car": "Carboidrati",
-        "nut_facts": "Valori Nutrizionali", "nut_cal": "Calorie", "nut_tfat": "Grassi Totali", "nut_sfat": "Grassi Saturi", "nut_sod": "Sodio", "nut_tcarb": "Carboidrati Totali", "nut_fib": "Fibra Alimentare", "nut_sug": "Zuccheri Totali", "nut_pro": "Proteine"
+        "nut_facts": "Valori Nutrizionali", "nut_cal": "Calorie", "nut_tfat": "Grassi Totali", "nut_sfat": "Grassi Saturi", "nut_sod": "Sodio", "nut_tcarb": "Carboidrati Totali", "nut_fib": "Fibra Alimentare", "nut_sug": "Zuccheri Totali", "nut_pro": "Proteine",
+        "cal_prev": "◀ Precedente", "cal_next": "Successivo ▶", "cal_weekly": "Settimanale", "cal_monthly": "Mensile",
+        "cal_add_meal_title": "➕ Aggiungi Pasto al Calendario", "cal_ph_food": "Es: 1 Mela, caffè e toast",
+        "cal_add_btn": "Aggiungi", "cal_analyzing": "Analizzando i macro...",
+        "meal_breakfast": "Colazione", "meal_lunch": "Pranzo", "meal_snack": "Spuntino", "meal_dinner": "Cena",
+        "mod4_title": "🩺 Dashboard Salute e Analisi Medica", "mod4_period_label": "Seleziona Periodo da Analizzare",
+        "mod4_period_today": "Oggi", "mod4_period_week": "Questa Settimana", "mod4_period_month": "Questo Mese",
+        "mod4_total_cal": "Calorie Totali", "mod4_gen_btn": "🩺 Genera Analisi Clinica Profonda IA",
+        "mod4_analyzing": "L'IA medica sta analizzando la tua nutrizione..."
     }
 }
 
@@ -635,10 +651,30 @@ for key in["step", "options", "selected_option", "full_recipe", "avail_ing", "av
     if key not in st.session_state: st.session_state[key] = None if key in["options", "selected_option", "full_recipe"] else ("input" if key == "step" else "")
 
 # ==========================================
-# SIDEBAR REDISEÑADA
+# SIDEBAR REDISEÑADA & PUNTERO MÁGICO
 # ==========================================
 with st.sidebar:
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
+
+    # Lógica del Puntero Mágico
+    cursor_opts = {"🖱️ Predeterminado": "default", "🍗 Muslito": "🍗", "🥑 Aguacate": "🥑", "🥘 Sartén": "🥘", "🍕 Pizza": "🍕", "🪄 Varita": "🪄", "🍎 Manzana": "🍎"}
+    if "custom_cursor" not in st.session_state: st.session_state.custom_cursor = "🖱️ Predeterminado"
+    
+    st.session_state.custom_cursor = st.selectbox(
+        "✨ Puntero Mágico", 
+        list(cursor_opts.keys()), 
+        index=list(cursor_opts.keys()).index(st.session_state.custom_cursor)
+    )
+    
+    selected_val = cursor_opts[st.session_state.custom_cursor]
+    if selected_val != "default":
+        st.markdown(f"""
+        <style>
+        * {{
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{selected_val}</text></svg>"), auto !important;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
 
     with st.expander(t["profile"], expanded=False):
         upd_weight = st.number_input(t["current_weight_label"], value=float(user_profile.get("weight",70)))
@@ -688,10 +724,10 @@ st.markdown(f"<h1 class='brand-logo'>NutriAI</h1>", unsafe_allow_html=True)
 # RUTEO DE PÁGINAS (DASHBOARD REDISEÑADO)
 # ==========================================
 if st.session_state.current_page == "home":
+    # CSS con EFECTO LUPA MODERNO para las cajetillas
     st.markdown("""
     <style>
-    /* Diseño Masivo y SVGs para los 4 Módulos */
-    [data-testid="column"] div.stButton > button {
+    /* Diseño Masivo, SVGs y EFECTO LUPA para los 4 Módulos */[data-testid="column"] div.stButton > button {
         min-height: 220px !important;
         border-radius: 24px !important;
         font-size: 26px !important;
@@ -701,16 +737,21 @@ if st.session_state.current_page == "home":
         background-image: none !important; 
         box-shadow: 0 10px 40px rgba(0,0,0,0.06) !important;
         border: 2px solid #E2E8F0 !important;
-        transition: all 0.3s ease !important;
+        /* Transición hiper suave para el efecto lupa */
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         background-repeat: no-repeat !important;
         background-position: center top 35px !important;
         background-size: 70px !important;
         padding-top: 100px !important; 
     }
+    
+    /* Efecto Lupa Hover 3D Magnífico */
     [data-testid="column"] div.stButton > button:hover {
-        transform: translateY(-8px) !important;
-        box-shadow: 0 20px 50px rgba(16,185,129,0.15) !important;
+        transform: scale(1.05) translateY(-8px) !important;
+        box-shadow: 0 25px 60px rgba(16,185,129,0.2) !important;
         border: 2px solid #10B981 !important;
+        z-index: 10 !important;
+        position: relative !important;
     }
     
     /* 1: Cocina Mágica (Wand/Chef Hat) */
@@ -758,7 +799,7 @@ if st.session_state.current_page == "home":
             st.rerun()
 
 # ==========================================
-# MÓDULO 1: COCINA INTELIGENTE (Actualizado Calendar)
+# MÓDULO 1: COCINA INTELIGENTE
 # ==========================================
 elif st.session_state.current_page == "mod1":
     if st.button(t["back_home"], type="secondary"): go_home()
@@ -940,8 +981,7 @@ elif st.session_state.current_page == "mod1":
                 update_user_data(user_profile["username"], {"favorites": favs})
                 st.toast(t["saved"])
         with c_act2:
-            # INTEGRACIÓN CALENDARIO (MÓDULO 1)
-            if st.button("📅 Añadir al Calendario de Hoy", type="primary", use_container_width=True):
+            if st.button(t.get("cal_add_meal_title", "📅 Añadir al Calendario de Hoy"), type="primary", use_container_width=True):
                 m_type, m_col = get_current_meal_info()
                 entry = {
                     "type": m_type,
@@ -1049,32 +1089,32 @@ elif st.session_state.current_page == "mod2":
                 st.rerun()
 
 # ==========================================
-# MÓDULO 3: CALENDARIO NUTRICIONAL INTERACTIVO (Reescrito)
+# MÓDULO 3: CALENDARIO NUTRICIONAL INTERACTIVO
 # ==========================================
 elif st.session_state.current_page == "mod3":
     if st.button(t["back_home"], type="secondary"): go_home()
     st.divider()
     
-    # Inicialización de estado del calendario
     if "cal_ref_date" not in st.session_state: st.session_state.cal_ref_date = datetime.date.today()
-    if "cal_view" not in st.session_state: st.session_state.cal_view = "Semanal"
+    if "cal_view" not in st.session_state: st.session_state.cal_view = "weekly"
 
     # Controles Superiores
     col_nav1, col_nav2, col_nav3, col_nav4 = st.columns([1, 2, 2, 1])
     with col_nav1:
-        if st.button("◀ Anterior", use_container_width=True):
-            if st.session_state.cal_view == "Semanal": st.session_state.cal_ref_date -= timedelta(days=7)
+        if st.button(t["cal_prev"], use_container_width=True):
+            if st.session_state.cal_view == "weekly": st.session_state.cal_ref_date -= timedelta(days=7)
             else:
                 first_day = st.session_state.cal_ref_date.replace(day=1)
                 st.session_state.cal_ref_date = first_day - timedelta(days=1)
             st.rerun()
     with col_nav2:
-        st.session_state.cal_view = st.radio("Vista", ["Semanal", "Mensual"], horizontal=True, label_visibility="collapsed")
+        view_opts = {"weekly": t["cal_weekly"], "monthly": t["cal_monthly"]}
+        st.session_state.cal_view = st.radio("Vista", ["weekly", "monthly"], format_func=lambda x: view_opts[x], horizontal=True, label_visibility="collapsed")
     with col_nav3:
         st.markdown(f"<h3 style='text-align:center; margin:0;'>{st.session_state.cal_ref_date.strftime('%B %Y').capitalize()}</h3>", unsafe_allow_html=True)
     with col_nav4:
-        if st.button("Siguiente ▶", use_container_width=True):
-            if st.session_state.cal_view == "Semanal": st.session_state.cal_ref_date += timedelta(days=7)
+        if st.button(t["cal_next"], use_container_width=True):
+            if st.session_state.cal_view == "weekly": st.session_state.cal_ref_date += timedelta(days=7)
             else:
                 next_month = st.session_state.cal_ref_date.replace(day=28) + timedelta(days=4)
                 st.session_state.cal_ref_date = next_month.replace(day=1)
@@ -1082,11 +1122,10 @@ elif st.session_state.current_page == "mod3":
 
     st.write("")
     user_cal = user_profile.get("meal_calendar") or {}
-    if not isinstance(user_cal, dict): 
-        user_cal = {}
+    if not isinstance(user_cal, dict): user_cal = {}
 
     # RENDER: VISTA SEMANAL
-    if st.session_state.cal_view == "Semanal":
+    if st.session_state.cal_view == "weekly":
         start_of_week = st.session_state.cal_ref_date - timedelta(days=st.session_state.cal_ref_date.weekday())
         days =[start_of_week + timedelta(days=i) for i in range(7)]
         cols = st.columns(7)
@@ -1111,8 +1150,7 @@ elif st.session_state.current_page == "mod3":
         start_cal = first_day - timedelta(days=first_day.weekday())
         end_cal = last_day + timedelta(days=(6 - last_day.weekday()))
         
-        # Cabeceras días
-        day_names =["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        day_names =[t["day_1"], t["day_2"], t["day_3"], t["day_4"], t["day_5"], t["day_6"], t["day_7"]]
         head_cols = st.columns(7)
         for i, d_name in enumerate(day_names):
             with head_cols[i]: st.markdown(f"<div style='text-align:center; font-size:12px; font-weight:bold; color:#64748B;'>{d_name}</div>", unsafe_allow_html=True)
@@ -1135,20 +1173,31 @@ elif st.session_state.current_page == "mod3":
                 curr += timedelta(days=1)
             st.divider()
 
-    # FORMULARIO IA INGRESO MANUAL SILENCIOSO
+    # FORMULARIO IA INGRESO MANUAL (Control Total de Usuario)
     st.divider()
-    st.subheader("➕ Añadir Comida al Calendario")
+    st.subheader(t["cal_add_meal_title"])
+    
+    # Opciones visuales para tipo de comida
+    meal_options = {
+        f"🍳 {t['meal_breakfast']}": (t['meal_breakfast'], "#F97316"),
+        f"🥗 {t['meal_lunch']}": (t['meal_lunch'], "#10B981"),
+        f"🥪 {t['meal_snack']}": (t['meal_snack'], "#8B5CF6"),
+        f"🥩 {t['meal_dinner']}": (t['meal_dinner'], "#3B82F6")
+    }
+    
+    selected_meal_ui = st.radio("Tipo de Comida", list(meal_options.keys()), horizontal=True, label_visibility="collapsed")
+    m_type, m_col = meal_options[selected_meal_ui]
+
     c_f1, c_f2, c_f3 = st.columns([3, 1, 1])
-    with c_f1: input_food = st.text_input("", placeholder="Ej: 1 Manzana, café y tostada", label_visibility="collapsed")
+    with c_f1: input_food = st.text_input("", placeholder=t["cal_ph_food"], label_visibility="collapsed")
     with c_f2: input_date = st.date_input("", value=datetime.date.today(), label_visibility="collapsed")
     with c_f3:
-        if st.button("Añadir", type="primary", use_container_width=True):
+        if st.button(t["cal_add_btn"], type="primary", use_container_width=True):
             if input_food:
-                with st.spinner("Analizando macros silenciosamente..."):
+                with st.spinner(t["cal_analyzing"]):
                     sys_p = "Estima los macros de este alimento. Devuelve un JSON ESTRICTO: {'calories': 100, 'protein': 2, 'fat': 0, 'carbs': 20}"
                     parsed = groq_generic_json(sys_p, f"Alimento: {input_food}")
                     if parsed:
-                        m_type, m_col = get_current_meal_info()
                         entry = {
                             "type": m_type,
                             "food": input_food.capitalize(),
@@ -1162,34 +1211,32 @@ elif st.session_state.current_page == "mod3":
                         st.rerun()
 
 # ==========================================
-# MÓDULO 4: DASHBOARD DE ANÁLISIS PROFUNDO MÉDICO (Reescrito)
+# MÓDULO 4: DASHBOARD DE ANÁLISIS PROFUNDO MÉDICO
 # ==========================================
 elif st.session_state.current_page == "mod4":
     if st.button(t["back_home"], type="secondary"): go_home()
     st.divider()
     
-    st.markdown("<h2>🩺 Dashboard de Salud y Análisis Médico</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2>{t['mod4_title']}</h2>", unsafe_allow_html=True)
     
-    periodo = st.selectbox("Selecciona el Período a Analizar", ["Hoy", "Esta Semana", "Este Mes"])
+    periods_list = ["today", "week", "month"]
+    period_map = {"today": t["mod4_period_today"], "week": t["mod4_period_week"], "month": t["mod4_period_month"]}
+    periodo_key = st.selectbox(t["mod4_period_label"], periods_list, format_func=lambda x: period_map[x])
+    
     today = datetime.date.today()
-    
-    if periodo == "Hoy":
+    if periodo_key == "today":
         start_date, end_date = today, today
-    elif periodo == "Esta Semana":
+    elif periodo_key == "week":
         start_date = today - timedelta(days=today.weekday())
         end_date = start_date + timedelta(days=6)
-    else: # Este Mes
+    else: # month
         start_date = today.replace(day=1)
         next_month = start_date.replace(day=28) + timedelta(days=4)
         end_date = next_month - timedelta(days=next_month.day)
         
     user_cal = user_profile.get("meal_calendar") or {}
-    if not isinstance(user_cal, dict): 
-        user_cal = {}
-        
-    t_cal = t_pro = t_fat = t_car = 0
-        
-    user_cal = user_profile.get("meal_calendar", {})
+    if not isinstance(user_cal, dict): user_cal = {}
+    
     t_cal = t_pro = t_fat = t_car = 0
     consumed_foods =[]
     
@@ -1207,19 +1254,18 @@ elif st.session_state.current_page == "mod4":
         
     st.markdown("<br>", unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric(f"🔥 Calorías Totales", f"{t_cal} kcal")
-    c2.metric(f"🍗 Proteínas", f"{t_pro} g")
-    c3.metric(f"🥑 Grasas", f"{t_fat} g")
-    c4.metric(f"🍞 Carbohidratos", f"{t_car} g")
+    c1.metric(f"🔥 {t['mod4_total_cal']}", f"{t_cal} kcal")
+    c2.metric(f"🍗 {t['mac_pro']}", f"{t_pro} g")
+    c3.metric(f"🥑 {t['mac_fat']}", f"{t_fat} g")
+    c4.metric(f"🍞 {t['mac_car']}", f"{t_car} g")
     st.divider()
 
-    if st.button("🩺 Generar Análisis Clínico Profundo por IA", type="primary", use_container_width=True):
-        with st.spinner("La IA médica está analizando tu nutrición en profundidad... (Esto puede tardar unos segundos)"):
-            
+    if st.button(t["mod4_gen_btn"], type="primary", use_container_width=True):
+        with st.spinner(t["mod4_analyzing"]):
             food_list_str = ', '.join(consumed_foods[:50]) if consumed_foods else 'Ninguno registrado'
             sys_eval = f"""
             Eres un Médico Nutricionista de élite evaluando a {user_profile['name']} ({user_profile['weight']}kg, Objetivo: {user_profile['goals']}).
-            Datos del período ({periodo}): {t_cal} kcal totales, {t_pro}g proteína, {t_fat}g grasa, {t_car}g carbos.
+            Datos del período ({period_map[periodo_key]}): {t_cal} kcal totales, {t_pro}g proteína, {t_fat}g grasa, {t_car}g carbos.
             Alimentos consumidos: {food_list_str}.
             
             Genera un informe PROFUNDO en formato Markdown. 
@@ -1231,8 +1277,8 @@ elif st.session_state.current_page == "mod4":
             5. ⚠️ **Advertencias médicas**: Picos de azúcar, déficits, grasas saturadas detectadas.
             6. 💡 **Recomendación clave para mañana**: Prescripción práctica y exacta.
             
-            CRÍTICO: Devuelve UN JSON ESTRICTO con la clave 'markdown_report' que contenga todo el texto en Markdown de forma estructurada y con los emojis indicados.
-            Ejemplo: {{"markdown_report": "### 🩺 Informe Clínico Nutricional\\n\\n..."}}
+            Traduce ABSOLUTAMENTE TODO al {lang_code}.
+            CRÍTICO: Devuelve UN JSON ESTRICTO con la clave 'markdown_report' que contenga todo el texto en Markdown.
             """
             
             eval_res = groq_generic_json(sys_eval, "Genera el reporte médico ahora.")
