@@ -1538,4 +1538,3 @@ elif st.session_state.current_page == "mod4":
         # Renderizado nativo: Esto garantiza que los #, * y saltos de línea funcionen perfectamente.
         st.markdown(st.session_state.mod4_eval_res.get('markdown_report', ''))
         st.markdown('</div>', unsafe_allow_html=True)
-        """, unsafe_allow_html=True)
