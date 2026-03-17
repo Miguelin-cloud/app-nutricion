@@ -269,10 +269,61 @@ def add_to_meal_calendar(username, date_str, meal_data):
     update_user_data(username, {"meal_calendar": cal})
 
 # ==========================================
-# FUNCIONES IA (GROQ) Y EXTRACCIÓN
+# FUNCIONES IA (GROQ) Y EXTRACCIÓN (CON FALLBACK 3 NIVELES)
 # ==========================================
-def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", avoid_tdy="", num_recipes=3):
+
+def execute_groq_with_fallback(system_prompt, user_prompt, temperature=0.3):
+    """Motor central de peticiones IA con cascada de 3 niveles ante error 429."""
     client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
+    
+    # NUESTRA CASCADA DE 3 NIVELES
+    models_hierarchy =[
+        {"name": "llama-3.3-70b-versatile", "alias": "Chef Ejecutivo (Plan A)"},
+        {"name": "llama-3.1-8b-instant", "alias": "Chef Ayudante Rápido (Plan B)"},
+        {"name": "mixtral-8x7b-32768", "alias": "Chef de Emergencia (Plan C)"}
+    ]
+    
+    for idx, model_info in enumerate(models_hierarchy):
+        try:
+            response = client.chat.completions.create(
+                model=model_info["name"], 
+                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], 
+                response_format={"type": "json_object"}, 
+                temperature=temperature
+            )
+            return json.loads(response.choices[0].message.content)
+            
+        except Exception as e:
+            err_msg = str(e).lower()
+            
+            # Comprobamos si es un error 429 (Límite de tokens/velocidad)
+            if "429" in err_msg or "rate limit" in err_msg or "tokens" in err_msg:
+                if idx < len(models_hierarchy) - 1:
+                    next_model = models_hierarchy[idx+1]
+                    
+                    # 1. Crear el mensaje de alerta
+                    time_str = datetime.datetime.now().strftime("%H:%M:%S")
+                    alert_msg = f"⚠️ Tokens agotados en {model_info['alias']}. Usando {next_model['alias']}..."
+                    
+                    # 2. Mostrar el Toast efímero (5 segundos)
+                    st.toast(alert_msg, icon="👨‍🍳")
+                    
+                    # 3. Guardar en el log de la barra lateral
+                    log_entry = f"<b>{time_str}</b>: {alert_msg}"
+                    if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
+                    st.session_state.app_alerts.insert(0, log_entry) # Lo pone el primero
+                    
+                    continue # Continúa el bucle y prueba el siguiente modelo
+                else:
+                    st.error("❌ Todos los Chefs de la Inteligencia Artificial están ocupados. Por favor, espera unos minutos e inténtalo de nuevo.")
+                    return None
+            else:
+                # Si el error NO es por tokens (ej. un fallo del sistema), mostramos el error original
+                st.error(f"Error técnico de IA ({model_info['name']}): {e}")
+                return None
+
+
+def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", avoid_tdy="", num_recipes=3):
     system_prompt = f"""
     You are a Michelin-star Executive Chef and Clinical Nutritionist.
     Your client is {u_prof['name']}. Profile: {u_prof['age']} y/o, {u_prof['weight']} kg, {u_prof['height']} cm, Gender: {u_prof['gender']}.
@@ -284,7 +335,7 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", 
     if avail_ing: system_prompt += f"\n[GOLDEN RULE] Recipes MUST be based EXCLUSIVELY on: {avail_ing}."
     if avoid_tdy: system_prompt += f"\n[STRICT PROHIBITION] Under NO circumstances include: {avoid_tdy}."
 
-    final_prompt = system_prompt + f"""
+    final_system_prompt = system_prompt + f"""
     \nEXPECTED JSON FORMAT:
     {expected_format_hint}
     
@@ -292,29 +343,14 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", 
     CRITICAL LANGUAGE RULE: The JSON KEYS MUST ALWAYS BE IN ENGLISH. 
     However, the JSON VALUES MUST BE STRICTLY, COMPLETELY, AND NATURALLY TRANSLATED TO {lang_code.upper()}. 
     """
+    
+    # Usa nuestro nuevo motor blindado
+    return execute_groq_with_fallback(final_system_prompt, prompt, temperature=0.4)
 
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile", 
-            messages=[{"role": "system", "content": final_prompt}, {"role": "user", "content": prompt}], 
-            response_format={"type": "json_object"}, 
-            temperature=0.4
-        )
-        return json.loads(response.choices[0].message.content)
-    except Exception as e:
-        st.error(f"AI Error: {e}")
-        return None
 
 def groq_generic_json(system_prompt, user_prompt):
-    client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile", 
-            messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], 
-            response_format={"type": "json_object"}, 
-            temperature=0.3
-        )
-        return json.loads(response.choices[0].message.content)
+    # Usa nuestro nuevo motor blindado
+    return execute_groq_with_fallback(system_prompt, user_prompt, temperature=0.3)
     except: return None
 
 def extract_number(val_str):
@@ -681,7 +717,7 @@ if not user_profile:
 
 for key in["step", "options", "selected_option", "full_recipe", "avail_ing", "avoid_tdy"]:
     if key not in st.session_state: st.session_state[key] = None if key in["options", "selected_option", "full_recipe"] else ("input" if key == "step" else "")
-
+if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 # ==========================================
 # SIDEBAR REDISEÑADA & PUNTERO MÁGICO
 # ==========================================
@@ -788,6 +824,21 @@ with st.sidebar:
         if st.button("🔄 Actualizar", key="btn_refresh_news", use_container_width=True):
             fetch_daily_healthy_recipes.clear()
             st.rerun()
+
+            # 5. EXPANDER: ALERTAS Y NOTIFICACIONES (Sistema de Respaldo IA)
+    with st.expander("🔔 Alertas del Sistema", expanded=False):
+        if not st.session_state.app_alerts:
+            st.info("No hay alertas recientes. ¡Todos los sistemas funcionan perfectamente!")
+        else:
+            if st.button("🧹 Limpiar historial", use_container_width=True):
+                st.session_state.app_alerts =[]
+                st.rerun()
+            for alerta in st.session_state.app_alerts:
+                st.markdown(f"""
+                <div style="background: #FFFBEB; border-left: 4px solid #F59E0B; padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 12px; color: #475569;">
+                    {alerta}
+                </div>
+                """, unsafe_allow_html=True)
 
     st.divider()
     if st.button("🚪 " + t["logout"], type="secondary", use_container_width=True): logout()
