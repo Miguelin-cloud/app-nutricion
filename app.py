@@ -12,19 +12,20 @@ from supabase import create_client, Client
 from streamlit_lottie import st_lottie
 from streamlit_javascript import st_javascript
 from duckduckgo_search import DDGS
+from datetime import timedelta
 
 # ==========================================
 # CONFIGURACIÓN DE PÁGINA Y PWA
 # ==========================================
 st.set_page_config(page_title="NutriAI | Chef Inteligente", page_icon="🌿", layout="wide")
 
-# Inyección PWA (Fuerza a Chrome a reconocerla como App Instalable)
+# Inyección PWA
 st.components.v1.html("""
 <script>
     var manifest = {
         "name": "NutriAI Chef", "short_name": "NutriAI",
         "start_url": window.location.pathname, "display": "standalone",
-        "background_color": "#0f172a", "theme_color": "#0f172a",
+        "background_color": "#FDFBF7", "theme_color": "#10B981",
         "icons":[{"src": "https://cdn-icons-png.flaticon.com/512/3565/3565418.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]
     };
     var blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
@@ -40,183 +41,134 @@ st.components.v1.html("""
     }
 
     var meta1 = document.createElement('meta'); meta1.name = "apple-mobile-web-app-capable"; meta1.content = "yes"; document.head.appendChild(meta1);
-    var meta2 = document.createElement('meta'); meta2.name = "apple-mobile-web-app-status-bar-"; meta2.content = "black-translucent"; document.head.appendChild(meta2);
+    var meta2 = document.createElement('meta'); meta2.name = "apple-mobile-web-app-status-bar-style"; meta2.content = "default"; document.head.appendChild(meta2);
 </script>
 """, height=0, width=0)
 
 # ==========================================
-# CSS PREMIUM (Glassmorphism, Botones & Contraste)
+# CSS PREMIUM (Light Theme / Soft Neumorphism)
 # ==========================================
 st.markdown("""
     <style>
+    /* 🔥 Fondo Claro y Acogedor */
     .stApp {
-        background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)), 
-                    url("https://images.unsplash.com/photo-1498837167922-41cfa6f5ae8f?auto=format&fit=crop&w=1920&q=80") no-repeat center center fixed !important;
-        background-size: cover !important; color: #f1f5f9;
+        background: #FDFBF7 !important;
+        color: #1E293B !important;
     }
     
-    /* 🔥 Contenedor Principal (Oscuro) */
+    /* 🔥 Contenedor Principal (Tarjetas Blancas) */
     .block-container {
-        background: rgba(30, 41, 59, 0.45) !important;
-        backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important;
-        border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        background: #FFFFFF !important;
+        border-radius: 20px !important;
+        padding-top: 3rem !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05) !important;
+        border: 1px solid rgba(0, 0, 0, 0.03) !important;
     }
     
-    /* 🔥 BARRA LATERAL REDISEÑADA (Beige Glassmorphism) */[data-testid="stSidebar"] {
-        background: rgba(245, 245, 220, 0.4) !important;
-        backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+    /* 🔥 BARRA LATERAL REDISEÑADA */
+    [data-testid="stSidebar"] {
+        background: #F8F9FA !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
     }
     
-    /* Forzar texto oscuro SOLO en la barra lateral para garantizar contraste */[data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2, 
-    [data-testid="stSidebar"] h3,[data-testid="stSidebar"] h4, 
-    [data-testid="stSidebar"] span,[data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] strong, [data-testid="stSidebar"] div {
-        color: #1e293b !important;
+    /* ALTO CONTRASTE CRÍTICO PARA TODOS LOS TEXTOS */
+    h1, h2, h3, h4, p, label, .stMarkdown, span, div, strong, li {
+        color: #1E293B !important;
     }
 
-    /* Ajuste de inputs y botones dentro del Sidebar para encajar con fondo claro */
-    [data-testid="stSidebar"] div[data-baseweb="input"] > div, 
-    [data-testid="stSidebar"] div[data-baseweb="textarea"] > div {
-        background-color: rgba(255, 255, 255, 0.5) !important;
-        border: 1px solid rgba(30, 41, 59, 0.2) !important; color: #1e293b !important;
+    /* Ajuste de inputs y textareas (Limpios y Blancos) */
+    div[data-baseweb="input"] > div, 
+    div[data-baseweb="textarea"] > div,
+    div[data-baseweb="select"] > div {
+        background-color: #FFFFFF !important;
+        border: 1px solid #CBD5E1 !important; 
+        border-radius: 10px !important;
+        transition: all 0.3s ease !important;
     }
-    [data-testid="stSidebar"] div[data-baseweb="input"] input, 
-    [data-testid="stSidebar"] div[data-baseweb="textarea"] textarea { color: #1e293b !important; }
+    div[data-baseweb="input"] > div:focus-within, 
+    div[data-baseweb="textarea"] > div:focus-within,
+    div[data-baseweb="select"] > div:focus-within {
+        border-color: #10B981 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+    }
+    div[data-baseweb="input"] input, 
+    div[data-baseweb="textarea"] textarea,
+    div[data-baseweb="select"] div { 
+        color: #1E293B !important; 
+    }
     
-    /* Expanders del Sidebar */
-    [data-testid="stSidebar"][data-testid="stExpander"] {
-        background-color: rgba(255, 255, 255, 0.3) !important;
-        border: 1px solid rgba(30, 41, 59, 0.1) !important;
-    }[data-testid="stSidebar"] [data-testid="stExpander"] summary {
-        background-color: rgba(245, 245, 220, 0.6) !important; border-radius: 8px !important;
+    /* Expanders (Acordeones) */[data-testid="stExpander"] {
+        background-color: #FFFFFF !important;
+        border: 1px solid #E2E8F0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02) !important;
+    }
+    [data-testid="stExpander"] summary {
+        background-color: #F8F9FA !important;
+        border-radius: 12px !important;
+        color: #1E293B !important;
     }
 
-    /* Textos Principal Oscuros */
-    h1, h2, h3, h4, p, label, .stMarkdown { color: #f8fafc !important; }
-
-    /* 🔥 Botones Principales Premium */
+    /* 🔥 Botones Principales (Verde/Azul Vibrante) */
     .stButton > button {
-        background: linear-gradient(45deg, #10b981, #3b82f6) !important;
-        color: white !important; border: none !important; border-radius: 8px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important; font-weight: bold !important;
+        background: linear-gradient(135deg, #10B981, #3B82F6) !important;
+        color: white !important; 
+        border: none !important; 
+        border-radius: 12px !important;
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25) !important; 
+        font-weight: 700 !important;
         transition: all 0.3s ease !important;
     }
     .stButton > button * { color: white !important; }
-    .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important; }
-
-    /* Botones de eliminar (Lista de compra) */
-    button[key^="del_"] { background: transparent !important; box-shadow: none !important; color: #ef4444 !important; font-size: 1.2rem !important; }
-    button[key^="del_"]:hover { transform: scale(1.1) !important; }
+    .stButton > button:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.35) !important; 
+    }
 
     /* Botones Secundarios */
     .stDownloadButton > button, button[kind="secondaryFormSubmit"], button[kind="secondary"] {
-        background: rgba(30, 41, 59, 0.8) !important; 
-        border: 1px solid #3b82f6 !important; color: #ffffff !important;
+        background: #F1F5F9 !important; 
+        border: 1px solid #CBD5E1 !important; 
+        color: #334155 !important;
+        box-shadow: none !important;
     }
-    [data-testid="stSidebar"] button[kind="secondary"] * { color: #ffffff !important; }
-    
-    /* 🔥 Tarjetas Grandes del Dashboard */
-    .dashboard-grid .stButton > button {
-        height: 160px !important; font-size: 22px !important;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        border-radius: 20px !important;
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)) !important;
-        border: 2px solid rgba(255,255,255,0.1) !important;
-    }
-    .dashboard-grid .stButton > button:hover { border: 2px solid #10b981 !important; transform: scale(1.02); }
+    button[kind="secondary"] * { color: #334155 !important; }
+    button[kind="secondary"]:hover { background: #E2E8F0 !important; border-color: #94A3B8 !important; }
 
-    /* 🔥 Desplegables Main UI (Alto Contraste) */
-    .block-container[data-testid="stExpander"] {
-        background-color: rgba(30, 41, 59, 0.6) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important; border-radius: 10px !important;
-    }
-    .block-container [data-testid="stExpander"] summary {
-        background-color: rgba(15, 23, 42, 0.9) !important; color: #ffffff !important; border-radius: 10px !important;
+    /* Botones de eliminar (Lista de compra) */
+    button[key^="del_"] { background: transparent !important; box-shadow: none !important; color: #EF4444 !important; font-size: 1.2rem !important; }
+    button[key^="del_"]:hover { transform: scale(1.1) !important; }
+
+    /* Logo Principal */
+    .brand-logo { 
+        font-family: 'Georgia', serif; font-size: 3.5rem; font-weight: 900; 
+        text-align: center; margin-bottom: 0px; 
+        background: -webkit-linear-gradient(45deg, #10B981, #3B82F6); 
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
     }
 
-    /* Inputs Oscuros Main UI */
-    .block-container div[data-baseweb="input"] > div, .block-container div[data-baseweb="select"] > div {
-        background-color: rgba(15, 23, 42, 0.6) !important;
-        border: 1px solid rgba(255,255,255,0.2) !important; border-radius: 8px !important; color: white !important;
+    /* Golden Card (Rediseñada para Light Theme) */
+    .golden-card {
+        background: linear-gradient(135deg, #FFD700 0%, #F59E0B 100%);
+        padding: 4px; border-radius: 20px; margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
     }
-    .block-container div[data-baseweb="input"] input, .block-container div[data-baseweb="select"] div { color: white !important; }
+    .golden-card-content {
+        background: #FFFFFF; border-radius: 18px; padding: 25px; text-align: center;
+    }
 
-    /* 🔥 Flechitas Visibles */
-    button[data-testid="stSidebarCollapseButton"] { background-color: rgba(245, 245, 220, 0.9) !important; border-radius: 50% !important; }
-    button[data-testid="stSidebarCollapseButton"] svg { fill: #1e293b !important; color: #1e293b !important; }
-    button[data-testid="collapsedControl"] { background-color: rgba(15, 23, 42, 0.6) !important; border-radius: 50% !important; }
-    button[data-testid="collapsedControl"] svg { fill: #ffffff !important; color: #ffffff !important; }
+    .hero-emoji { text-align: center; font-size: 70px; margin-bottom: -10px; }
 
-    .brand-logo { font-family: 'Georgia', serif; font-size: 3rem; font-weight: bold; text-align: center; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    /* ============================= */
-/* GOLDEN CARD (Chef Recommendation) */
-/* ============================= */
-
-.golden-card {
-    background: linear-gradient(135deg, #FFDF00 0%, #D4AF37 100%);
-    padding: 3px;
-    border-radius: 16px;
-    margin-bottom: 20px;
-}
-
-.golden-card-content {
-    background: #0f172a;
-    border-radius: 14px;
-    padding: 25px;
-    text-align: center;
-}
-
-/* ============================= */
-/* HERO EMOJI */
-/* ============================= */
-
-.hero-emoji {
-    text-align: center;
-    font-size: 70px;
-    margin-bottom: -10px;
-}
-
-/* ============================= */
-/* NUTRITION LABEL */
-/* ============================= */
-
-.nutrition-label {
-    background: white;
-    color: black;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 350px;
-    font-family: Arial, sans-serif;
-}
-
-.nutrition-label * {
-    color: black !important;
-}
-
-.nutrition-label h2 {
-    border-bottom: 4px solid black;
-    padding-bottom: 5px;
-    color: black;
-}
-
-.nut-row {
-    display: flex;
-    justify-content: space-between;
-    border-top: 1px solid black;
-    padding: 5px 0;
-}
-
-.nut-row.thick {
-    border-top: 3px solid black;
-}
-
-.nut-bold {
-    font-weight: bold;
-}
-    
+    /* Nutrition Label (Mantenido estético sobre blanco) */
+    .nutrition-label {
+        background: #FFFFFF; color: #000000; padding: 20px; border-radius: 12px;
+        border: 2px solid #E2E8F0; max-width: 350px; font-family: Arial, sans-serif;
+    }
+    .nutrition-label * { color: #000000 !important; }
+    .nutrition-label h2 { border-bottom: 4px solid #000000; padding-bottom: 5px; }
+    .nut-row { display: flex; justify-content: space-between; border-top: 1px solid #CBD5E1; padding: 6px 0; }
+    .nut-row.thick { border-top: 3px solid #000000; }
+    .nut-bold { font-weight: bold; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -246,12 +198,9 @@ if st.session_state.get("do_logout_js", False):
     st.components.v1.html("<script>window.parent.localStorage.removeItem('nutri_username'); window.parent.sessionStorage.removeItem('nutri_username');</script>", height=0, width=0)
     st.session_state.do_logout_js = False
 
-if "auth_checked" not in st.session_state:
-    st.session_state.auth_checked = False
-if "current_username" not in st.session_state:
-    st.session_state.current_username = None
-if "current_page" not in st.session_state:
-    st.session_state.current_page = "home"
+if "auth_checked" not in st.session_state: st.session_state.auth_checked = False
+if "current_username" not in st.session_state: st.session_state.current_username = None
+if "current_page" not in st.session_state: st.session_state.current_page = "home"
 
 if not st.session_state.auth_checked:
     col_s1, col_s2, col_s3 = st.columns([1, 2, 1])
@@ -263,8 +212,7 @@ if not st.session_state.auth_checked:
         
     js_val = st_javascript('window.localStorage.getItem("nutri_username") || window.sessionStorage.getItem("nutri_username") || "NONE"')
     
-    if js_val == 0:
-        st.stop()
+    if js_val == 0: st.stop()
     elif js_val == "NONE":
         st.session_state.auth_checked = True
         st.rerun()
@@ -307,8 +255,7 @@ def append_to_daily_log(username, entry_data):
     user = get_user_data(username)
     logs = user.get("daily_logs") or {}
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    if today not in logs:
-        logs[today] = []
+    if today not in logs: logs[today] = []
     logs[today].append(entry_data)
     update_user_data(username, {"daily_logs": logs})
 
@@ -319,14 +266,15 @@ TRANSLATIONS = {
     "🇪🇸 Español": {
         "lang_code": "Spanish",
         "title": "¡Hola {name}! ¿Qué cocinamos hoy? 🍲", "subtitle": "Tu ecosistema inteligente de nutrición y cocina.",
-        "assistant_msg": "¿Qué hay en la despensa? ¡Hagamos magia!", "avail_ing_label": "Ingredientes disponibles hoy", "avoid_today_label": "¿Algo que evitar hoy?", "find_btn": "🍳 Buscar Recetas Mágicas",
+        "dash_mod1": "Cocina Mágica", "dash_mod2": "Mi Compra", "dash_mod3": "Mis Menús", "dash_mod4": "Mi Salud",
+        "assistant_msg": "¿Qué hay en la despensa? ¡Hagamos magia!", "avail_ing_label": "Ingredientes disponibles hoy", "avoid_today_label": "¿Algo que evitar hoy?", "find_btn": "Buscar Recetas Mágicas",
         "analyzing": "El Chef está analizando...", "here_options": "Opciones para ti:", "diff": "Dificultad", "time": "Tiempo", "health": "Salud",
         "cook_btn": "Cocinar {}", "loading_recipe": "Calculando macros exactos...", "start_over": "← Empezar de Nuevo", "note": "Nota del Nutricionista:",
         "ingredients": "🛒 Ingredientes", "save_fav": "⭐ Guardar en Favoritos", "saved": "¡Guardado!", "instructions": "👨‍🍳 Preparación", "adjust_title": "⚖️ Ajustar Macros",
         "adjust_sub": "¿Necesitas otras cantidades?", "adjust_ph": "Ej: 'Añade 20g de proteína'", "recalc_btn": "Recalcular", "recalculating": "Ajustando receta...",
         "profile": "👤 Mi Perfil", "update_prof": "Actualizar Perfil", "prof_updated": "¡Perfil actualizado!", "favs": "⭐ Favoritos", "no_favs": "Aún no hay favoritos.",
         "logout": "Cerrar Sesión", "news_title": "📰 Tendencias Nutricionales", "feed_title": "Últimas Noticias 🔥", "cook_this": "Cocinar esto 🍳", "download_btn": "⬇️ Descargar",
-        "keep_logged_in": "Mantener sesión iniciada", "chef_recom": "🌟 RECOMENDACIÓN ESTRELLA DEL CHEF 🌟",
+        "keep_logged_in": "Mantener sesión iniciada", "chef_recom": "🌟 RECOMENDACIÓN ESTRELLA 🌟",
         "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Tu chef y nutricionista personal impulsado por IA.", "tab_login": "🔑 Iniciar Sesión", "tab_register": "📝 Registrarse", "tab_recover": "🆘 Recuperar PIN",
         "username_label_login": "Usuario", "pin_label_login": "PIN", "login_btn": "Entrar a la Cocina 🚀", "login_error": "Usuario o PIN incorrectos.",
         "reg_section1": "1. Datos de Acceso", "create_user_label": "Crea un Usuario único", "create_pin_label": "Crea un PIN corto", "security_question_label": "Pregunta de Seguridad",
@@ -337,21 +285,20 @@ TRANSLATIONS = {
         "search_user_btn": "Buscar", "user_found": "Usuario encontrado.", "user_not_found": "Usuario no encontrado.", "recover_question_prefix": "Pregunta:", "your_answer_label": "Respuesta", "new_pin_label": "Nuevo PIN",
         "change_pin_btn": "Cambiar PIN", "pin_changed_success": "¡PIN cambiado!", "wrong_answer": "Incorrecta.", "current_weight_label": "Peso Actual (kg)",
         "profile_goals_label": "Objetivos", "profile_restrictions_label": "Restricciones", "macro_protein": "Proteínas", "macro_fat": "Grasas", "macro_carbs": "Carbohidratos",
-        "dash_mod1": "🍳\nCocina Inteligente", "dash_mod2": "🛒\nLista de Compras", "dash_mod3": "📅\nPlanificador", "dash_mod4": "📊\nResumen Diario", "back_home": "🏠 Volver al Menú",
-        "add_to_log": "📝 Añadir al registro de hoy", "log_success": "¡Añadido al registro de hoy!",
+        "back_home": "🏠 Volver al Menú", "add_to_log": "📝 Añadir al registro de hoy", "log_success": "¡Añadido al registro de hoy!",
         "shop_title": "Lista de la Compra Dinámica", "search_web_label": "¿Qué te gustaría preparar?", "search_web_btn": "🔍 Buscar y Extraer Ingredientes",
         "shop_list_title": "Tu Inventario de Compra", "add_item_btn": "Añadir Item", "clear_list": "🗑️ Vaciar Lista",
         "plan_title": "Planificador Semanal", "save_plan": "💾 Guardar Planificación", "plan_saved": "¡Planificación guardada!",
         "nutri_title": "Resumen Nutricional Diario", "manual_log_label": "¿Qué has comido fuera de la app? (Ej: 1 Manzana)", "manual_log_btn": "➕ Añadir",
         "eval_btn": "🩺 Evaluar mi día", "total_today": "Total de hoy", "analyzing_nutri": "Evaluando datos médicos...",
-        # Nuevas categorías y textos Módulo 2
         "cat_produce": "🥦 Frutas y Verduras", "cat_dairy": "🥛 Lácteos y Huevos", "cat_white_meat": "🍗 Carnes Blancas", 
         "cat_red_meat": "🥩 Carnes Rojas", "cat_seafood": "🐟 Pescados y Mariscos", "cat_pantry": "🥫 Despensa y Granos", "cat_other": "🛒 Otros",
         "add_to_list": "Añadir a la lista", "delete_item": "Eliminar", "type_food": "Escribe un alimento suelto..."
     },
     "🇬🇧 English": {
         "lang_code": "English", "title": "Hi {name}! What are we cooking today? 🍲", "subtitle": "Your smart nutrition ecosystem.",
-        "assistant_msg": "What's in the pantry?", "avail_ing_label": "Available ingredients", "avoid_today_label": "Anything to avoid?", "find_btn": "🍳 Find Magic Recipes",
+        "dash_mod1": "Magic Kitchen", "dash_mod2": "My Groceries", "dash_mod3": "My Menus", "dash_mod4": "My Health",
+        "assistant_msg": "What's in the pantry?", "avail_ing_label": "Available ingredients", "avoid_today_label": "Anything to avoid?", "find_btn": "Find Magic Recipes",
         "analyzing": "Analyzing...", "here_options": "Options:", "diff": "Difficulty", "time": "Time", "health": "Health",
         "cook_btn": "Cook {}", "loading_recipe": "Calculating macros...", "start_over": "← Start Over", "note": "Nutritionist Note:",
         "ingredients": "🛒 Ingredients", "save_fav": "⭐ Save Fav", "saved": "Saved!", "instructions": "👨‍🍳 Instructions", "adjust_title": "⚖️ Adjust Macros",
@@ -368,8 +315,7 @@ TRANSLATIONS = {
         "search_user_btn": "Search", "user_found": "Found.", "user_not_found": "Not found.", "recover_question_prefix": "Q:", "your_answer_label": "Answer", 
         "new_pin_label": "New PIN", "change_pin_btn": "Change", "pin_changed_success": "Changed!", "wrong_answer": "Wrong.", "current_weight_label": "Weight",
         "profile_goals_label": "Goals", "profile_restrictions_label": "Restrictions", "macro_protein": "Protein", "macro_fat": "Fat", "macro_carbs": "Carbs",
-        "dash_mod1": "🍳\nSmart Cooking", "dash_mod2": "🛒\nShopping List", "dash_mod3": "📅\nWeekly Planner", "dash_mod4": "📊\nDaily Summary", "back_home": "🏠 Back to Home",
-        "add_to_log": "📝 Add to today's log", "log_success": "Added to log!",
+        "back_home": "🏠 Back to Home", "add_to_log": "📝 Add to today's log", "log_success": "Added to log!",
         "shop_title": "Dynamic Shopping List", "search_web_label": "What do you want to cook?", "search_web_btn": "🔍 Search & Extract",
         "shop_list_title": "Your Groceries", "add_item_btn": "Add Item", "clear_list": "🗑️ Clear List",
         "plan_title": "Weekly Planner", "save_plan": "💾 Save Plan", "plan_saved": "Plan saved!",
@@ -381,7 +327,8 @@ TRANSLATIONS = {
     },
     "🇫🇷 Français": {
         "lang_code": "French", "title": "Bonjour {name} !", "subtitle": "Votre écosystème nutritionnel.",
-        "assistant_msg": "Qu'y a-t-il dans le frigo ?", "avail_ing_label": "Ingrédients disponibles", "avoid_today_label": "À éviter ?", "find_btn": "🍳 Trouver",
+        "dash_mod1": "Cuisine Magique", "dash_mod2": "Mes Courses", "dash_mod3": "Mes Menus", "dash_mod4": "Ma Santé",
+        "assistant_msg": "Qu'y a-t-il dans le frigo ?", "avail_ing_label": "Ingrédients disponibles", "avoid_today_label": "À éviter ?", "find_btn": "Trouver",
         "analyzing": "Analyse...", "here_options": "Options :", "diff": "Difficulté", "time": "Temps", "health": "Santé",
         "cook_btn": "Cuisiner {}", "loading_recipe": "Calcul...", "start_over": "← Recommencer", "note": "Note :",
         "ingredients": "🛒 Ingrédients", "save_fav": "⭐ Sauvegarder", "saved": "Sauvegardé !", "instructions": "👨‍🍳 Préparation", "adjust_title": "⚖️ Ajuster",
@@ -398,8 +345,7 @@ TRANSLATIONS = {
         "search_user_btn": "Chercher", "user_found": "Trouvé.", "user_not_found": "Non trouvé.", "recover_question_prefix": "Q :", "your_answer_label": "Réponse",
         "new_pin_label": "Nouveau PIN", "change_pin_btn": "Changer", "pin_changed_success": "Changé !", "wrong_answer": "Faux.", "current_weight_label": "Poids",
         "profile_goals_label": "Objectifs", "profile_restrictions_label": "Restrictions", "macro_protein": "Protéines", "macro_fat": "Graisses", "macro_carbs": "Glucides",
-        "dash_mod1": "🍳\nCuisine Intelligente", "dash_mod2": "🛒\nListe de Courses", "dash_mod3": "📅\nPlanificateur", "dash_mod4": "📊\nRésumé Quotidien", "back_home": "🏠 Retour",
-        "add_to_log": "📝 Ajouter au journal", "log_success": "Ajouté !", "shop_title": "Liste de Courses", "search_web_label": "Que voulez-vous cuisiner ?", "search_web_btn": "🔍 Extraire",
+        "back_home": "🏠 Retour", "add_to_log": "📝 Ajouter au journal", "log_success": "Ajouté !", "shop_title": "Liste de Courses", "search_web_label": "Que voulez-vous cuisiner ?", "search_web_btn": "🔍 Extraire",
         "shop_list_title": "Inventaire", "add_item_btn": "Ajouter", "clear_list": "🗑️ Vider", "plan_title": "Planificateur", "save_plan": "💾 Sauvegarder", "plan_saved": "Sauvegardé !",
         "nutri_title": "Résumé Nutritionnel", "manual_log_label": "Mangé dehors ?", "manual_log_btn": "➕ Ajouter", "eval_btn": "🩺 Évaluer", "total_today": "Total", "analyzing_nutri": "Évaluation...",
         "cat_produce": "🥦 Fruits et Légumes", "cat_dairy": "🥛 Produits Laitiers", "cat_white_meat": "🍗 Viande Blanche", 
@@ -408,7 +354,8 @@ TRANSLATIONS = {
     },
     "🇮🇹 Italiano": {
         "lang_code": "Italian", "title": "Ciao {name}!", "subtitle": "Il tuo ecosistema nutrizionale.",
-        "assistant_msg": "Cosa c'è in dispensa?", "avail_ing_label": "Ingredienti", "avoid_today_label": "Da evitare?", "find_btn": "🍳 Trova Ricette",
+        "dash_mod1": "Cucina Magica", "dash_mod2": "La Mia Spesa", "dash_mod3": "I Miei Menù", "dash_mod4": "La Mia Salute",
+        "assistant_msg": "Cosa c'è in dispensa?", "avail_ing_label": "Ingredienti", "avoid_today_label": "Da evitare?", "find_btn": "Trova Ricette",
         "analyzing": "Analizzando...", "here_options": "Opzioni:", "diff": "Difficoltà", "time": "Tempo", "health": "Salute",
         "cook_btn": "Cucina {}", "loading_recipe": "Calcolando...", "start_over": "← Ricomincia", "note": "Nota:",
         "ingredients": "🛒 Ingredienti", "save_fav": "⭐ Salva", "saved": "Salvato!", "instructions": "👨‍🍳 Preparazione", "adjust_title": "⚖️ Regola",
@@ -425,8 +372,7 @@ TRANSLATIONS = {
         "search_user_btn": "Cerca", "user_found": "Trovato.", "user_not_found": "Non trovato.", "recover_question_prefix": "D:", "your_answer_label": "Risposta",
         "new_pin_label": "Nuovo PIN", "change_pin_btn": "Cambia", "pin_changed_success": "Cambiato!", "wrong_answer": "Errato.", "current_weight_label": "Peso",
         "profile_goals_label": "Obiettivi", "profile_restrictions_label": "Restrizioni", "macro_protein": "Proteine", "macro_fat": "Grassi", "macro_carbs": "Carboidrati",
-        "dash_mod1": "🍳\nCucina Intelligente", "dash_mod2": "🛒\nLista della Spesa", "dash_mod3": "📅\nPianificatore", "dash_mod4": "📊\nRiassunto Quotidiano", "back_home": "🏠 Torna alla Home",
-        "add_to_log": "📝 Aggiungi al diario", "log_success": "Aggiunto!", "shop_title": "Lista della Spesa", "search_web_label": "Cosa vuoi cucinare?", "search_web_btn": "🔍 Estrai",
+        "back_home": "🏠 Torna alla Home", "add_to_log": "📝 Aggiungi al diario", "log_success": "Aggiunto!", "shop_title": "Lista della Spesa", "search_web_label": "Cosa vuoi cucinare?", "search_web_btn": "🔍 Estrai",
         "shop_list_title": "La tua spesa", "add_item_btn": "Aggiungi", "clear_list": "🗑️ Svuota lista", "plan_title": "Pianificatore", "save_plan": "💾 Salva", "plan_saved": "Salvato!",
         "nutri_title": "Riassunto Nutrizionale", "manual_log_label": "Mangiato fuori?", "manual_log_btn": "➕ Aggiungi", "eval_btn": "🩺 Valuta la mia giornata", "total_today": "Totale di oggi", "analyzing_nutri": "Valutazione...",
         "cat_produce": "🥦 Frutta e Verdura", "cat_dairy": "🥛 Latticini e Uova", "cat_white_meat": "🍗 Carne Bianca", 
@@ -434,8 +380,6 @@ TRANSLATIONS = {
         "add_to_list": "Aggiungi alla lista", "delete_item": "Elimina", "type_food": "Scrivi un alimento..."
     }
 }
-
-t_trending =[{"name": "Ratatouille", "emoji": "🍅", "desc": "Un clásico lleno de vitaminas y muy bajo en calorías."}, {"name": "Risotto de Setas", "emoji": "🍄", "desc": "Cremoso, reconfortante y perfecto para cargar energía."}, {"name": "Poke Bowl de Salmón", "emoji": "🥗", "desc": "Fresco, rico en omega-3 y grasas saludables."}, {"name": "Shakshuka", "emoji": "🍳", "desc": "Huevos en salsa de tomate especiada. Alto en proteína."}]
 
 if "selected_lang" not in st.session_state: st.session_state.selected_lang = "🇪🇸 Español"
 cols_top = st.columns([1, 6, 1])
@@ -448,7 +392,7 @@ lang_code = t["lang_code"]
 # ==========================================
 if not st.session_state.current_username:
     st.markdown(f"<h1 class='brand-logo'>{t['auth_app_name']}</h1>", unsafe_allow_html=True)
-    st.markdown(f"<p class='brand-subtitle'>{t['auth_subtitle']}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:center; color:#64748B;'>{t['auth_subtitle']}</p>", unsafe_allow_html=True)
     
     col_auth1, col_auth2, col_auth3 = st.columns([1, 2, 1])
     with col_auth2:
@@ -542,15 +486,17 @@ def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", 
     system_prompt = f"""
     You are a Michelin-star Executive Chef and Clinical Nutritionist.
     Your client is {u_prof['name']}. Profile: {u_prof['age']} y/o, {u_prof['weight']} kg, {u_prof['height']} cm, Gender: {u_prof['gender']}.
-    Main goal: "{u_prof['goals']}". Restrictions: "{u_prof['restrictions']}".[DYNAMIC GENERATION] Generate exactly {num_recipes} recipe options.[CHEF'S RECOMMENDATION - CRITICAL] Analyze the client's profile/goals. Tag exactly ONE recipe with `"is_chefs_recommendation": true` that is the healthiest for them. All others `false`.
+    Main goal: "{u_prof['goals']}". Restrictions: "{u_prof['restrictions']}".
+    [DYNAMIC GENERATION] Generate exactly {num_recipes} recipe options.
+    [CHEF'S RECOMMENDATION - CRITICAL] Analyze the client's profile/goals. Tag exactly ONE recipe with `"is_chefs_recommendation": true` that is the healthiest for them.
+    [COHERENCE FILTER - CRITICAL] Formulate ONLY realistic, delicious, and culturally sensible dishes. DO NOT invent bizarre or disgusting combinations (e.g., chorizo with Nutella). If the ingredients provided don't mix well, ignore the outliers and suggest a logical, tasty recipe using only a subset.[MULTILINGUAL - CRITICAL] You MUST translate the ENTIRE JSON response (recipe_name, description, ingredients, steps, nutritionist_note, health_badges) into {lang_code}. If {lang_code} is 'French', the title MUST be in French. NEVER mix languages.
     """
     if avail_ing: system_prompt += f"\n[GOLDEN RULE] Recipes MUST be based EXCLUSIVELY on: {avail_ing}. Do NOT invent main ingredients."
     if avoid_tdy: system_prompt += f"\n[STRICT PROHIBITION] Under NO circumstances include: {avoid_tdy}."
 
-    system_prompt += f"\nCRITICAL: Reply entirely in {lang_code}. ALWAYS valid JSON format."
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": system_prompt + "\n" + expected_format_hint}, {"role": "user", "content": prompt}], response_format={"type": "json_object"}, temperature=0.7)
+            model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": system_prompt + "\n" + expected_format_hint}, {"role": "user", "content": prompt}], response_format={"type": "json_object"}, temperature=0.6)
         return json.loads(response.choices[0].message.content)
     except Exception as e:
         st.error(f"AI Error: {e}")
@@ -576,122 +522,53 @@ def format_recipe_for_download(recipe, t_dict):
     text += f"\n--- MACROS ---\nCalorías: {m.get('calories', '0')} | Proteína: {m.get('protein', '0g')} | Grasas: {m.get('total_fat', '0g')} | Carbohidratos: {m.get('total_carbs', '0g')}\n"
     return text
 
-from duckduckgo_search import DDGS
-from datetime import timedelta
-
-# ==========================================
-# FUNCIÓN CACHÉ NOTICIAS RECETAS / TENDENCIAS
-# ==========================================
-
 @st.cache_data(ttl=timedelta(days=3))
 def fetch_food_trends():
-
     query = "famous recipes food trends popular dishes gastronomy news"
-
     try:
         results = list(DDGS().text(query, max_results=4))
         return results
-    except Exception:
-        return []
-
+    except Exception: return[]
 
 # ==========================================
 # SIDEBAR REDISEÑADA
 # ==========================================
-
 with st.sidebar:
-
-    st.markdown(
-        f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>",
-        unsafe_allow_html=True
-    )
+    st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
     with st.expander(t["profile"], expanded=False):
-
-        upd_weight = st.number_input(
-            t["current_weight_label"],
-            value=float(user_profile.get("weight",70))
-        )
-
-        upd_goals = st.text_area(
-            t["profile_goals_label"],
-            value=user_profile.get("goals","")
-        )
-
-        upd_rest = st.text_input(
-            t["profile_restrictions_label"],
-            value=user_profile.get("restrictions","")
-        )
-
+        upd_weight = st.number_input(t["current_weight_label"], value=float(user_profile.get("weight",70)))
+        upd_goals = st.text_area(t["profile_goals_label"], value=user_profile.get("goals",""))
+        upd_rest = st.text_input(t["profile_restrictions_label"], value=user_profile.get("restrictions",""))
         if st.button(t["update_prof"], use_container_width=True):
-            update_user_data(
-                user_profile["username"],
-                {"weight":upd_weight,"goals":upd_goals,"restrictions":upd_rest}
-            )
+            update_user_data(user_profile["username"], {"weight":upd_weight,"goals":upd_goals,"restrictions":upd_rest})
             st.success(t["prof_updated"])
             st.rerun()
 
-
     st.divider()
-
     st.subheader(t["favs"])
-
     favs = user_profile.get("favorites",[])
-
     if favs:
         for f in favs:
-            with st.expander(f["name"]):
-                st.write(f"🔥 {f['calories']} | 💪 {f['protein']}")
-    else:
-        st.info(t["no_favs"])
-
+            with st.expander(f["name"]): st.write(f"🔥 {f['calories']} | 💪 {f['protein']}")
+    else: st.info(t["no_favs"])
 
     st.divider()
-
-    # ==========================================
-    # EXPANDER NOTICIAS RECETAS TENDENCIA
-    # ==========================================
-
     with st.expander("🔥 Recetas y Tendencias", expanded=False):
-
         news_items = fetch_food_trends()
-
         if news_items:
-
             for news in news_items:
-
                 st.markdown(f"""
-                <div style="
-                background: rgba(255,255,255,0.55);
-                padding:12px;
-                border-radius:10px;
-                margin-bottom:12px;
-                border:1px solid rgba(0,0,0,0.05);
-                ">
-                    <h4 style="margin:0;font-size:14px;font-weight:700;">
-                    {news.get('title','')}
-                    </h4>
-
-                    <p style="font-size:12px;margin-top:6px;margin-bottom:6px;line-height:1.4;">
-                    {news.get('body','')[:100]}...
-                    </p>
-
-                    <a href="{news.get('href','#')}"
-                       target="_blank"
-                       style="font-size:12px;color:#2563eb;font-weight:bold;text-decoration:none;">
-                       Ver receta / noticia →
-                    </a>
+                <div style="background: #FFFFFF; padding:12px; border-radius:10px; margin-bottom:12px; border:1px solid #E2E8F0; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <h4 style="margin:0;font-size:14px;font-weight:700;color:#1E293B;">{news.get('title','')}</h4>
+                    <p style="font-size:12px;margin-top:6px;margin-bottom:6px;line-height:1.4;color:#475569;">{news.get('body','')[:100]}...</p>
+                    <a href="{news.get('href','#')}" target="_blank" style="font-size:12px;color:#3B82F6;font-weight:bold;text-decoration:none;">Ver receta / noticia →</a>
                 </div>
                 """, unsafe_allow_html=True)
-
-        else:
-            st.write("No hay tendencias disponibles.")
-
+        else: st.write("No hay tendencias disponibles.")
 
     st.divider()
-
-    if st.button(t["logout"], type="secondary", use_container_width=True):
-        logout()
+    if st.button(t["logout"], type="secondary", use_container_width=True): logout()
 
 # ==========================================
 # HEADER PRINCIPAL
@@ -699,20 +576,71 @@ with st.sidebar:
 st.markdown(f"<h1 class='brand-logo'>NutriAI</h1>", unsafe_allow_html=True)
 
 # ==========================================
-# RUTEO DE PÁGINAS (DASHBOARD)
+# RUTEO DE PÁGINAS (DASHBOARD REDISEÑADO)
 # ==========================================
 if st.session_state.current_page == "home":
-    st.markdown(f"<h2 style='text-align:center;'>{t['title'].format(name=user_profile['name'])}</h2>", unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align:center; font-size:1.2rem; color:#cbd5e1;'>{t['subtitle']}</p><br>", unsafe_allow_html=True)
+    # CSS Específico Inyectado para los Botones Masivos con SVGs (Layout Dinámico y Accesible)
+    st.markdown("""
+    <style>
+    /* Diseño Masivo y SVGs para los 4 Módulos */
+    [data-testid="column"] div.stButton > button {
+        min-height: 220px !important;
+        border-radius: 24px !important;
+        font-size: 26px !important;
+        font-weight: 800 !important;
+        color: #1E293B !important;
+        background-color: #FFFFFF !important;
+        background-image: none !important; /* Reseteamos el gradiente base */
+        box-shadow: 0 10px 40px rgba(0,0,0,0.06) !important;
+        border: 2px solid #E2E8F0 !important;
+        transition: all 0.3s ease !important;
+        background-repeat: no-repeat !important;
+        background-position: center top 35px !important;
+        background-size: 70px !important;
+        padding-top: 100px !important; 
+    }
+    [data-testid="column"] div.stButton > button:hover {
+        transform: translateY(-8px) !important;
+        box-shadow: 0 20px 50px rgba(16,185,129,0.15) !important;
+        border: 2px solid #10B981 !important;
+    }
     
-    st.markdown('<div class="dashboard-grid">', unsafe_allow_html=True)
+    /* 1: Cocina Mágica (Wand/Chef Hat) */
+    [data-testid="column"]:nth-of-type(1) div.stButton:nth-of-type(1) button {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z'/%3E%3C/svg%3E") !important;
+    }
+    
+    /* 3: Mis Menús (Calendar) */
+    [data-testid="column"]:nth-of-type(1) div.stButton:nth-of-type(2) button {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") !important;
+    }
+
+    /* 2: Mi Compra (Cart) */
+    [data-testid="column"]:nth-of-type(2) div.stButton:nth-of-type(1) button {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='21' r='1'/%3E%3Ccircle cx='20' cy='21' r='1'/%3E%3Cpath d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/%3E%3C/svg%3E") !important;
+    }
+
+    /* 4: Mi Salud (Heart) */[data-testid="column"]:nth-of-type(2) div.stButton:nth-of-type(2) button {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'/%3E%3C/svg%3E") !important;
+    }
+    
+    /* Layout Móvil */
+    @media (max-width: 768px) {
+        [data-testid="column"] div.stButton > button { min-height: 180px !important; font-size: 22px !important; margin-bottom: 10px; }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown(f"<h2 style='text-align:center;'>{t['title'].format(name=user_profile['name'])}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:center; font-size:1.2rem; color:#64748B;'>{t['subtitle']}</p><br>", unsafe_allow_html=True)
+    
+    # 2x2 en Escritorio / 1x4 en Móvil Automático vía st.columns
     c1, c2 = st.columns(2)
     with c1:
         if st.button(t["dash_mod1"], use_container_width=True):
             st.session_state.current_page = "mod1"
             st.session_state.step = "input"
             st.rerun()
-        st.markdown("<br>", unsafe_allow_html=True)
         if st.button(t["dash_mod3"], use_container_width=True):
             st.session_state.current_page = "mod3"
             st.rerun()
@@ -720,11 +648,9 @@ if st.session_state.current_page == "home":
         if st.button(t["dash_mod2"], use_container_width=True):
             st.session_state.current_page = "mod2"
             st.rerun()
-        st.markdown("<br>", unsafe_allow_html=True)
         if st.button(t["dash_mod4"], use_container_width=True):
             st.session_state.current_page = "mod4"
             st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
 # MÓDULO 1: COCINA INTELIGENTE
@@ -742,8 +668,12 @@ elif st.session_state.current_page == "mod1":
             if available_ingredients:
                 st.session_state.avail_ing = available_ingredients
                 st.session_state.avoid_tdy = avoid_today
-                ing_count = len([x for x in re.split(r',|\sy\s|\sand\s|\set\s', available_ingredients) if x.strip()])
-                n_recipes = 5 if ing_count >= 4 else 3
+                
+                # Lógica dinámica estricta de cantidad
+                ing_count = len([x for x in re.split(r',|\sy\s|\sand\s|\set\s|\n', available_ingredients) if x.strip()])
+                if ing_count <= 4: n_recipes = 2
+                elif ing_count <= 8: n_recipes = 3
+                else: n_recipes = 4
                 
                 lottie_placeholder = st.empty()
                 with lottie_placeholder.container():
@@ -773,10 +703,10 @@ elif st.session_state.current_page == "mod1":
                     st.markdown(f"""
                     <div class="golden-card">
                         <div class="golden-card-content">
-                            <span style="color:#D4AF37; font-weight:bold; letter-spacing:2px; font-size:14px;">{t['chef_recom']}</span>
+                            <span style="color:#B45309; font-weight:900; letter-spacing:2px; font-size:14px;">{t['chef_recom']}</span>
                             <h1 style="font-size: 55px; margin: 5px 0;">{opt.get('hero_emoji', '🍽️')}</h1>
-                            <h2 style="margin: 0; color: white;">{opt['name']}</h2>
-                            <p style="color:#cbd5e1; font-style:italic; margin-top:5px;">Alineado 100% con tu perfil de salud</p>
+                            <h2 style="margin: 0; color: #1E293B;">{opt['name']}</h2>
+                            <p style="color:#64748B; font-style:italic; margin-top:5px;">Alineado 100% con tu perfil de salud</p>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
@@ -797,16 +727,20 @@ elif st.session_state.current_page == "mod1":
         with lottie_placeholder.container():
             st.markdown("<br>", unsafe_allow_html=True)
             if lottie_cooking: st_lottie(lottie_cooking, height=200, key="loading_anim_2")
-            st.markdown(f"<h3 style='text-align:center;'>{t['loading_recipe'].format(st.session_state.selected_option['name'])}</h3>", unsafe_allow_html=True)
+            st.markdown(f"<h3 style='text-align:center;'>{t['loading_recipe']}</h3>", unsafe_allow_html=True)
         
-        # PROMPT MEJORADO: Tono pedagógico y macros detallados
-        prompt = f"Genera la receta completa para '{st.session_state.selected_option['name']}'. Actúa como un chef amigable y pedagógico. Explica el porqué de cada paso de forma detallada, clara y cercana para que no haya dudas."
+        prompt = f"Genera la receta completa para '{st.session_state.selected_option['name']}'. Explica cada paso."
+        # Incorporación de Health Badges en el prompt
         format_hint = """{ 
             "recipe_name": "Name", 
             "region": "Style", 
             "hero_emoji": "🥘", 
             "ingredients_emojis": "🍅🧅", 
             "nutritionist_note": "Empathetic note", 
+            "health_badges":[
+                {"icon": "🟢", "label": "Sin Colesterol", "type": "positive"},
+                {"icon": "🔴", "label": "Alto en Sodio", "type": "warning"}
+            ],
             "macros": { 
                 "calories": "450 kcal", 
                 "total_fat": "15g", 
@@ -818,10 +752,7 @@ elif st.session_state.current_page == "mod1":
                 "protein": "40g" 
             }, 
             "ingredients":[{"item": "Ing", "qty": "200g"}], 
-            "instructions":[
-                "1. 🍳 Empezaremos calentando la sartén a fuego medio para que los sabores se liberen lentamente...", 
-                "2. 🔪 Ahora cortamos..."
-            ] 
+            "instructions":["1. 🍳 Paso 1...", "2. 🔪 Paso 2..."] 
         }"""
         res = call_ai_json(prompt, format_hint, lang_code, user_profile, st.session_state.avail_ing, st.session_state.avoid_tdy)
         lottie_placeholder.empty()
@@ -842,15 +773,24 @@ elif st.session_state.current_page == "mod1":
             txt_data = format_recipe_for_download(recipe, t)
             st.download_button(label=t["download_btn"], data=txt_data, file_name=f"{recipe['recipe_name'].replace(' ', '_')}.txt", mime="text/plain", use_container_width=True)
 
-        st.markdown(f"<p class='hero-emoji'>{recipe.get('hero_emoji', '🍽️')}</p><h2 style='text-align:center;'>{recipe['recipe_name']}</h2><h4 style='text-align:center; color:#cbd5e1;'>🌍 {recipe.get('region', 'Global')}</h4><h3 style='text-align:center; letter-spacing: 5px;'>{recipe.get('ingredients_emojis', '')}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<p class='hero-emoji'>{recipe.get('hero_emoji', '🍽️')}</p><h2 style='text-align:center;'>{recipe['recipe_name']}</h2><h4 style='text-align:center; color:#64748B;'>🌍 {recipe.get('region', 'Global')}</h4><h3 style='text-align:center; letter-spacing: 5px;'>{recipe.get('ingredients_emojis', '')}</h3>", unsafe_allow_html=True)
         st.info(f"**{t['note']}** {recipe.get('nutritionist_note', '')}")
         st.divider()
+        
+        # Renderización de SEMÁFOROS (Health Badges)
+        badges = recipe.get('health_badges',[])
+        if badges:
+            html_b = "<div style='display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:20px;'>"
+            for b in badges:
+                c = "#10b981" if b.get("type")=="positive" else "#f59e0b" if b.get("type")=="warning" else "#ef4444"
+                html_b += f"<span style='background:{c}15; color:{c}; padding:8px 18px; border-radius:20px; font-weight:700; font-size:14px; border:1px solid {c}50; box-shadow:0 2px 5px rgba(0,0,0,0.05);'>{b.get('icon','')} {b.get('label','')}</span>"
+            html_b += "</div>"
+            st.markdown(html_b, unsafe_allow_html=True)
         
         col_label, col_chart = st.columns(2)
         m = recipe['macros']
         
         with col_label:
-            # ETIQUETA NUTRICIONAL DETALLADA TIPO FDA
             st.markdown(f"""
             <div class="nutrition-label">
                 <h2>Nutrition Facts</h2>
@@ -866,28 +806,18 @@ elif st.session_state.current_page == "mod1":
             """, unsafe_allow_html=True)
             
         with col_chart:
-            # GRÁFICO PLOTLY CON LEYENDA Y TEXTOS EN BLANCO
+            # Gráfico de Plotly optimizado para Light Theme
             macro_df = pd.DataFrame({
                 "Macro":[t.get("macro_protein", "Protein"), t.get("macro_fat", "Fat"), t.get("macro_carbs", "Carbs")], 
                 "Gramos":[extract_number(m.get('protein', '0g')), extract_number(m.get('total_fat', '0g')), extract_number(m.get('total_carbs', '0g'))]
             })
             if macro_df['Gramos'].sum() > 0:
-                fig = px.pie(macro_df, values='Gramos', names='Macro', hole=0.55, color_discrete_sequence=['#ff6b6b', '#feca57', '#48dbfb'])
-                fig.update_traces(textfont_color='white')
+                fig = px.pie(macro_df, values='Gramos', names='Macro', hole=0.55, color_discrete_sequence=['#EF4444', '#F59E0B', '#3B82F6'])
+                fig.update_traces(textfont_color='#FFFFFF', textinfo='percent+label', textposition='inside')
                 fig.update_layout(
-                    margin=dict(t=20, b=20, l=20, r=20), 
-                    showlegend=True, 
-                    legend=dict(
-                        orientation="h", 
-                        yanchor="bottom", 
-                        y=-0.3, 
-                        xanchor="center", 
-                        x=0.5,
-                        font=dict(color='white') # Leyenda forzada a color blanco
-                    ), 
-                    paper_bgcolor='rgba(0,0,0,0)', 
-                    plot_bgcolor='rgba(0,0,0,0)', 
-                    font=dict(color='white') # Fuente general del gráfico en blanco
+                    margin=dict(t=20, b=20, l=20, r=20), showlegend=True, 
+                    legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5, font=dict(color='#1E293B')), 
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#1E293B')
                 )
                 st.plotly_chart(fig, use_container_width=True)
         
@@ -908,8 +838,7 @@ elif st.session_state.current_page == "mod1":
             for ing in recipe["ingredients"]: st.markdown(f"- **{ing['qty']}** {ing['item']}")
                 
         with st.expander("👨‍🍳 " + t["instructions"], expanded=True):
-            for i, step in enumerate(recipe["instructions"]): 
-                st.write(f"{step}") # Se asume que el JSON ya trae el número y el emoji
+            for i, step in enumerate(recipe["instructions"]): st.write(f"{step}")
 
         st.divider()
         st.subheader(t["adjust_title"])
@@ -932,178 +861,70 @@ elif st.session_state.current_page == "mod1":
 # MÓDULO 2: LISTA DE LA COMPRA E INVENTARIO
 # ==========================================
 elif st.session_state.current_page == "mod2":
-
-    if st.button(t["back_home"], type="secondary"):
-        go_home()
-
+    if st.button(t["back_home"], type="secondary"): go_home()
     st.divider()
-
-    st.markdown(
-        f"<h2 style='text-align:center;'>{t['shop_title']}</h2>",
-        unsafe_allow_html=True
-    )
-
-    # ==========================
-    # INPUT NUEVO ALIMENTO
-    # ==========================
+    st.markdown(f"<h2 style='text-align:center;'>{t['shop_title']}</h2>", unsafe_allow_html=True)
 
     col1, col2 = st.columns([4,1])
-
-    with col1:
-        new_item = st.text_input(
-            "",
-            placeholder=t["type_food"],
-            label_visibility="collapsed"
-        )
-
-    with col2:
-        add_pressed = st.button(
-            t["add_to_list"],
-            type="primary",
-            use_container_width=True
-        )
+    with col1: new_item = st.text_input("", placeholder=t["type_food"], label_visibility="collapsed")
+    with col2: add_pressed = st.button(t["add_to_list"], type="primary", use_container_width=True)
 
     if add_pressed and new_item:
-
         with st.spinner("Organizando alimento..."):
-
-            sys_prompt = """
-            Clasifica el alimento del usuario en UNA sola categoría.
-
-            Categorías válidas:
-            - cat_produce
-            - cat_dairy
-            - cat_white_meat
-            - cat_red_meat
-            - cat_seafood
-            - cat_pantry
-            - cat_other
-
-            Devuelve SOLO JSON:
-            {"category":"cat_x"}
+            # Ahora la IA traduce automáticamente el alimento al idioma del usuario
+            sys_prompt = f"""
+            Clasifica el alimento del usuario en UNA sola categoría y TRADÚCELO al {lang_code}.
+            Categorías válidas: cat_produce, cat_dairy, cat_white_meat, cat_red_meat, cat_seafood, cat_pantry, cat_other.
+            Devuelve SOLO JSON: {{"category":"cat_x", "translated_item": "Nombre traducido"}}
             """
-
-            parsed = groq_generic_json(
-                sys_prompt,
-                f"Food: {new_item}"
-            )
-
+            parsed = groq_generic_json(sys_prompt, f"Food: {new_item}")
             category = "cat_other"
-
-            if parsed and "category" in parsed:
-                category = parsed["category"]
+            item_name = new_item.capitalize()
+            
+            if parsed:
+                category = parsed.get("category", "cat_other")
+                item_name = parsed.get("translated_item", new_item).capitalize()
 
             shop_list = user_profile.get("shopping_list",[])
-
-            if not isinstance(shop_list,list):
-                shop_list = []
-
-            shop_list.append({
-                "item": new_item.capitalize(),
-                "category": category
-            })
-
-            update_user_data(
-                user_profile["username"],
-                {"shopping_list":shop_list}
-            )
-
+            if not isinstance(shop_list,list): shop_list =[]
+            shop_list.append({"item": item_name, "category": category})
+            update_user_data(user_profile["username"], {"shopping_list":shop_list})
             st.rerun()
 
-
     st.divider()
-
     st.subheader(t["shop_list_title"])
-
     shop_list = user_profile.get("shopping_list",[])
 
     if not shop_list:
-
         st.info("🛒 Tu lista está vacía.")
-
     else:
-
         categorized = {}
-
         for idx,obj in enumerate(shop_list):
-
             cat = obj.get("category","cat_other")
-
-            if cat not in categorized:
-                categorized[cat] = []
-
+            if cat not in categorized: categorized[cat] =[]
             categorized[cat].append((idx,obj["item"]))
 
-
-        category_order = [
-            "cat_produce",
-            "cat_dairy",
-            "cat_white_meat",
-            "cat_red_meat",
-            "cat_seafood",
-            "cat_pantry",
-            "cat_other"
-        ]
-
-
+        category_order =["cat_produce", "cat_dairy", "cat_white_meat", "cat_red_meat", "cat_seafood", "cat_pantry", "cat_other"]
         for cat in category_order:
-
             if cat in categorized:
-
                 items = categorized[cat]
-
                 if items:
-
-                    with st.expander(
-                        f"{t.get(cat,cat)} ({len(items)})",
-                        expanded=True
-                    ):
-
+                    with st.expander(f"{t.get(cat,cat)} ({len(items)})", expanded=True):
                         for idx,item in items:
-
                             c1,c2 = st.columns([6,1])
-
-                            with c1:
-                                st.markdown(
-                                    f"<p style='font-size:1.05rem;font-weight:500;margin-top:6px;'>• {item}</p>",
-                                    unsafe_allow_html=True
-                                )
-
+                            with c1: st.markdown(f"<p style='font-size:1.05rem;font-weight:500;margin-top:6px;'>• {item}</p>", unsafe_allow_html=True)
                             with c2:
-                                if st.button(
-                                    "🗑️",
-                                    key=f"del_{idx}",
-                                    use_container_width=True
-                                ):
+                                if st.button("🗑️", key=f"del_{idx}", use_container_width=True):
                                     shop_list.pop(idx)
-
-                                    update_user_data(
-                                        user_profile["username"],
-                                        {"shopping_list":shop_list}
-                                    )
-
+                                    update_user_data(user_profile["username"], {"shopping_list":shop_list})
                                     st.rerun()
 
-
     if shop_list:
-
         st.markdown("<br>", unsafe_allow_html=True)
-
         col1,col2 = st.columns([3,1])
-
         with col2:
-
-            if st.button(
-                t["clear_list"],
-                type="secondary",
-                use_container_width=True
-            ):
-
-                update_user_data(
-                    user_profile["username"],
-                    {"shopping_list":[]}
-                )
-
+            if st.button(t["clear_list"], type="secondary", use_container_width=True):
+                update_user_data(user_profile["username"], {"shopping_list":[]})
                 st.rerun()
 
 # ==========================================
@@ -1137,7 +958,6 @@ elif st.session_state.current_page == "mod4":
     daily_logs = user_profile.get("daily_logs") or {}
     today_data = daily_logs.get(today_str,[])
     
-    # Calcular totales
     t_cal = sum(item.get("calories", 0) for item in today_data)
     t_pro = sum(item.get("protein", 0) for item in today_data)
     t_fat = sum(item.get("fat", 0) for item in today_data)
@@ -1151,8 +971,7 @@ elif st.session_state.current_page == "mod4":
     
     with st.expander("Ver detalle de hoy", expanded=True):
         if not today_data: st.write("No has registrado nada hoy.")
-        for d in today_data:
-            st.write(f"- **{d['name']}**: {d['calories']} kcal (P:{d['protein']}g | G:{d['fat']}g | C:{d['carbs']}g)")
+        for d in today_data: st.write(f"- **{d['name']}**: {d['calories']} kcal (P:{d['protein']}g | G:{d['fat']}g | C:{d['carbs']}g)")
 
     st.divider()
     manual_input = st.text_input(t["manual_log_label"])
