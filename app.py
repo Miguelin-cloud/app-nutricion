@@ -722,10 +722,23 @@ if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 # SIDEBAR REDISEÑADA & PUNTERO MÁGICO
 # ==========================================
 with st.sidebar:
+    # ESCUDO CSS: Evita que las tarjetas gigantes del Home afecten a la barra lateral
+    st.markdown("""
+    <style>[data-testid="stSidebar"] button {
+        min-height: 0px !important;
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+        background-image: none !important;
+        box-shadow: none !important;
+    }[data-testid="stSidebar"] button::after { display: none !important; content: none !important; }[data-testid="stSidebar"] button p { transform: none !important; color: inherit !important; margin: 0 !important; font-weight: normal !important; }
+    [data-testid="stSidebar"] button:hover { transform: translateY(-2px) scale(1.05) !important; }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
     # 1. EXPANDER: PUNTERO MÁGICO (Multilingüe y Sin Lag)
-    with st.expander(t["magic_pointer"], expanded=False):
+    with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
         cursor_mapping = {
             "default": t["ptr_default"], "🍗": t["ptr_drumstick"], "🥑": t["ptr_avocado"],
             "🥘": t["ptr_pan"], "🍕": t["ptr_pizza"], "🪄": t["ptr_wand"], "🍎": t["ptr_apple"]
@@ -734,12 +747,11 @@ with st.sidebar:
         
         if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
         
-        # Obtenemos el índice actual para que el selectbox mantenga el estado correcto al cambiar de idioma
         options_list = list(cursor_mapping.values())
         try: current_idx = list(cursor_mapping.keys()).index(st.session_state.cursor_val)
         except ValueError: current_idx = 0
             
-        selected_label = st.selectbox(t["choose_pointer"], options_list, index=current_idx)
+        selected_label = st.selectbox(t.get("choose_pointer", "Elige:"), options_list, index=current_idx)
         st.session_state.cursor_val = inv_cursor[selected_label]
         
         if st.session_state.cursor_val != "default":
@@ -750,7 +762,7 @@ with st.sidebar:
             """, unsafe_allow_html=True)
 
     # 2. EXPANDER: PERFIL
-    with st.expander(t["profile"], expanded=False):
+    with st.expander("👤 " + t["profile"], expanded=False):
         upd_weight = st.number_input(t["current_weight_label"], value=float(user_profile.get("weight",70)))
         upd_goals = st.text_area(t["profile_goals_label"], value=user_profile.get("goals",""))
         upd_rest = st.text_input(t["profile_restrictions_label"], value=user_profile.get("restrictions",""))
@@ -759,7 +771,7 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    # 3. EXPANDER: RECETAS FAVORITAS (Con opción de eliminar)
+    # 3. EXPANDER: RECETAS FAVORITAS
     with st.expander(t["favs"], expanded=False):
         favs = user_profile.get("favorites",[])
         if favs:
@@ -769,14 +781,14 @@ with st.sidebar:
                 
                 col_c, col_d = st.columns([3, 1])
                 with col_c:
-                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar"):
+                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar esta receta"):
                         if "ingredients" in f:
                             st.session_state.full_recipe = f
                             st.session_state.current_page = "mod1"
                             st.session_state.step = "recipe_view"
                             st.rerun()
                         else:
-                            st.warning("Receta de versión antigua. Faltan pasos.")
+                            st.warning("Receta antigua. Faltan pasos.")
                 with col_d:
                     if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help=t["btn_delete"]):
                         favs.pop(idx)
@@ -786,25 +798,28 @@ with st.sidebar:
         else: 
             st.info(t["no_favs"])
 
-    # 4. EXPANDER: TENDENCIAS NUTRICIONALES (Multilingüe)
+    # 4. EXPANDER: TENDENCIAS NUTRICIONALES (CARRUSEL DE EMOJIS)
     with st.expander(t.get("news_title", "Tendencias"), expanded=True):
         trend_keys =["trend_sweets", "trend_salty", "trend_snacks", "trend_breakfast", "trend_drinks"]
+        trend_emojis =["🍰", "🥨", "🥪", "🥣", "🥤"]
         if "trend_idx" not in st.session_state: st.session_state.trend_idx = 0
         
-        col_l, col_c, col_r = st.columns([1, 4, 1])
-        with col_l:
-            if st.button("◀", key="btn_prev_trend"): 
-                st.session_state.trend_idx = (st.session_state.trend_idx - 1) % len(trend_keys)
-                st.rerun()
-        with col_c:
-            current_key = trend_keys[st.session_state.trend_idx]
-            st.markdown(f"<div style='text-align:center; font-weight:800; color:#10B981; font-size:13px; margin-top:8px;'>{t[current_key]}</div>", unsafe_allow_html=True)
-        with col_r:
-            if st.button("▶", key="btn_next_trend"): 
-                st.session_state.trend_idx = (st.session_state.trend_idx + 1) % len(trend_keys)
-                st.rerun()
+        # Generar el Carrusel de Emojis interactivo
+        cols = st.columns(5)
+        for i, (key, emoji) in enumerate(zip(trend_keys, trend_emojis)):
+            with cols[i]:
+                # Usamos el parámetro 'help' para que salga la cajetilla flotante al pasar el ratón
+                is_selected = (st.session_state.trend_idx == i)
+                btn_type = "primary" if is_selected else "secondary"
+                if st.button(emoji, key=f"trend_btn_{i}", help=t.get(key, key), use_container_width=True, type=btn_type):
+                    st.session_state.trend_idx = i
+                    st.rerun()
+                    
+        # Mostrar el título de la categoría seleccionada
+        current_key = trend_keys[st.session_state.trend_idx]
+        st.markdown(f"<div style='text-align:center; font-weight:800; color:#10B981; font-size:14px; margin:10px 0;'>{t.get(current_key, current_key)}</div>", unsafe_allow_html=True)
                 
-        # Cargar noticias por clave interna (independiente del idioma)
+        # Cargar noticias
         news_items = fetch_daily_healthy_recipes(lang_code, current_key)
         if news_items:
             for news in news_items:
@@ -821,11 +836,11 @@ with st.sidebar:
         else: 
             st.warning("No hay tendencias hoy.")
             
-        if st.button("🔄 Actualizar", key="btn_refresh_news", use_container_width=True):
+        if st.button("🔄 Actualizar Noticias", key="btn_refresh_news", use_container_width=True):
             fetch_daily_healthy_recipes.clear()
             st.rerun()
 
-            # 5. EXPANDER: ALERTAS Y NOTIFICACIONES (Sistema de Respaldo IA)
+    # 5. EXPANDER: ALERTAS Y NOTIFICACIONES (Sistema de Respaldo IA)
     with st.expander("🔔 Alertas del Sistema", expanded=False):
         if not st.session_state.app_alerts:
             st.info("No hay alertas recientes. ¡Todos los sistemas funcionan perfectamente!")
@@ -841,7 +856,8 @@ with st.sidebar:
                 """, unsafe_allow_html=True)
 
     st.divider()
-    if st.button("🚪 " + t["logout"], type="secondary", use_container_width=True): logout()
+    if st.button("🚪 " + t["logout"], type="secondary", use_container_width=True): 
+        logout()
 # ==========================================
 # HEADER PRINCIPAL
 # ==========================================
