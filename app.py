@@ -331,8 +331,18 @@ def format_recipe_for_download(recipe, t_dict):
     return text
 
 @st.cache_data(ttl=timedelta(days=1), show_spinner=False)
-def fetch_daily_healthy_recipes(lang_code):
-    url = "https://news.google.com/rss/search?q=recetas+saludables+faciles+rapidas&hl=es&gl=ES&ceid=ES:es"
+def fetch_daily_healthy_recipes(lang_code, category="recetas+saludables"):
+    # Mapeo interno de búsqueda para Google News
+    query_map = {
+        "🍰 Dulces": "recetas+postres+dulces+saludables",
+        "🥨 Salados": "recetas+saladas+cenas+saludables",
+        "🥪 Snacks Rápidos": "recetas+snacks+aperitivos+saludables",
+        "🥣 Desayunos": "recetas+desayunos+saludables",
+        "🥤 Bebidas/Smoothies": "recetas+smoothies+batidos+saludables"
+    }
+    search_query = query_map.get(category, "recetas+saludables")
+    url = f"https://news.google.com/rss/search?q={search_query}&hl=es&gl=ES&ceid=ES:es"
+    
     raw_results =[]
     try:
         res = requests.get(url, timeout=10)
@@ -342,11 +352,11 @@ def fetch_daily_healthy_recipes(lang_code):
             link = item.find('link').text
             clean_title = title.split(" - ")[0] 
             raw_results.append({"title": clean_title, "url": link, "summary": clean_title})
-            if len(raw_results) >= 15: break
+            if len(raw_results) >= 10: break
         random.shuffle(raw_results)
-        raw_results = raw_results[:4]
+        raw_results = raw_results[:3] # Mostramos 3 por categoría para no saturar
     except Exception:
-        return[]
+        return []
 
     if not raw_results: return[]
         
@@ -354,7 +364,7 @@ def fetch_daily_healthy_recipes(lang_code):
     You are a Michelin-star Chef and an expert culinary copywriter.
     I am providing you with a JSON list of REAL daily recipes extracted from Google News.
     Rewrite the 'title' to sound premium, write a 2-line 'summary'. TRANSLATE EVERYTHING TO {lang_code.upper()}.
-    Keep 'url' intact. Return JSON format: {{"recipes": [{{"title": "...", "summary": "...", "url": "..."}}]}}
+    Keep 'url' intact. Return JSON format: {{"recipes":[{{"title": "...", "summary": "...", "url": "..."}}]}}
     """
     user_prompt = "REAL GOOGLE NEWS RECIPES:\n" + json.dumps(raw_results)
     
@@ -656,26 +666,26 @@ for key in["step", "options", "selected_option", "full_recipe", "avail_ing", "av
 with st.sidebar:
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
-    # Lógica del Puntero Mágico
-    cursor_opts = {"🖱️ Predeterminado": "default", "🍗 Muslito": "🍗", "🥑 Aguacate": "🥑", "🥘 Sartén": "🥘", "🍕 Pizza": "🍕", "🪄 Varita": "🪄", "🍎 Manzana": "🍎"}
-    if "custom_cursor" not in st.session_state: st.session_state.custom_cursor = "🖱️ Predeterminado"
-    
-    st.session_state.custom_cursor = st.selectbox(
-        "✨ Puntero Mágico", 
-        list(cursor_opts.keys()), 
-        index=list(cursor_opts.keys()).index(st.session_state.custom_cursor)
-    )
-    
-    selected_val = cursor_opts[st.session_state.custom_cursor]
-    if selected_val != "default":
-        st.markdown(f"""
-        <style>
-        * {{
-            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{selected_val}</text></svg>"), auto !important;
-        }}
-        </style>
-        """, unsafe_allow_html=True)
+    # 1. EXPANDER: PUNTERO MÁGICO (Lag solucionado)
+    with st.expander("🪄 Puntero Mágico", expanded=False):
+        cursor_opts = {"🖱️ Predeterminado": "default", "🍗 Muslito": "🍗", "🥑 Aguacate": "🥑", "🥘 Sartén": "🥘", "🍕 Pizza": "🍕", "🪄 Varita": "🪄", "🍎 Manzana": "🍎"}
+        if "custom_cursor" not in st.session_state: 
+            st.session_state.custom_cursor = "🖱️ Predeterminado"
+        
+        # Al usar key="custom_cursor" directamente, Streamlit gestiona el estado sin lag ni doble clic.
+        st.selectbox("Elige tu puntero:", list(cursor_opts.keys()), key="custom_cursor")
+        
+        selected_val = cursor_opts[st.session_state.custom_cursor]
+        if selected_val != "default":
+            st.markdown(f"""
+            <style>
+            * {{
+                cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{selected_val}</text></svg>"), auto !important;
+            }}
+            </style>
+            """, unsafe_allow_html=True)
 
+    # 2. EXPANDER: PERFIL
     with st.expander(t["profile"], expanded=False):
         upd_weight = st.number_input(t["current_weight_label"], value=float(user_profile.get("weight",70)))
         upd_goals = st.text_area(t["profile_goals_label"], value=user_profile.get("goals",""))
@@ -685,35 +695,71 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    st.divider()
-    st.subheader(t["favs"])
-    favs = user_profile.get("favorites",[])
-    if favs:
-        for f in favs:
-            with st.expander(f.get("name", "Favorito")): 
-                st.write(f"🔥 {f.get('calories', 0)} | 💪 {f.get('protein', '0g')}")
-    else: st.info(t["no_favs"])
+    # 3. EXPANDER: RECETAS FAVORITAS (Con redirección al Módulo 1)
+    with st.expander("⭐ " + t["favs"], expanded=False):
+        favs = user_profile.get("favorites",[])
+        if favs:
+            for idx, f in enumerate(favs):
+                r_name = f.get('recipe_name', f.get('name', 'Receta'))
+                st.markdown(f"<p style='font-size:14px; font-weight:bold; margin-bottom:5px;'>{r_name}</p>", unsafe_allow_html=True)
+                
+                if st.button(f"🍳 Cocinar", key=f"load_fav_{idx}", use_container_width=True):
+                    if "ingredients" in f: # Verificamos que sea una receta completa (nuevo formato)
+                        st.session_state.full_recipe = f
+                        st.session_state.current_page = "mod1"
+                        st.session_state.step = "recipe_view"
+                        st.rerun()
+                    else:
+                        st.warning("Esta receta guardada es de una versión anterior y no tiene los pasos completos.")
+                st.divider()
+        else: 
+            st.info(t["no_favs"])
 
-    st.divider()
-    with st.expander(t.get("news_title", "📰 Tendencias Nutricionales"), expanded=True):
-        news_items = fetch_daily_healthy_recipes(lang_code)
+    # 4. EXPANDER: TENDENCIAS NUTRICIONALES (Carrusel interactivo)
+    with st.expander("📰 " + t.get("news_title", "Tendencias"), expanded=True):
+        trend_categories =["🍰 Dulces", "🥨 Salados", "🥪 Snacks Rápidos", "🥣 Desayunos", "🥤 Bebidas/Smoothies"]
+        
+        if "trend_idx" not in st.session_state: st.session_state.trend_idx = 0
+        
+        # Botones del Carrusel
+        col_l, col_c, col_r = st.columns([1, 4, 1])
+        with col_l:
+            if st.button("◀", key="btn_prev_trend"): 
+                st.session_state.trend_idx = (st.session_state.trend_idx - 1) % len(trend_categories)
+                st.rerun()
+        with col_c:
+            st.markdown(f"<div style='text-align:center; font-weight:800; color:#10B981; font-size:13px; margin-top:8px;'>{trend_categories[st.session_state.trend_idx]}</div>", unsafe_allow_html=True)
+        with col_r:
+            if st.button("▶", key="btn_next_trend"): 
+                st.session_state.trend_idx = (st.session_state.trend_idx + 1) % len(trend_categories)
+                st.rerun()
+                
+        current_trend_cat = trend_categories[st.session_state.trend_idx]
+        
+        # Cargar noticias por categoría
+        news_items = fetch_daily_healthy_recipes(lang_code, current_trend_cat)
         if news_items:
             for news in news_items:
                 r_title = news.get('title', 'Receta Saludable')
-                r_summary = news.get('summary', '')[:120] + "..."
+                r_summary = news.get('summary', '')[:90] + "..."
                 r_url = news.get('url', '#')
                 st.markdown(f"""
-                <div style="background: #FFFFFF; padding:12px; border-radius:10px; margin-bottom:12px; border:1px solid #E2E8F0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s;">
-                    <h4 style="margin:0;font-size:14px;font-weight:700;color:#1E293B;line-height:1.2;">{r_title}</h4>
-                    <p style="font-size:12px;margin-top:6px;margin-bottom:8px;line-height:1.4;color:#475569;">{r_summary}</p>
-                    <a href="{r_url}" target="_blank" style="display:inline-block; padding:4px 0px; font-size:12px;color:#10B981;font-weight:800;text-decoration:none;">{t.get("cook_this", "Ver receta 🍳")} →</a>
+                <div style="background: #F8FAFC; padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid #E2E8F0;">
+                    <h4 style="margin:0;font-size:13px;font-weight:700;color:#1E293B;line-height:1.2;">{r_title}</h4>
+                    <p style="font-size:11px;margin-top:4px;margin-bottom:6px;line-height:1.3;color:#475569;">{r_summary}</p>
+                    <a href="{r_url}" target="_blank" style="font-size:11px;color:#10B981;font-weight:800;text-decoration:none;">Ver receta →</a>
                 </div>
                 """, unsafe_allow_html=True)
         else: 
-            st.warning("No se pudieron cargar las noticias hoy.")
-        if st.button("🔄 Actualizar Recetas", use_container_width=True):
+            st.warning("No hay tendencias para esta categoría hoy.")
+            
+        if st.button("🔄 Actualizar", key="btn_refresh_news", use_container_width=True):
             fetch_daily_healthy_recipes.clear()
             st.rerun()
+
+    # Botón Salir al final de la barra
+    st.divider()
+    if st.button("🚪 " + t["logout"], type="secondary", use_container_width=True): logout()
 
 # ==========================================
 # HEADER PRINCIPAL
@@ -977,9 +1023,10 @@ elif st.session_state.current_page == "mod1":
         with c_act1:
             if st.button(t["save_fav"], use_container_width=True):
                 favs = user_profile.get("favorites",[])
-                favs.append({"name": recipe.get("recipe_name", ""), "calories": m.get('calories', '0'), "protein": m.get('protein', '0g')})
+                # ¡Ahora guardamos todo el diccionario 'recipe' entero!
+                favs.append(recipe) 
                 update_user_data(user_profile["username"], {"favorites": favs})
-                st.toast(t["saved"])
+                st.toast("¡Receta completa guardada en Favoritos! ⭐")
         with c_act2:
             if st.button(t.get("cal_add_meal_title", "📅 Añadir al Calendario de Hoy"), type="primary", use_container_width=True):
                 m_type, m_col = get_current_meal_info()
