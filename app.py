@@ -1413,7 +1413,7 @@ elif st.session_state.current_page == "mod4":
             with st.spinner(t["mod4_analyzing"]):
                 food_list_str = ', '.join(consumed_foods[:50]) if consumed_foods else 'Ninguno registrado'
                 sys_eval = f"""
-                Eres un Médico Nutricionista de élite evaluando a {user_profile['name']} ({user_profile['weight']}kg, Objetivo: {user_profile['goals']}).
+                Eres un Médico Nutricionista empático y experto evaluando a {user_profile['name']} ({user_profile['weight']}kg, Objetivo: {user_profile['goals']}).
                 Datos del período ({period_map[periodo_key]}): {t_cal} kcal totales, {t_pro}g proteína, {t_fat}g grasa, {t_car}g carbos.
                 Alimentos consumidos: {food_list_str}.
                 
@@ -1423,7 +1423,7 @@ elif st.session_state.current_page == "mod4":
                     "funny_comment": "<Comentario médico ingenioso y divertido sobre su nota (max 15 palabras)>",
                     "strengths": ["<Punto fuerte 1>", "<Punto fuerte 2>"],
                     "weaknesses":["<Debilidad a mejorar 1>", "<Debilidad a mejorar 2>"],
-                    "markdown_report": "<Un informe médico profundo en Markdown detallando el equilibrio de macros, calidad de ingredientes y prescripción para mañana.>"
+                    "markdown_report": "<Un análisis estructurado y amigable en Markdown. Usa encabezados (###), listas (*) y dobles saltos de línea (\\n\\n) para separar los párrafos. Evita el exceso de emojis.>"
                 }}
                 Traduce TODO el contenido del JSON al {lang_code}.
                 """
@@ -1451,8 +1451,9 @@ elif st.session_state.current_page == "mod4":
             elif score >= 20: bg, text_col = "linear-gradient(135deg, #92400E, #78350F)", "#FFFFFF" # Marrón
             else: bg, text_col = "linear-gradient(135deg, #334155, #0F172A)", "#FFFFFF" # Negro
             
-            str_html = "".join([f"<li style='margin-bottom:4px;'>✅ {s}</li>" for s in res.get("strengths", [])])
-            weak_html = "".join([f"<li style='margin-bottom:4px;'>⚠️ {w}</li>" for w in res.get("weaknesses", [])])
+            # Listas limpias con punto a media altura (&bull;)
+            str_html = "".join([f"<li style='margin-bottom:6px; padding-left:15px; text-indent:-15px;'>&bull; {s}</li>" for s in res.get("strengths", [])])
+            weak_html = "".join([f"<li style='margin-bottom:6px; padding-left:15px; text-indent:-15px;'>&bull; {w}</li>" for w in res.get("weaknesses", [])])
             
             card_html = f"""
             <style>
@@ -1468,12 +1469,13 @@ elif st.session_state.current_page == "mod4":
             .front p {{ color: #94A3B8; font-size: 14px; margin:0; line-height:1.5; }}
             .pulse-icon {{ font-size: 50px; margin-bottom: 20px; animation: bounce 2s infinite; }}
             
-            /* Back (Resultados) */
+            /* Back (Resultados Elegantes) */
             .back {{ background: {bg}; color: {text_col}; transform: rotateY(180deg); border: 2px solid rgba(255,255,255,0.2); }}
             .score {{ font-size: 70px; font-weight: 900; margin: 0; line-height: 1; text-shadow: 2px 2px 10px rgba(0,0,0,0.2); }}
             .comment {{ font-size: 15px; font-style: italic; margin: 15px 0; font-weight: 600; opacity: 0.9; }}
-            .lists-container {{ text-align: left; width: 100%; font-size: 13px; font-weight: 500; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 12px; }}
-            .lists-container ul {{ padding-left: 0; list-style: none; margin: 0 0 10px 0; }}
+            .lists-container {{ text-align: left; width: 100%; font-size: 13px; font-weight: 500; background: rgba(0,0,0,0.1); padding: 18px; border-radius: 12px; }}
+            .lists-container ul {{ padding-left: 0; list-style: none; margin: 0 0 12px 0; line-height: 1.4; }}
+            .list-title {{ font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; opacity: 0.8; display: block; }}
             
             @keyframes glow {{ 0% {{ box-shadow: 0 0 10px #38BDF820; }} 100% {{ box-shadow: 0 0 30px #38BDF880; }} }}
             @keyframes bounce {{ 0%, 100% {{ transform: translateY(0); }} 50% {{ transform: translateY(-10px); }} }}
@@ -1490,9 +1492,9 @@ elif st.session_state.current_page == "mod4":
                         <h1 class="score">{score}</h1>
                         <p class="comment">"{res.get('funny_comment', '')}"</p>
                         <div class="lists-container">
-                            <strong>💪 Puntos Fuertes:</strong>
+                            <span class="list-title">Puntos Fuertes</span>
                             <ul>{str_html}</ul>
-                            <strong>🎯 A Mejorar:</strong>
+                            <span class="list-title">A Mejorar</span>
                             <ul style="margin:0;">{weak_html}</ul>
                         </div>
                     </div>
@@ -1519,14 +1521,21 @@ elif st.session_state.current_page == "mod4":
             """
             st.components.v1.html(placeholder_html, height=440)
 
-    # REPORTE DETALLADO (Full Width)
+    # REPORTE DETALLADO (Renderizado Nativo en Markdown)
     if "mod4_eval_res" in st.session_state:
         st.divider()
-        st.markdown(f"""
-        <div style="background-color:#FFFFFF; padding: 40px; border-radius:20px; border:1px solid #E2E8F0; box-shadow: 0 15px 40px rgba(0,0,0,0.04);">
-            <h3 style="color:#1E293B; margin-top:0; border-bottom: 2px solid #F1F5F9; padding-bottom: 15px;">🩺 Informe Clínico Detallado</h3>
-            <div style="color: #475569; line-height: 1.8; font-size: 1.05rem;">
-                {st.session_state.mod4_eval_res.get('markdown_report', '')}
-            </div>
-        </div>
+        st.markdown(f"### ✨ Análisis Nutricional")
+        
+        # Le aplicamos un poco de color sutil a las listas y textos para que sea amigable
+        st.markdown("""
+        <style>
+        .report-content p, .report-content li { color: #475569; font-size: 1.05rem; line-height: 1.7; }
+        .report-content h1, .report-content h2, .report-content h3 { color: #1E293B; margin-top: 25px; }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        st.markdown('<div class="report-content">', unsafe_allow_html=True)
+        # Renderizado nativo: Esto garantiza que los #, * y saltos de línea funcionen perfectamente.
+        st.markdown(st.session_state.mod4_eval_res.get('markdown_report', ''))
+        st.markdown('</div>', unsafe_allow_html=True)
         """, unsafe_allow_html=True)
