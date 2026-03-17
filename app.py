@@ -697,85 +697,16 @@ if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 with st.sidebar:
     # ESCUDO CSS: Evita que las tarjetas gigantes del Home afecten a la barra lateral
     st.markdown("""
-<style>
-
-/* ==========================================
-AISLAMIENTO TOTAL SIDEBAR (ANTI-BUG HOME)
-========================================== */
-section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
-    all: unset !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    width: 100% !important;
-    height: 60px !important;
-    border-radius: 14px !important;
-    font-size: 22px !important;
-    cursor: pointer !important;
-    transition: all 0.25s ease !important;
-    border: 2px solid transparent !important;
-}
-
-/* ==========================================
-GRID DE ICONOS (ESPACIADO BONITO)
-========================================== */
-section[data-testid="stSidebar"] .stColumns {
-    gap: 8px !important;
-}
-
-/* ==========================================
-HOVER (ELEGANTE)
-========================================== */
-section[data-testid="stSidebar"] button:hover {
-    transform: translateY(-3px) scale(1.05);
-    filter: brightness(1.05);
-}
-
-/* ==========================================
-BOTÓN ACTIVO (BORDE BRILLANTE)
-========================================== */
-section[data-testid="stSidebar"] button[kind="primary"] {
-    border: 2px solid #10B981 !important;
-    box-shadow: 0 0 10px rgba(16,185,129,0.6);
-    transform: scale(1.05);
-}
-
-/* ==========================================
-COLORES POR CATEGORÍA
-========================================== */
-
-/* Dulces 🍰 */
-section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]:nth-child(1) {
-    background: #FCE7F3;
-    color: #BE185D;
-}
-
-/* Salado 🥨 */
-section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]:nth-child(2) {
-    background: #FEF3C7;
-    color: #B45309;
-}
-
-/* Snacks 🥪 */
-section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]:nth-child(3) {
-    background: #E0F2FE;
-    color: #0369A1;
-}
-
-/* Desayuno 🥣 */
-section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]:nth-child(4) {
-    background: #ECFCCB;
-    color: #4D7C0F;
-}
-
-/* Bebidas 🥤 */
-section[data-testid="stSidebar"] button[data-testid="baseButton-secondary"]:nth-child(5) {
-    background: #EDE9FE;
-    color: #6D28D9;
-}
-
-</style>
-""", unsafe_allow_html=True)
+    <style>[data-testid="stSidebar"] button {
+        min-height: 0px !important;
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+        background-image: none !important;
+        box-shadow: none !important;
+    }[data-testid="stSidebar"] button::after { display: none !important; content: none !important; }[data-testid="stSidebar"] button p { transform: none !important; color: inherit !important; margin: 0 !important; font-weight: normal !important; }
+    [data-testid="stSidebar"] button:hover { transform: translateY(-2px) scale(1.05) !important; }
+    </style>
+    """, unsafe_allow_html=True)
 
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
