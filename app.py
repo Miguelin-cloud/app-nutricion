@@ -402,9 +402,7 @@ def fetch_daily_healthy_recipes(lang_code, category_key="trend_sweets"):
     except Exception:
         pass
     return raw_results
-# ==========================================
-# SISTEMA MULTIDIOMA Y TEXTOS (Actualizado Mod 3 y 4)
-# ==========================================
+
 # ==========================================
 # SISTEMA MULTIDIOMA Y TEXTOS
 # ==========================================
@@ -419,6 +417,7 @@ TRANSLATIONS = {
         "ingredients": "🛒 Ingredientes", "save_fav": "⭐ Guardar en Favoritos", "saved": "¡Guardado!", "instructions": "👨‍🍳 Preparación", "adjust_title": "⚖️ Ajustar Macros",
         "adjust_sub": "¿Necesitas otras cantidades?", "adjust_ph": "Ej: 'Añade 20g de proteína'", "recalc_btn": "Recalcular", "recalculating": "Ajustando receta...",
         "profile": "👤 Mi Perfil", "update_prof": "Actualizar Perfil", "prof_updated": "¡Perfil actualizado!", "favs": "⭐ Favoritos", "no_favs": "Aún no hay favoritos.",
+        "fav_cook_help": "Cocinar esta receta", "fav_delete_help": "Eliminar de favoritos", "fav_old_recipe": "⚠️ Receta antigua. Faltan pasos.",
         "logout": "Cerrar Sesión", "news_title": "📰 Tendencias Nutricionales", "feed_title": "Últimas Noticias 🔥", "cook_this": "Cocinar esto 🍳", "download_btn": "⬇️ Descargar",
         "keep_logged_in": "Mantener sesión iniciada", "chef_recom": "🌟 RECOMENDACIÓN ESTRELLA 🌟",
         "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Tu chef y nutricionista personal impulsado por IA.", "tab_login": "🔑 Iniciar Sesión", "tab_register": "📝 Registrarse", "tab_recover": "🆘 Recuperar PIN",
@@ -454,6 +453,8 @@ TRANSLATIONS = {
         "ptr_default": "🖱️ Predeterminado", "ptr_drumstick": "🍗 Muslito", "ptr_avocado": "🥑 Aguacate", "ptr_pan": "🥘 Sartén", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Varita", "ptr_apple": "🍎 Manzana",
         "magic_pointer": "🪄 Puntero Mágico", "choose_pointer": "Elige tu puntero:",
         "trend_sweets": "🍰 Dulces", "trend_salty": "🥨 Salados", "trend_snacks": "🥪 Snacks Rápidos", "trend_breakfast": "🥣 Desayunos", "trend_drinks": "🥤 Bebidas/Smoothies",
+        "no_trends": "No hay tendencias hoy.", "update_news": "🔄 Actualizar Noticias",
+        "alerts_title": "🔔 Alertas del Sistema", "alerts_none": "No hay alertas recientes. ¡Todos los sistemas funcionan perfectamente!", "alerts_clear": "🧹 Limpiar historial",
         "btn_delete": "🗑️ Eliminar", "btn_edit": "✏️ Editar", "btn_save": "💾 Guardar",
         "manage_meals": "⚙️ Gestionar Comidas del Día", "no_meals": "No hay comidas registradas para este día.", "manage_date": "Selecciona la fecha a editar"
     },
@@ -466,6 +467,7 @@ TRANSLATIONS = {
         "ingredients": "🛒 Ingredients", "save_fav": "⭐ Save Fav", "saved": "Saved!", "instructions": "👨‍🍳 Instructions", "adjust_title": "⚖️ Adjust Macros",
         "adjust_sub": "Need different targets?", "adjust_ph": "e.g. 'Add 20g protein'", "recalc_btn": "Recalculate", "recalculating": "Adjusting...",
         "profile": "👤 Profile", "update_prof": "Update", "prof_updated": "Updated!", "favs": "⭐ Favs", "no_favs": "No favs yet.",
+        "fav_cook_help": "Cook this recipe", "fav_delete_help": "Remove from favorites", "fav_old_recipe": "⚠️ Old recipe. Missing steps.",
         "logout": "Logout", "news_title": "📰 Nutrition Trends", "feed_title": "Latest News 🔥", "cook_this": "Cook this 🍳", "download_btn": "⬇️ Download",
         "keep_logged_in": "Keep logged in", "chef_recom": "🌟 CHEF'S RECOMMENDATION 🌟", "auth_app_name": "NutriAI 🌿", "auth_subtitle": "AI Personal Chef", 
         "tab_login": "🔑 Log In", "tab_register": "📝 Register", "tab_recover": "🆘 Recover", "username_label_login": "Username", "pin_label_login": "PIN", 
@@ -500,6 +502,8 @@ TRANSLATIONS = {
         "ptr_default": "🖱️ Default", "ptr_drumstick": "🍗 Drumstick", "ptr_avocado": "🥑 Avocado", "ptr_pan": "🥘 Pan", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Wand", "ptr_apple": "🍎 Apple",
         "magic_pointer": "🪄 Magic Pointer", "choose_pointer": "Choose your pointer:",
         "trend_sweets": "🍰 Sweets", "trend_salty": "🥨 Salty", "trend_snacks": "🥪 Quick Snacks", "trend_breakfast": "🥣 Breakfasts", "trend_drinks": "🥤 Drinks/Smoothies",
+        "no_trends": "No trends today.", "update_news": "🔄 Update News",
+        "alerts_title": "🔔 System Alerts", "alerts_none": "No recent alerts. All systems operational!", "alerts_clear": "🧹 Clear history",
         "btn_delete": "🗑️ Delete", "btn_edit": "✏️ Edit", "btn_save": "💾 Save",
         "manage_meals": "⚙️ Manage Daily Meals", "no_meals": "No meals logged for this day.", "manage_date": "Select date to edit"
     },
@@ -512,6 +516,7 @@ TRANSLATIONS = {
         "ingredients": "🛒 Ingrédients", "save_fav": "⭐ Sauvegarder", "saved": "Sauvegardé !", "instructions": "👨‍🍳 Préparation", "adjust_title": "⚖️ Ajuster",
         "adjust_sub": "Autres quantités ?", "adjust_ph": "Ex : '20g de protéines'", "recalc_btn": "Recalculer", "recalculating": "Ajustement...",
         "profile": "👤 Profil", "update_prof": "Mettre à jour", "prof_updated": "Mis à jour !", "favs": "⭐ Favoris", "no_favs": "Pas de favoris.",
+        "fav_cook_help": "Cuisiner cette recette", "fav_delete_help": "Supprimer des favoris", "fav_old_recipe": "⚠️ Ancienne recette. Étapes manquantes.",
         "logout": "Déconnexion", "news_title": "📰 Tendances Nutrition", "feed_title": "Dernières Nouvelles 🔥", "cook_this": "Cuisiner 🍳", "download_btn": "⬇️ Télécharger",
         "keep_logged_in": "Rester connecté", "chef_recom": "🌟 RECOMMANDATION 🌟", "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Chef personnel IA.",
         "tab_login": "🔑 Login", "tab_register": "📝 Inscription", "tab_recover": "🆘 Récupérer", "username_label_login": "Utilisateur", "pin_label_login": "PIN",
@@ -543,6 +548,8 @@ TRANSLATIONS = {
         "ptr_default": "🖱️ Par défaut", "ptr_drumstick": "🍗 Pilon", "ptr_avocado": "🥑 Avocat", "ptr_pan": "🥘 Poêle", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Baguette", "ptr_apple": "🍎 Pomme",
         "magic_pointer": "🪄 Pointeur Magique", "choose_pointer": "Choisissez votre pointeur :",
         "trend_sweets": "🍰 Sucreries", "trend_salty": "🥨 Salé", "trend_snacks": "🥪 En-cas", "trend_breakfast": "🥣 Petit-déj", "trend_drinks": "🥤 Boissons",
+        "no_trends": "Pas de tendances aujourd'hui.", "update_news": "🔄 Mettre à jour les actus",
+        "alerts_title": "🔔 Alertes Système", "alerts_none": "Aucune alerte récente. Tout fonctionne !", "alerts_clear": "🧹 Effacer l'historique",
         "btn_delete": "🗑️ Supprimer", "btn_edit": "✏️ Modifier", "btn_save": "💾 Enregistrer",
         "manage_meals": "⚙️ Gérer les repas du jour", "no_meals": "Aucun repas enregistré ce jour.", "manage_date": "Sélectionner la date"
     },
@@ -555,6 +562,7 @@ TRANSLATIONS = {
         "ingredients": "🛒 Ingredienti", "save_fav": "⭐ Salva", "saved": "Salvato!", "instructions": "👨‍🍳 Preparazione", "adjust_title": "⚖️ Regola",
         "adjust_sub": "Altre quantità?", "adjust_ph": "Es: '20g proteine'", "recalc_btn": "Ricalcola", "recalculating": "Regolazione...",
         "profile": "👤 Profilo", "update_prof": "Aggiorna", "prof_updated": "Aggiornato!", "favs": "⭐ Preferiti", "no_favs": "Nessun preferito.",
+        "fav_cook_help": "Cucina questa ricetta", "fav_delete_help": "Rimuovi dai preferiti", "fav_old_recipe": "⚠️ Vecchia ricetta. Passaggi mancanti.",
         "logout": "Esci", "news_title": "📰 Tendenze Nutrizionali", "feed_title": "Ultime Notizie 🔥", "cook_this": "Cucina 🍳", "download_btn": "⬇️ Scarica",
         "keep_logged_in": "Mantieni accesso", "chef_recom": "🌟 RACCOMANDAZIONE 🌟", "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Chef IA.",
         "tab_login": "🔑 Accedi", "tab_register": "📝 Registrati", "tab_recover": "🆘 Recupera", "username_label_login": "Utente", "pin_label_login": "PIN",
@@ -586,6 +594,8 @@ TRANSLATIONS = {
         "ptr_default": "🖱️ Predefinito", "ptr_drumstick": "🍗 Cosciotto", "ptr_avocado": "🥑 Avocado", "ptr_pan": "🥘 Padella", "ptr_pizza": "🍕 Pizza", "ptr_wand": "🪄 Bacchetta", "ptr_apple": "🍎 Mela",
         "magic_pointer": "🪄 Puntatore Magico", "choose_pointer": "Scegli il puntatore:",
         "trend_sweets": "🍰 Dolci", "trend_salty": "🥨 Salati", "trend_snacks": "🥪 Spuntini", "trend_breakfast": "🥣 Colazioni", "trend_drinks": "🥤 Bevande",
+        "no_trends": "Nessuna tendenza oggi.", "update_news": "🔄 Aggiorna Notizie",
+        "alerts_title": "🔔 Avvisi di Sistema", "alerts_none": "Nessun avviso recente. Tutti i sistemi operativi!", "alerts_clear": "🧹 Cancella cronologia",
         "btn_delete": "🗑️ Elimina", "btn_edit": "✏️ Modifica", "btn_save": "💾 Salva",
         "manage_meals": "⚙️ Gestisci i Pasti del Giorno", "no_meals": "Nessun pasto registrato.", "manage_date": "Seleziona la data"
     }
@@ -725,180 +735,47 @@ if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 # SIDEBAR REDISEÑADA & PUNTERO MÁGICO
 # ==========================================
 with st.sidebar:
-    # 1. ESCUDO CSS ABSOLUTO: Bloquea cualquier CSS de la pantalla principal
+    # 1. ESCUDO CSS DE LA BARRA LATERAL
     st.markdown("""
     <style>
-    /* Resetear botones base en la barra lateral */
-    html body div#root section[data-testid="stSidebar"] div.stButton > button {
+    [data-testid="stSidebar"] button {
+        min-height: 0px !important;
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
         background-image: none !important;
         box-shadow: none !important;
     }
-    
-    /* ELIMINAR textos fantasma filtrados del Home en la barra lateral */
-    html body div#root section[data-testid="stSidebar"] div.stButton > button::after,
-    html body div#root section[data-testid="stSidebar"] div.stButton > button::before {
-        content: none !important; display: none !important; background-image: none !important;
-    }
-    
-    /* Quitar animaciones base que estiran botones */
-    html body div#root section[data-testid="stSidebar"] div.stButton > button p {
-        transform: none !important; margin: 0 !important; font-weight: normal !important;
-    }
-
-    /* ========================================================================= */
-    /* 2. PROTECCIÓN NUCLEAR PARA FAVORITOS (Expander 3)                         */
-    /* ========================================================================= */
-    
-    /* Reducir márgenes internos de la columna para apilar a la perfección */
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div[data-testid="stColumn"]:nth-child(2) > div {
-        margin-bottom: 0px !important;
-        padding-bottom: 0px !important;
-    }
-
-    /* SARTÉN (Secondary) - 100% BLANCO Y ESTÁTICO */
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"],
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"]:hover,
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"]:active {
-        all: revert !important;
-        appearance: none !important;
-        background: #FFFFFF !important;
-        background-color: #FFFFFF !important;
-        border: 1px solid #CBD5E1 !important;
-        border-radius: 4px !important;
-        height: 32px !important;
-        min-height: 32px !important;
-        max-height: 32px !important;
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: none !important;
-        transform: none !important;
-        animation: none !important;
-        transition: none !important;
-        cursor: pointer !important;
-    }
-
-    /* BASURA (Primary) - 100% ROJO Y ESTÁTICO */
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"],
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"]:hover,
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"]:active {
-        all: revert !important;
-        appearance: none !important;
-        background: #FEE2E2 !important;
-        background-color: #FEE2E2 !important;
-        border: 1px solid #EF4444 !important;
-        border-radius: 4px !important;
-        height: 32px !important;
-        min-height: 32px !important;
-        max-height: 32px !important;
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: none !important;
-        transform: none !important;
-        animation: none !important;
-        transition: none !important;
-        cursor: pointer !important;
-    }
-
-    /* ANIQUILAR CORAZONES, REPORTES MÉDICOS Y FONDOS GLOBALES */
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button::before,
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button::after,
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button:hover::before,
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button:hover::after {
-        content: none !important; display: none !important; background: none !important; background-image: none !important; animation: none !important;
-    }
-
-    /* CONGELAR EL EMOJI (Cero zooms) */
-    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button p {
-        all: unset !important;
-        display: block !important;
-        transform: none !important;
-        animation: none !important;
-        font-size: 15px !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        line-height: 1 !important;
-    }
-    /* ========================================================================= */
+    [data-testid="stSidebar"] button::after { display: none !important; content: none !important; }
+    [data-testid="stSidebar"] button p { transform: none !important; color: inherit !important; margin: 0 !important; font-weight: normal !important; }
+    [data-testid="stSidebar"] button:hover { transform: translateY(-2px) scale(1.05) !important; }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
-    # FUNCIÓN AUXILIAR: Botones Circulares
-    def render_circle_btn(emoji, key, tooltip_text, is_selected=False):
-        bg = "rgba(16, 185, 129, 0.15)" if is_selected else "transparent"
-        border = "#FFD700" if is_selected else "#CBD5E1"
-        
-        st.markdown(f"""
-        <style>
-        div:has(>.btn-marker-{key}), div:has(>.btn-marker-{key}) + div.element-container, div:has(>.btn-marker-{key}) + div.element-container > div.stButton {{
-            overflow: visible !important; display: flex !important; justify-content: center !important;
-        }}
-        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button {{
-            width: 42px !important; min-width: 42px !important; max-width: 42px !important;
-            height: 42px !important; min-height: 42px !important; max-height: 42px !important;
-            border-radius: 50% !important; padding: 0 !important; margin: 0 auto !important;
-            flex: 0 0 auto !important; background-color: {bg} !important; border: 2px solid {border} !important;
-            font-size: 20px !important; color: #1E293B !important;
-            display: flex !important; align-items: center !important; justify-content: center !important;
-            position: relative !important; overflow: visible !important; 
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s ease, background-color 0.2s ease !important;
-            transform: scale(1) !important;
-        }}
-        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover {{
-            border-color: #FFD700 !important; transform: scale(1.15) !important; z-index: 9999 !important; background-image: none !important;
-        }}
-        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::after {{
-            content: "{tooltip_text}" !important; display: block !important; position: absolute !important;
-            bottom: calc(100% + 10px) !important; left: 50% !important; transform: translateX(-50%) !important;
-            background: #1E293B !important; color: #FFFFFF !important; padding: 6px 12px !important; border-radius: 6px !important;
-            font-size: 11px !important; font-weight: 700 !important; white-space: nowrap !important; width: max-content !important; 
-            opacity: 1 !important; visibility: visible !important; pointer-events: none !important; z-index: 99999 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
-        }}
-        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::before {{
-            content: "" !important; display: block !important; position: absolute !important;
-            bottom: calc(100% + 5px) !important; left: 50% !important; transform: translateX(-50%) !important;
-            border-width: 5px !important; border-style: solid !important; border-color: #1E293B transparent transparent transparent !important;
-            opacity: 1 !important; visibility: visible !important; pointer-events: none !important; z-index: 99999 !important;
-        }}
-        </style>
-        <div class="btn-marker-{key}" data-emoji="{emoji}"></div>
-        """, unsafe_allow_html=True)
-        return st.button(emoji, key=key, use_container_width=False)
-
-
     # 1. EXPANDER: PUNTERO MÁGICO
     with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
+        cursor_mapping = {
+            "default": t["ptr_default"], "🍗": t["ptr_drumstick"], "🥑": t["ptr_avocado"],
+            "🥘": t["ptr_pan"], "🍕": t["ptr_pizza"], "🪄": t["ptr_wand"], "🍎": t["ptr_apple"]
+        }
+        inv_cursor = {v: k for k, v in cursor_mapping.items()}
+        
         if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
-        cursors =[("default", "🖱️", t.get("ptr_default", "Predeterminado")), ("🍗", "🍗", t.get("ptr_drumstick", "Muslito")), ("🥑", "🥑", t.get("ptr_avocado", "Aguacate")), ("🥘", "🥘", t.get("ptr_pan", "Sartén")), ("🍕", "🍕", t.get("ptr_pizza", "Pizza")), ("🪄", "🪄", t.get("ptr_wand", "Varita")), ("🍎", "🍎", t.get("ptr_apple", "Manzana")), ("🌮", "🌮", t.get("ptr_taco", "Taco")), ("🍣", "🍣", t.get("ptr_sushi", "Sushi")), ("☕", "☕", t.get("ptr_coffee", "Café"))]
-        cols_ptr_1 = st.columns(5)
-        for i in range(5):
-            with cols_ptr_1[i]:
-                p_val, p_emoji, p_label = cursors[i]
-                if render_circle_btn(p_emoji, f"ptr_btn_{p_val}", p_label, st.session_state.cursor_val == p_val):
-                    st.session_state.cursor_val = p_val; st.rerun()
-
-        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-
-        cols_ptr_2 = st.columns(5)
-        for i in range(5, 10):
-            with cols_ptr_2[i-5]:
-                p_val, p_emoji, p_label = cursors[i]
-                if render_circle_btn(p_emoji, f"ptr_btn_{p_val}", p_label, st.session_state.cursor_val == p_val):
-                    st.session_state.cursor_val = p_val; st.rerun()
-
-        st.components.v1.html("""<script>const doc = window.parent.document; doc.addEventListener('mousedown', function(e) { let btn = e.target.closest('button'); if(!btn) return; let container = btn.closest('div[data-testid="element-container"]'); if(container && container.previousElementSibling) { let marker = container.previousElementSibling.querySelector('[class^="btn-marker-ptr_btn_"]'); if(marker) { let emoji = marker.getAttribute('data-emoji'); let styleId = 'dynamic-cursor-style'; let oldStyle = doc.getElementById(styleId); if(oldStyle) oldStyle.remove(); if(emoji && emoji !== 'default' && emoji !== '🖱️') { let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size: 24px"><text y="24">${emoji}</text></svg>`; let css = `* { cursor: url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}'), auto !important; }`; let style = doc.createElement('style'); style.id = styleId; style.innerHTML = css; doc.head.appendChild(style); } } } }); </script>""", height=0, width=0)
-
+        
+        options_list = list(cursor_mapping.values())
+        try: current_idx = list(cursor_mapping.keys()).index(st.session_state.cursor_val)
+        except ValueError: current_idx = 0
+            
+        selected_label = st.selectbox(t.get("choose_pointer", "Elige:"), options_list, index=current_idx)
+        st.session_state.cursor_val = inv_cursor[selected_label]
+        
         if st.session_state.cursor_val != "default":
-            st.markdown(f"<style>* {{ cursor: url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{st.session_state.cursor_val}</text></svg>\"), auto !important; }}</style>", unsafe_allow_html=True)
+            st.markdown(f"""
+            <style>
+            * {{ cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{st.session_state.cursor_val}</text></svg>"), auto !important; }}
+            </style>
+            """, unsafe_allow_html=True)
 
     # 2. EXPANDER: PERFIL
     with st.expander("👤 " + t["profile"], expanded=False):
@@ -910,10 +787,8 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-   # 3. EXPANDER: RECETAS FAVORITAS
+    # 3. EXPANDER: RECETAS FAVORITAS (BLINDADO Y MULTIDIOMA)
     with st.expander(t["favs"], expanded=False):
-        
-        # ESCUDO Y ESTILOS NATIVOS: Usamos el ID interno de Streamlit para blindar y estilizar los botones
         st.markdown("""
         <style>
         /* Tarjetita adaptada para el nombre de la receta */
@@ -955,7 +830,7 @@ with st.sidebar:
             transform: scale(1.05) !important;
         }
 
-        /* 🗑️ BOTÓN BASURA: Blanco normal, Rojo al pasar el ratón */
+        /* 🗑️ BOTÓN BASURA */
         div[class*="st-key-del_fav_"] button {
             background: #FFFFFF !important;
             border: 1px solid #CBD5E1 !important;
@@ -991,24 +866,25 @@ with st.sidebar:
             for idx, f in enumerate(favs):
                 r_name = f.get('recipe_name', f.get('name', 'Receta'))
                 
-                # Layout compacto en una línea: [ Nombre de receta ] [ 🍳 ] [ 🗑️ ]
                 col_name, col_sarten, col_basura = st.columns([6, 2, 2])
                 
                 with col_name:
                     st.markdown(f"<div class='fav-card' title='{r_name}'>{r_name}</div>", unsafe_allow_html=True)
                 
                 with col_sarten:
-                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar esta receta"):
+                    # USAMOS LA VARIABLE DE IDIOMA PARA LA ETIQUETA 'help'
+                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help=t["fav_cook_help"]):
                         if "ingredients" in f:
                             st.session_state.full_recipe = f
                             st.session_state.current_page = "mod1"
                             st.session_state.step = "recipe_view"
                             st.rerun()
                         else:
-                            st.toast("⚠️ Receta antigua. Faltan pasos.", icon="⚠️")
+                            st.toast(t["fav_old_recipe"], icon="⚠️")
                 
                 with col_basura:
-                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help="Eliminar de favoritos"):
+                    # USAMOS LA VARIABLE DE IDIOMA PARA LA ETIQUETA 'help'
+                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help=t["fav_delete_help"]):
                         favs.pop(idx)
                         update_user_data(user_profile["username"], {"favorites": favs})
                         st.rerun()
@@ -1023,12 +899,12 @@ with st.sidebar:
         trend_emojis =["🍰", "🥨", "🥪", "🥣", "🥤"]
         if "trend_idx" not in st.session_state: st.session_state.trend_idx = 0
         
-        cols_trend = st.columns(5)
+        cols = st.columns(5)
         for i, (key, emoji) in enumerate(zip(trend_keys, trend_emojis)):
-            with cols_trend[i]:
+            with cols[i]:
                 is_selected = (st.session_state.trend_idx == i)
-                tooltip_text = t.get(key, key)
-                if render_circle_btn(emoji, f"trend_btn_{i}", tooltip_text, is_selected):
+                btn_type = "primary" if is_selected else "secondary"
+                if st.button(emoji, key=f"trend_btn_{i}", help=t.get(key, key), use_container_width=True, type=btn_type):
                     st.session_state.trend_idx = i
                     st.rerun()
                     
@@ -1049,18 +925,22 @@ with st.sidebar:
                 </div>
                 """, unsafe_allow_html=True)
         else: 
-            st.warning("No hay tendencias hoy.")
+            # TRADUCCIÓN APLICADA
+            st.warning(t["no_trends"])
             
-        if st.button("🔄 Actualizar Noticias", key="btn_refresh_news", use_container_width=True):
+        # TRADUCCIÓN APLICADA AL BOTÓN
+        if st.button(t["update_news"], key="btn_refresh_news", use_container_width=True):
             fetch_daily_healthy_recipes.clear()
             st.rerun()
 
     # 5. EXPANDER: ALERTAS Y NOTIFICACIONES
-    with st.expander("🔔 Alertas del Sistema", expanded=False):
+    with st.expander(t["alerts_title"], expanded=False):
         if not st.session_state.app_alerts:
-            st.info("No hay alertas recientes. ¡Todos los sistemas funcionan perfectamente!")
+            # TRADUCCIÓN APLICADA
+            st.info(t["alerts_none"])
         else:
-            if st.button("🧹 Limpiar historial", use_container_width=True):
+            # TRADUCCIÓN APLICADA
+            if st.button(t["alerts_clear"], use_container_width=True):
                 st.session_state.app_alerts =[]
                 st.rerun()
             for alerta in st.session_state.app_alerts:
