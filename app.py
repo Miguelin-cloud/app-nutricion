@@ -592,6 +592,17 @@ def handle_language_change():
             res = groq_generic_json(sys_p, user_p)
             if res:
                 st.session_state.full_recipe = res
+                
+        # --- NUEVO: TRADUCIR FAVORITOS EN LA BASE DE DATOS ---
+        usr = st.session_state.get("current_username")
+        if usr:
+            prof = get_user_data(usr)
+            if prof and prof.get("favorites"):
+                sys_p = f"Translate all the string VALUES of this JSON array into {new_lang_code.upper()}, keeping the exact same English KEYS. Return ONLY the JSON object with a 'favorites' key containing the translated array."
+                user_p = json.dumps({"favorites": prof["favorites"]})
+                res = groq_generic_json(sys_p, user_p)
+                if res and "favorites" in res:
+                    update_user_data(usr, {"favorites": res["favorites"]})
 
 cols_top = st.columns([1, 6, 1])
 with cols_top[2]: 
@@ -880,68 +891,78 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    # 3. EXPANDER: RECETAS FAVORITAS (DISEÑO BLINDADO "PLAN B")
+   # 3. EXPANDER: RECETAS FAVORITAS
     with st.expander(t["favs"], expanded=False):
         
-        # CSS INFALIBLE: 
+        # ESCUDO Y ESTILOS NATIVOS: Usamos el ID interno de Streamlit para blindar y estilizar los botones
         st.markdown("""
         <style>
-        /* Ocultamos los botones nativos de Streamlit de forma segura para que el clic de JS funcione */
-        div[class*="st-key-real_load_"], div[class*="st-key-real_del_"] {
-            position: absolute !important;
-            opacity: 0 !important;
-            height: 1px !important;
-            width: 1px !important;
-            overflow: hidden !important;
-            z-index: -9999 !important;
-            margin: 0 !important;
+        /* Tarjetita adaptada para el nombre de la receta */
+        .fav-card {
+            background-color: #F8FAFC; 
+            border: 1px solid #E2E8F0; 
+            border-radius: 6px; 
+            padding: 0 10px; 
+            height: 38px; 
+            display: flex;
+            align-items: center;
+            font-size: 13px; 
+            font-weight: 600; 
+            color: #1E293B; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            margin-top: 4px;
+        }
+
+        /* 🍳 BOTÓN SARTÉN */
+        div[class*="st-key-load_fav_"] button {
+            background: #FFFFFF !important;
+            border: 1px solid #CBD5E1 !important;
+            border-radius: 6px !important;
+            min-height: 38px !important;
+            height: 38px !important;
             padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.2s !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
         }
-        
-        /* Botón Sartén: Blanco por defecto, gris claro al hover */
-        .pure-btn-sarten {
-            background: #FFFFFF !important; 
+        div[class*="st-key-load_fav_"] button:hover {
+            background: #F8FAFC !important;
+            border-color: #94A3B8 !important;
+            transform: scale(1.05) !important;
+        }
+
+        /* 🗑️ BOTÓN BASURA: Blanco normal, Rojo al pasar el ratón */
+        div[class*="st-key-del_fav_"] button {
+            background: #FFFFFF !important;
             border: 1px solid #CBD5E1 !important;
-            border-radius: 6px !important; 
-            height: 32px !important; 
-            width: 42px !important; 
-            cursor: pointer !important; 
-            display: flex !important; 
-            align-items: center !important; 
-            justify-content: center !important; 
-            font-size: 15px !important; 
-            transition: all 0.2s !important; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important; 
-            padding:0 !important; 
-            margin:0 !important;
+            border-radius: 6px !important;
+            min-height: 38px !important;
+            height: 38px !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.2s !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
         }
-        .pure-btn-sarten:hover { 
-            background: #F8FAFC !important; 
-            border-color: #94A3B8 !important; 
-            transform: scale(1.05) !important; 
+        div[class*="st-key-del_fav_"] button:hover {
+            background: #FEE2E2 !important;
+            border-color: #EF4444 !important;
+            transform: scale(1.05) !important;
         }
-        
-        /* Botón Basura: Blanco por defecto, rojo al hover */
-        .pure-btn-basura {
-            background: #FFFFFF !important; 
-            border: 1px solid #CBD5E1 !important;
-            border-radius: 6px !important; 
-            height: 32px !important; 
-            width: 42px !important; 
-            cursor: pointer !important; 
-            display: flex !important; 
-            align-items: center !important; 
-            justify-content: center !important; 
-            font-size: 15px !important; 
-            transition: all 0.2s !important; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important; 
-            padding:0 !important; 
-            margin:0 !important;
+
+        /* DESTRUIR EL CSS FANTASMA DEL MENÚ PRINCIPAL */
+        div[class*="st-key-load_fav_"] button::before, div[class*="st-key-load_fav_"] button::after,
+        div[class*="st-key-del_fav_"] button::before, div[class*="st-key-del_fav_"] button::after {
+            content: none !important; display: none !important; background-image: none !important;
         }
-        .pure-btn-basura:hover { 
-            background: #FEE2E2 !important; 
-            border-color: #EF4444 !important; 
-            transform: scale(1.05) !important; 
+        div[class*="st-key-load_fav_"] button p, div[class*="st-key-del_fav_"] button p {
+            font-size: 16px !important; margin: 0 !important; transform: none !important; color: #1E293B !important;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -951,43 +972,29 @@ with st.sidebar:
             for idx, f in enumerate(favs):
                 r_name = f.get('recipe_name', f.get('name', 'Receta'))
                 
-                # --- 1. BOTONES INVISIBLES DE STREAMLIT (El puente hacia Python) ---
-                if st.button("load", key=f"real_load_{idx}"):
-                    if "ingredients" in f:
-                        st.session_state.full_recipe = f
-                        st.session_state.current_page = "mod1"
-                        st.session_state.step = "recipe_view"
+                # Layout compacto en una línea: [ Nombre de receta ] [ 🍳 ] [ 🗑️ ]
+                col_name, col_sarten, col_basura = st.columns([6, 2, 2])
+                
+                with col_name:
+                    st.markdown(f"<div class='fav-card' title='{r_name}'>{r_name}</div>", unsafe_allow_html=True)
+                
+                with col_sarten:
+                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar esta receta"):
+                        if "ingredients" in f:
+                            st.session_state.full_recipe = f
+                            st.session_state.current_page = "mod1"
+                            st.session_state.step = "recipe_view"
+                            st.rerun()
+                        else:
+                            st.toast("⚠️ Receta antigua. Faltan pasos.", icon="⚠️")
+                
+                with col_basura:
+                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help="Eliminar de favoritos"):
+                        favs.pop(idx)
+                        update_user_data(user_profile["username"], {"favorites": favs})
                         st.rerun()
-                    else:
-                        st.toast("⚠️ Receta antigua. Faltan pasos. Por favor, elimínala.", icon="⚠️")
                         
-                if st.button("del", key=f"real_del_{idx}"):
-                    favs.pop(idx)
-                    update_user_data(user_profile["username"], {"favorites": favs})
-                    st.rerun()
-                
-                # --- 2. LA UI DE LA RECETA EN HTML PURO (Inmune a los stColumn) ---
-                # Javascript robusto que pulsa en el botón oculto correcto de Streamlit
-                js_click_load = f"var b = document.querySelector('.st-key-real_load_{idx} button'); if(b) b.click();"
-                js_click_del = f"var b = document.querySelector('.st-key-real_del_{idx} button'); if(b) b.click();"
-                
-                st.markdown(f"""
-                <div style="display: flex; justify-content: space-between; align-items: center; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <div style="flex-grow: 1; margin-right: 15px;">
-                        <span style="font-size: 13px; font-weight: 600; color: #1E293B; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                            {r_name}
-                        </span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;">
-                        <button class="pure-btn-sarten" onclick="{js_click_load}" title="Cocinar Receta">
-                            🍳
-                        </button>
-                        <button class="pure-btn-basura" onclick="{js_click_del}" title="Eliminar de Favoritos">
-                            🗑️
-                        </button>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown("<div style='height: 3px;'></div>", unsafe_allow_html=True)
         else: 
             st.info(t["no_favs"])
 
