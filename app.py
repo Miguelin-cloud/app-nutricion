@@ -699,34 +699,37 @@ with st.sidebar:
     st.markdown("""
     <style>
     /* Resetear botones base en la barra lateral */
-    section[data-testid="stSidebar"] div.stButton > button {
+    html body div#root section[data-testid="stSidebar"] div.stButton > button {
         background-image: none !important;
         box-shadow: none !important;
     }
     
     /* ELIMINAR textos fantasma filtrados del Home en la barra lateral */
-    section[data-testid="stSidebar"] div.stButton > button::after,
-    section[data-testid="stSidebar"] div.stButton > button::before {
+    html body div#root section[data-testid="stSidebar"] div.stButton > button::after,
+    html body div#root section[data-testid="stSidebar"] div.stButton > button::before {
         content: none !important; display: none !important; background-image: none !important;
     }
     
     /* Quitar animaciones base que estiran botones */
-    section[data-testid="stSidebar"] div.stButton > button p {
+    html body div#root section[data-testid="stSidebar"] div.stButton > button p {
         transform: none !important; margin: 0 !important; font-weight: normal !important;
     }
 
     /* ========================================================================= */
-    /* 2. PROTECCIÓN NUCLEAR PARA LOS BOTONES DE FAVORITOS (Botones simples)     */
+    /* 2. PROTECCIÓN NUCLEAR PARA FAVORITOS (Expander 3)                         */
     /* ========================================================================= */
     
-    /* Ocultar los marcadores invisibles */
-    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) {
-        display: none !important;
+    /* Reducir márgenes internos de la columna para apilar a la perfección */
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div[data-testid="stColumn"]:nth-child(2) > div {
+        margin-bottom: 0px !important;
+        padding-bottom: 0px !important;
     }
 
-    /* FORZAR UN ESTILO RÚSTICO, BLANCO Y ESTÁTICO (Destruye los estilos del home) */
-    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button {
-        all: revert !important; /* Destruye TODA herencia del CSS del home */
+    /* SARTÉN (Secondary) - 100% BLANCO Y ESTÁTICO */
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"],
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"]:hover,
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"]:active {
+        all: revert !important;
         appearance: none !important;
         background: #FFFFFF !important;
         background-color: #FFFFFF !important;
@@ -748,32 +751,47 @@ with st.sidebar:
         cursor: pointer !important;
     }
 
-    /* Evitar que cambien al pasar el ratón */
-    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button:hover,
-    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button:active {
-        background: #F8FAFC !important;
-        background-color: #F8FAFC !important;
-        border-color: #94A3B8 !important;
+    /* BASURA (Primary) - 100% ROJO Y ESTÁTICO */
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"],
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"]:hover,
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"]:active {
+        all: revert !important;
+        appearance: none !important;
+        background: #FEE2E2 !important;
+        background-color: #FEE2E2 !important;
+        border: 1px solid #EF4444 !important;
+        border-radius: 4px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: none !important;
         transform: none !important;
         animation: none !important;
-        box-shadow: none !important;
+        transition: none !important;
+        cursor: pointer !important;
     }
 
-    /* ANIQUILAR CORAZONES, FONDOS Y TEXTOS MÉDICOS */
-    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button::before,
-    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button::after,
-    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button:hover::before,
-    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button:hover::after {
+    /* ANIQUILAR CORAZONES, REPORTES MÉDICOS Y FONDOS GLOBALES */
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button::before,
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button::after,
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button:hover::before,
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button:hover::after {
         content: none !important; display: none !important; background: none !important; background-image: none !important; animation: none !important;
     }
 
-    /* BLINDAR EL EMOJI */
-    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button p {
+    /* CONGELAR EL EMOJI (Cero zooms) */
+    html body div#root section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button p {
         all: unset !important;
         display: block !important;
         transform: none !important;
         animation: none !important;
-        font-size: 14px !important;
+        font-size: 15px !important;
         margin: 0 !important;
         padding: 0 !important;
         line-height: 1 !important;
@@ -862,7 +880,7 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    # 3. EXPANDER: RECETAS FAVORITAS (BOTONES SIMPLES Y SEPARADOS)
+    # 3. EXPANDER: RECETAS FAVORITAS (DISEÑO BLINDADO)
     with st.expander(t["favs"], expanded=False):
         favs = user_profile.get("favorites",[])
         if favs:
@@ -872,7 +890,7 @@ with st.sidebar:
                 col_c, col_d = st.columns([4, 1])
                 
                 with col_c:
-                    # Casetilla izquierda con la receta adaptada a la altura de los 2 botones (32 + 11 + 32 = 75px)
+                    # Casetilla izquierda adaptada matemáticamente a la altura de los botones (75px)
                     st.markdown(f"""
                     <div style="
                         background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; 
@@ -886,23 +904,22 @@ with st.sidebar:
                     """, unsafe_allow_html=True)
                 
                 with col_d:
-                    # SARTÉN - Simple, sin parámetros extra
-                    st.markdown('<div class="fav-btn-marker" style="display:none;"></div>', unsafe_allow_html=True)
-                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True):
+                    # SARTÉN - Type="secondary" obliga a que el CSS la fije en blanco
+                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, type="secondary"):
                         if "ingredients" in f:
                             st.session_state.full_recipe = f
                             st.session_state.current_page = "mod1"
                             st.session_state.step = "recipe_view"
                             st.rerun()
                         else:
-                            st.warning("Receta antigua. Faltan pasos.")
+                            # SUSTITUIDO st.warning POR st.toast PARA QUE NO ROMPA EL DISEÑO
+                            st.toast("⚠️ Receta antigua. Faltan pasos. Por favor, elimínala.", icon="⚠️")
                             
-                    # SEPARADOR FÍSICO (Fuerza a que estén separados y no pegados)
+                    # SEPARADOR EXACTO
                     st.markdown("<div style='height: 11px;'></div>", unsafe_allow_html=True)
                             
-                    # BASURA - Simple, sin parámetros extra
-                    st.markdown('<div class="fav-btn-marker" style="display:none;"></div>', unsafe_allow_html=True)
-                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True):
+                    # BASURA - Type="primary" obliga a que el CSS la fije en ROJO
+                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, type="primary"):
                         favs.pop(idx)
                         update_user_data(user_profile["username"], {"favorites": favs})
                         st.rerun()
