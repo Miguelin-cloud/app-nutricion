@@ -644,83 +644,108 @@ t = TRANSLATIONS[st.session_state.selected_lang]
 lang_code = t["lang_code"]
 
 # ==========================================
-# PANTALLA DE AUTENTICACIÓN
+# PANTALLA DE AUTENTICACIÓN REDISEÑADA
 # ==========================================
 if not st.session_state.current_username:
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(f"<h1 class='brand-logo'>{t['auth_app_name']}</h1>", unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align:center; color:#64748B;'>{t['auth_subtitle']}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:center; color:#64748B; font-size: 1.1rem; margin-bottom: 30px;'>{t['auth_subtitle']}</p>", unsafe_allow_html=True)
     
     col_auth1, col_auth2, col_auth3 = st.columns([1, 2, 1])
     with col_auth2:
-        tab1, tab2, tab3 = st.tabs([t["tab_login"], t["tab_register"], t["tab_recover"]])
-        with tab1:
-            log_user = st.text_input(t["username_label_login"], key="log_user")
-            log_pin = st.text_input(t["pin_label_login"], type="password", key="log_pin")
-            keep_in = st.checkbox(t["keep_logged_in"], value=True)
-            if st.button(t["login_btn"], type="primary", use_container_width=True):
-                res = supabase.table("app_users_2").select("*").eq("username", log_user).eq("pin", log_pin).execute()
-                if res.data:
-                    st.session_state.current_username = log_user
-                    st.session_state.keep_in = keep_in
-                    st.session_state.do_login_js = True
-                    st.rerun()
-                else: st.error(t["login_error"])
-                    
-        with tab2:
-            st.markdown(f"**{t['reg_section1']}**")
-            reg_user = st.text_input(t["create_user_label"], key="reg_user")
-            reg_pin = st.text_input(t["create_pin_label"], type="password", key="reg_pin")
-            reg_sq = st.selectbox(t["security_question_label"], t["security_options"])
-            reg_sa = st.text_input(t["security_answer_label"])
+        # Usamos un contenedor visual moderno (tarjeta flotante)
+        with st.container():
+            st.markdown("""
+            <style>[data-testid="stVerticalBlock"] > [style*="flex-direction: column"] > [data-testid="stVerticalBlock"] {
+                background: #FFFFFF; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.06); border: 1px solid #F1F5F9;
+            }
+            </style>
+            """, unsafe_allow_html=True)
             
-            st.markdown(f"**{t['reg_section2']}**")
-            reg_name = st.text_input(t["name_label"])
-            col1, col2, col3 = st.columns(3)
-            reg_age = col1.number_input(t["age_label"], min_value=10, max_value=100, step=1, value=25)
-            reg_weight = col2.number_input(t["weight_label"], min_value=30.0, max_value=200.0, step=0.1, value=70.0)
-            reg_height = col3.number_input(t["height_label"], min_value=100, max_value=250, step=1, value=170)
-            reg_gender = st.selectbox(t["gender_label"], t["gender_options"])
+            tab1, tab2, tab3 = st.tabs(["🔑 " + t["tab_login"].replace("🔑 ", ""), "📝 " + t["tab_register"].replace("📝 ", ""), "🆘 " + t["tab_recover"].replace("🆘 ", "")])
             
-            st.markdown(f"**{t['reg_section3']}**")
-            reg_goals = st.text_area(t["goals_label"])
-            reg_rest = st.text_input(t["rest_label"])
-            
-            if st.button(t["create_account_btn"], type="primary", use_container_width=True):
-                if reg_user and reg_pin and reg_sa and reg_name:
-                    check = supabase.table("app_users_2").select("username").eq("username", reg_user).execute()
-                    if check.data: st.error(t["username_taken"])
-                    else:
-                        new_user = {"username": reg_user, "pin": reg_pin, "security_question": reg_sq, "security_answer": reg_sa.lower(), "name": reg_name, "age": reg_age, "weight": reg_weight, "height": reg_height, "gender": reg_gender, "goals": reg_goals, "restrictions": reg_rest, "favorites":[], "daily_logs":{}, "weekly_planner":{}, "shopping_list":[], "meal_calendar":{}}
-                        supabase.table("app_users_2").insert(new_user).execute()
-                        st.session_state.current_username = reg_user
-                        st.session_state.keep_in = True
+            with tab1:
+                st.markdown("<br>", unsafe_allow_html=True)
+                log_user = st.text_input(t["username_label_login"], key="log_user")
+                log_pin = st.text_input(t["pin_label_login"], type="password", key="log_pin")
+                keep_in = st.checkbox(t["keep_logged_in"], value=True)
+                st.markdown("<br>", unsafe_allow_html=True)
+                if st.button(t["login_btn"], type="primary", use_container_width=True):
+                    # Usamos .strip() por seguridad por si se cuelan espacios al inicio o final
+                    res = supabase.table("app_users_2").select("*").eq("username", log_user.strip()).eq("pin", log_pin).execute()
+                    if res.data:
+                        st.session_state.current_username = log_user.strip()
+                        st.session_state.keep_in = keep_in
                         st.session_state.do_login_js = True
-                        st.success(t["account_created"])
                         st.rerun()
-                else: st.warning(t["fill_required"])
-        
-        with tab3:
-            st.markdown(t["forgot_pin_text"])
-            rec_user = st.text_input(t["search_user_label"], key="rec_user")
-            if st.button(t["search_user_btn"]):
-                res = supabase.table("app_users_2").select("security_question").eq("username", rec_user).execute()
-                if res.data:
-                    st.session_state.recover_user = rec_user
-                    st.session_state.recover_q = res.data[0]["security_question"]
-                    st.success(t["user_found"])
-                else: st.error(t["user_not_found"])
-                    
-            if "recover_user" in st.session_state:
-                st.info(f"{t['recover_question_prefix']} **{st.session_state.recover_q}**")
-                rec_ans = st.text_input(t["your_answer_label"])
-                new_pin = st.text_input(t["new_pin_label"], type="password")
-                if st.button(t["change_pin_btn"], use_container_width=True):
-                    res = supabase.table("app_users_2").select("security_answer").eq("username", st.session_state.recover_user).execute()
-                    if res.data and res.data[0]["security_answer"] == rec_ans.lower():
-                        supabase.table("app_users_2").update({"pin": new_pin}).eq("username", st.session_state.recover_user).execute()
-                        st.success(t["pin_changed_success"])
-                        del st.session_state.recover_user
-                    else: st.error(t["wrong_answer"])
+                    else: 
+                        st.error(t["login_error"])
+                        
+            with tab2:
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.info("💡 Puedes usar letras, números, espacios y símbolos en tu Usuario.")
+                st.markdown(f"**{t['reg_section1']}**")
+                # El .strip() limpia los espacios accidentales del principio y el final, pero permite todos los símbolos interiores
+                reg_user_input = st.text_input(t["create_user_label"], key="reg_user")
+                reg_pin = st.text_input(t["create_pin_label"], type="password", key="reg_pin")
+                reg_sq = st.selectbox(t["security_question_label"], t["security_options"])
+                reg_sa = st.text_input(t["security_answer_label"])
+                
+                st.markdown(f"<br>**{t['reg_section2']}**", unsafe_allow_html=True)
+                reg_name = st.text_input(t["name_label"])
+                col1, col2, col3 = st.columns(3)
+                reg_age = col1.number_input(t["age_label"], min_value=10, max_value=100, step=1, value=25)
+                reg_weight = col2.number_input(t["weight_label"], min_value=30.0, max_value=200.0, step=0.1, value=70.0)
+                reg_height = col3.number_input(t["height_label"], min_value=100, max_value=250, step=1, value=170)
+                reg_gender = st.selectbox(t["gender_label"], t["gender_options"])
+                
+                st.markdown(f"<br>**{t['reg_section3']}**", unsafe_allow_html=True)
+                reg_goals = st.text_area(t["goals_label"])
+                reg_rest = st.text_input(t["rest_label"])
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                if st.button(t["create_account_btn"], type="primary", use_container_width=True):
+                    reg_user = reg_user_input.strip() # Limpieza definitiva de espacios residuales
+                    if reg_user and reg_pin and reg_sa and reg_name:
+                        check = supabase.table("app_users_2").select("username").eq("username", reg_user).execute()
+                        if check.data: 
+                            st.error(t["username_taken"])
+                        else:
+                            new_user = {"username": reg_user, "pin": reg_pin, "security_question": reg_sq, "security_answer": reg_sa.lower().strip(), "name": reg_name.strip(), "age": reg_age, "weight": reg_weight, "height": reg_height, "gender": reg_gender, "goals": reg_goals, "restrictions": reg_rest, "favorites":[], "daily_logs":{}, "weekly_planner":{}, "shopping_list":[], "meal_calendar":{}}
+                            supabase.table("app_users_2").insert(new_user).execute()
+                            st.session_state.current_username = reg_user
+                            st.session_state.keep_in = True
+                            st.session_state.do_login_js = True
+                            st.success(t["account_created"])
+                            st.rerun()
+                    else: 
+                        st.warning(t["fill_required"])
+            
+            with tab3:
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown(t["forgot_pin_text"])
+                rec_user = st.text_input(t["search_user_label"], key="rec_user")
+                if st.button(t["search_user_btn"], use_container_width=True):
+                    res = supabase.table("app_users_2").select("security_question").eq("username", rec_user.strip()).execute()
+                    if res.data:
+                        st.session_state.recover_user = rec_user.strip()
+                        st.session_state.recover_q = res.data[0]["security_question"]
+                        st.success(t["user_found"])
+                    else: 
+                        st.error(t["user_not_found"])
+                        
+                if "recover_user" in st.session_state:
+                    st.info(f"{t['recover_question_prefix']} **{st.session_state.recover_q}**")
+                    rec_ans = st.text_input(t["your_answer_label"])
+                    new_pin = st.text_input(t["new_pin_label"], type="password")
+                    if st.button(t["change_pin_btn"], type="primary", use_container_width=True):
+                        res = supabase.table("app_users_2").select("security_answer").eq("username", st.session_state.recover_user).execute()
+                        if res.data and res.data[0]["security_answer"] == rec_ans.lower().strip():
+                            supabase.table("app_users_2").update({"pin": new_pin}).eq("username", st.session_state.recover_user).execute()
+                            st.success(t["pin_changed_success"])
+                            del st.session_state.recover_user
+                        else: 
+                            st.error(t["wrong_answer"])
     st.stop()
 
 # ==========================================
