@@ -723,62 +723,52 @@ with st.sidebar:
     }
 
     /* ========================================================================= */
-    /* 2. ESCUDO PLANO PARA RECETAS FAVORITAS (100% Estático y Blindado)         */
+    /* 2. DISEÑO "CASETILLAS Y MINI-BOTONES" PARA FAVORITOS (80/20)              */
     /* ========================================================================= */
     
-    /* Estado Normal, Activo y Focus */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:active,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:focus {
-        transform: none !important;
-        scale: 1 !important;
-        box-shadow: none !important;
-        background-image: none !important;
-        background-color: #F8FAFC !important; /* Fondo gris claro clásico */
-        border: 1px solid #CBD5E1 !important;
-        border-radius: 8px !important;
-        min-height: 0 !important;
-        padding: 5px 10px !important;
-        color: #1E293B !important;
-        animation: none !important;
+    /* Reset base para todos los botones dentro de Favoritos (Cuadrados, no círculos) */
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button {
+        transform: none !important; scale: 1 !important; box-shadow: none !important;
+        background-image: none !important; animation: none !important;
+        background-color: #FFFFFF !important; border: 1px solid #CBD5E1 !important;
+        border-radius: 6px !important; /* Puntas redondeadas, no círculos */
+        height: 30px !important; min-height: 30px !important; padding: 0 !important;
+        width: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important;
         transition: background-color 0.2s ease, border-color 0.2s ease !important;
     }
-    
-    /* Estado Hover (Sin crecer, solo oscurece fondo/borde) */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover {
-        transform: none !important;
-        scale: 1 !important;
-        box-shadow: none !important;
-        background-image: none !important;
-        background-color: #E2E8F0 !important;
-        border-color: #94A3B8 !important;
-        color: #1E293B !important;
-        animation: none !important;
-    }
 
-    /* Congelar el contenido interno (el Emoji) para evitar que haga zoom */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button p,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover p {
-        transform: none !important;
-        scale: 1 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        animation: none !important;
-    }
-
-    /* Aniquilar cualquier pseudo-elemento residual que traiga las sombras, fondos o bocadillos */
+    /* Aniquilar texto dinámico o pseudo-elementos filtrados */
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button::before,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button::after,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover::before,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover::after {
-        content: none !important;
-        display: none !important;
-        background-image: none !important;
-        box-shadow: none !important;
-        animation: none !important;
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button::after {
+        display: none !important; content: none !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button p {
+        transform: none !important; scale: 1 !important; margin: 0 !important; animation: none !important; font-size: 14px !important;
+    }
+
+    /* Ocultar los contenedores invisibles de los marcadores para que no ocupen espacio */
+    section[data-testid="stSidebar"] div.element-container:has(.marker-cook),
+    section[data-testid="stSidebar"] div.element-container:has(.marker-trash) {
+        display: none !important; 
+    }
+
+    /* HOVER SARTÉN (Esmeralda plano) */
+    section[data-testid="stSidebar"] div.element-container:has(.marker-cook) + div.element-container div.stButton > button:hover {
+        background-color: #D1FAE5 !important; border-color: #10B981 !important;
+        transform: none !important; scale: 1 !important;
+    }
+
+    /* HOVER BASURA (Rojo plano) */
+    section[data-testid="stSidebar"] div.element-container:has(.marker-trash) + div.element-container div.stButton > button:hover {
+        background-color: #FEE2E2 !important; border-color: #EF4444 !important;
+        transform: none !important; scale: 1 !important;
+    }
+
+    /* Reducir el espacio (gap) entre los dos mini-botones para que queden compactos */
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div[data-testid="stColumn"]:nth-child(2) {
+        display: flex !important; flex-direction: column !important; gap: 6px !important;
     }
     /* ========================================================================= */
-
     </style>
     """, unsafe_allow_html=True)
 
@@ -937,19 +927,41 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    # 3. EXPANDER: RECETAS FAVORITAS
+    # 3. EXPANDER: RECETAS FAVORITAS (NUEVO DISEÑO BLINDADO 80/20)
     with st.expander(t["favs"], expanded=False):
-        # El marcador que protege esta sección específica (estático y blindado)
+        # Marcador maestro que protege y delimita el CSS de esta sección
         st.markdown('<div class="fav-container-marker" style="display:none;"></div>', unsafe_allow_html=True)
         
         favs = user_profile.get("favorites",[])
         if favs:
             for idx, f in enumerate(favs):
                 r_name = f.get('recipe_name', f.get('name', 'Receta'))
-                st.markdown(f"<p style='font-size:14px; font-weight:bold; margin-bottom:5px;'>{r_name}</p>", unsafe_allow_html=True)
                 
-                col_c, col_d = st.columns([3, 1])
+                # Proporción 80% (casetilla receta) y 20% (botones apilados)
+                col_c, col_d = st.columns([4, 1])
+                
                 with col_c:
+                    # Casetilla independiente con altura matemática para cuadrar con los 2 botones (30px + 30px + 6px gap = 66px)
+                    st.markdown(f"""
+                    <div style="
+                        background-color: #F8FAFC; 
+                        border: 1px solid #E2E8F0; 
+                        border-radius: 8px; 
+                        padding: 8px 12px; 
+                        height: 66px; 
+                        display: flex; 
+                        align-items: center; 
+                        box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                        <span style="font-size: 13px; font-weight: 600; color: #1E293B; line-height: 1.2; 
+                                     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            {r_name}
+                        </span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with col_d:
+                    # Marcador invisible + Botón Sartén (Cocinar)
+                    st.markdown('<div class="marker-cook"></div>', unsafe_allow_html=True)
                     if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar esta receta"):
                         if "ingredients" in f:
                             st.session_state.full_recipe = f
@@ -958,12 +970,16 @@ with st.sidebar:
                             st.rerun()
                         else:
                             st.warning("Receta antigua. Faltan pasos.")
-                with col_d:
+                            
+                    # Marcador invisible + Botón Basura (Eliminar)
+                    st.markdown('<div class="marker-trash"></div>', unsafe_allow_html=True)
                     if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help=t["btn_delete"]):
                         favs.pop(idx)
                         update_user_data(user_profile["username"], {"favorites": favs})
                         st.rerun()
-                st.divider()
+                
+                # Espacio en blanco en lugar de divisor para mantenerlo limpio
+                st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
         else: 
             st.info(t["no_favs"])
 
