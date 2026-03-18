@@ -423,13 +423,13 @@ TRANSLATIONS = {
         "fav_cook_help": "Cocinar esta receta", "fav_delete_help": "Eliminar de favoritos", "fav_old_recipe": "⚠️ Receta antigua. Faltan pasos.",
         "logout": "Cerrar Sesión", "news_title": "📰 Tendencias Nutricionales", "feed_title": "Últimas Noticias 🔥", "cook_this": "Cocinar esto 🍳", "download_btn": "⬇️ Descargar",
         "keep_logged_in": "Mantener sesión iniciada", "chef_recom": "🌟 RECOMENDACIÓN ESTRELLA 🌟",
-        "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Tu chef y nutricionista personal impulsado por IA.", "tab_login": "🔑 Iniciar Sesión", "tab_register": "📝 Registrarse", "tab_recover": "🆘 Recuperar PIN",
+        "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Tu chef y nutricionista personal impulsado por IA.", "tab_login": "🔑 Entrar", "tab_register": "📝 Nuevo", "tab_recover": "🆘 Recuperar",
         "username_label_login": "Usuario", "pin_label_login": "PIN", "login_btn": "Entrar a la Cocina 🚀", "login_error": "Usuario o PIN incorrectos.",
         "reg_section1": "1. Datos de Acceso", "create_user_label": "Crea un Usuario único", "create_pin_label": "Crea un PIN corto", "security_question_label": "Pregunta de Seguridad",
         "security_options":["¿Nombre de tu primera mascota?", "¿Ciudad de nacimiento?", "¿Nombre de tu colegio?"], "security_answer_label": "Respuesta",
         "reg_section2": "2. Tu Perfil Clínico", "name_label": "Nombre Real", "age_label": "Edad", "weight_label": "Peso (kg)", "height_label": "Altura (cm)", "gender_label": "Género", "gender_options":["Masculino", "Femenino", "Otro"],
         "reg_section3": "3. Objetivos", "goals_label": "Objetivo principal", "rest_label": "Restricciones Crónicas", "create_account_btn": "Crear Cuenta 🚀", "username_taken": "Usuario en uso.",
-        "account_created": "¡Cuenta creada!", "fill_required": "Rellena los campos.", "forgot_pin_text": "¿Olvidaste tu PIN?", "search_user_label": "Introduce tu Usuario",
+        "account_created": "¡Cuenta creada!", "fill_required": "Rellena los campos obligatorios.", "forgot_pin_text": "¿Olvidaste tu PIN?", "search_user_label": "Introduce tu Usuario",
         "search_user_btn": "Buscar", "user_found": "Usuario encontrado.", "user_not_found": "Usuario no encontrado.", "recover_question_prefix": "Pregunta:", "your_answer_label": "Respuesta", "new_pin_label": "Nuevo PIN",
         "change_pin_btn": "Cambiar PIN", "pin_changed_success": "¡PIN cambiado!", "wrong_answer": "Incorrecta.", "current_weight_label": "Peso Actual (kg)",
         "profile_goals_label": "Objetivos", "profile_restrictions_label": "Restricciones", 
@@ -459,7 +459,8 @@ TRANSLATIONS = {
         "no_trends": "No hay tendencias hoy.", "update_news": "🔄 Actualizar Noticias",
         "alerts_title": "🔔 Alertas del Sistema", "alerts_none": "No hay alertas recientes. ¡Todos los sistemas funcionan perfectamente!", "alerts_clear": "🧹 Limpiar historial",
         "btn_delete": "🗑️ Eliminar", "btn_edit": "✏️ Editar", "btn_save": "💾 Guardar",
-        "manage_meals": "⚙️ Gestionar Comidas del Día", "no_meals": "No hay comidas registradas para este día.", "manage_date": "Selecciona la fecha a editar"
+        "manage_meals": "⚙️ Gestionar Comidas del Día", "no_meals": "No hay comidas registradas para este día.", "manage_date": "Selecciona la fecha a editar",
+        "ph_user": "Ej: Chef Mágico 24 ✨", "ph_pin": "Ej: 1234", "ph_name": "Ej: Laura García", "ph_goals": "Ej: Comer más sano, ganar masa muscular...", "ph_rest": "Ej: Sin gluten, alergia al kiwi..."
     },
     "🇬🇧 English": {
         "lang_code": "English", "title": "Hi {name}! What are we cooking today? 🍲", "subtitle": "Your smart nutrition ecosystem.",
@@ -478,7 +479,7 @@ TRANSLATIONS = {
         "security_question_label": "Question", "security_options":["Pet?", "City?", "School?"], "security_answer_label": "Answer",
         "reg_section2": "2. Profile", "name_label": "Name", "age_label": "Age", "weight_label": "Weight", "height_label": "Height", "gender_label": "Gender", 
         "gender_options":["Male", "Female", "Other"], "reg_section3": "3. Goals", "goals_label": "Goals", "rest_label": "Restrictions", "create_account_btn": "Create 🚀", 
-        "username_taken": "Taken.", "account_created": "Created!", "fill_required": "Fill all.", "forgot_pin_text": "Forgot PIN?", "search_user_label": "Username",
+        "username_taken": "Taken.", "account_created": "Created!", "fill_required": "Fill all fields.", "forgot_pin_text": "Forgot PIN?", "search_user_label": "Username",
         "search_user_btn": "Search", "user_found": "Found.", "user_not_found": "Not found.", "recover_question_prefix": "Q:", "your_answer_label": "Answer", 
         "new_pin_label": "New PIN", "change_pin_btn": "Change", "pin_changed_success": "Changed!", "wrong_answer": "Wrong.", "current_weight_label": "Weight",
         "profile_goals_label": "Goals", "profile_restrictions_label": "Restrictions",
@@ -508,7 +509,8 @@ TRANSLATIONS = {
         "no_trends": "No trends today.", "update_news": "🔄 Update News",
         "alerts_title": "🔔 System Alerts", "alerts_none": "No recent alerts. All systems operational!", "alerts_clear": "🧹 Clear history",
         "btn_delete": "🗑️ Delete", "btn_edit": "✏️ Edit", "btn_save": "💾 Save",
-        "manage_meals": "⚙️ Manage Daily Meals", "no_meals": "No meals logged for this day.", "manage_date": "Select date to edit"
+        "manage_meals": "⚙️ Manage Daily Meals", "no_meals": "No meals logged for this day.", "manage_date": "Select date to edit",
+        "ph_user": "e.g., Magic Chef 24 ✨", "ph_pin": "e.g., 1234", "ph_name": "e.g., Laura Smith", "ph_goals": "e.g., Eat healthier, gain muscle...", "ph_rest": "e.g., Gluten-free, kiwi allergy..."
     },
     "🇫🇷 Français": {
         "lang_code": "French", "title": "Bonjour {name} !", "subtitle": "Votre écosystème nutritionnel.",
@@ -522,7 +524,7 @@ TRANSLATIONS = {
         "fav_cook_help": "Cuisiner cette recette", "fav_delete_help": "Supprimer des favoris", "fav_old_recipe": "⚠️ Ancienne recette. Étapes manquantes.",
         "logout": "Déconnexion", "news_title": "📰 Tendances Nutrition", "feed_title": "Dernières Nouvelles 🔥", "cook_this": "Cuisiner 🍳", "download_btn": "⬇️ Télécharger",
         "keep_logged_in": "Rester connecté", "chef_recom": "🌟 RECOMMANDATION 🌟", "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Chef personnel IA.",
-        "tab_login": "🔑 Login", "tab_register": "📝 Inscription", "tab_recover": "🆘 Récupérer", "username_label_login": "Utilisateur", "pin_label_login": "PIN",
+        "tab_login": "🔑 Login", "tab_register": "📝 Nouveau", "tab_recover": "🆘 Récupérer", "username_label_login": "Utilisateur", "pin_label_login": "PIN",
         "login_btn": "Entrer 🚀", "login_error": "Erreur.", "reg_section1": "1. Accès", "create_user_label": "Utilisateur", "create_pin_label": "PIN",
         "security_question_label": "Question", "security_options":["Animal ?", "Ville ?", "École ?"], "security_answer_label": "Réponse",
         "reg_section2": "2. Profil", "name_label": "Nom", "age_label": "Âge", "weight_label": "Poids", "height_label": "Taille", "gender_label": "Genre",
@@ -554,7 +556,8 @@ TRANSLATIONS = {
         "no_trends": "Pas de tendances aujourd'hui.", "update_news": "🔄 Mettre à jour les actus",
         "alerts_title": "🔔 Alertes Système", "alerts_none": "Aucune alerte récente. Tout fonctionne !", "alerts_clear": "🧹 Effacer l'historique",
         "btn_delete": "🗑️ Supprimer", "btn_edit": "✏️ Modifier", "btn_save": "💾 Enregistrer",
-        "manage_meals": "⚙️ Gérer les repas du jour", "no_meals": "Aucun repas enregistré ce jour.", "manage_date": "Sélectionner la date"
+        "manage_meals": "⚙️ Gérer les repas du jour", "no_meals": "Aucun repas enregistré ce jour.", "manage_date": "Sélectionner la date",
+        "ph_user": "Ex : Chef Magique 24 ✨", "ph_pin": "Ex : 1234", "ph_name": "Ex : Sophie Martin", "ph_goals": "Ex : Manger plus sain, gagner du muscle...", "ph_rest": "Ex : Sans gluten, allergie au kiwi..."
     },
     "🇮🇹 Italiano": {
         "lang_code": "Italian", "title": "Ciao {name}!", "subtitle": "Il tuo ecosistema nutrizionale.",
@@ -568,7 +571,7 @@ TRANSLATIONS = {
         "fav_cook_help": "Cucina questa ricetta", "fav_delete_help": "Rimuovi dai preferiti", "fav_old_recipe": "⚠️ Vecchia ricetta. Passaggi mancanti.",
         "logout": "Esci", "news_title": "📰 Tendenze Nutrizionali", "feed_title": "Ultime Notizie 🔥", "cook_this": "Cucina 🍳", "download_btn": "⬇️ Scarica",
         "keep_logged_in": "Mantieni accesso", "chef_recom": "🌟 RACCOMANDAZIONE 🌟", "auth_app_name": "NutriAI 🌿", "auth_subtitle": "Chef IA.",
-        "tab_login": "🔑 Accedi", "tab_register": "📝 Registrati", "tab_recover": "🆘 Recupera", "username_label_login": "Utente", "pin_label_login": "PIN",
+        "tab_login": "🔑 Accedi", "tab_register": "📝 Nuovo", "tab_recover": "🆘 Recupera", "username_label_login": "Utente", "pin_label_login": "PIN",
         "login_btn": "Entra 🚀", "login_error": "Errore.", "reg_section1": "1. Accesso", "create_user_label": "Utente", "create_pin_label": "PIN",
         "security_question_label": "Domanda", "security_options":["Animale?", "Città?", "Scuola?"], "security_answer_label": "Risposta",
         "reg_section2": "2. Profilo", "name_label": "Nome", "age_label": "Età", "weight_label": "Peso", "height_label": "Altezza", "gender_label": "Genere",
@@ -600,7 +603,8 @@ TRANSLATIONS = {
         "no_trends": "Nessuna tendenza oggi.", "update_news": "🔄 Aggiorna Notizie",
         "alerts_title": "🔔 Avvisi di Sistema", "alerts_none": "Nessun avviso recente. Tutti i sistemi operativi!", "alerts_clear": "🧹 Cancella cronologia",
         "btn_delete": "🗑️ Elimina", "btn_edit": "✏️ Modifica", "btn_save": "💾 Salva",
-        "manage_meals": "⚙️ Gestisci i Pasti del Giorno", "no_meals": "Nessun pasto registrato.", "manage_date": "Seleziona la data"
+        "manage_meals": "⚙️ Gestisci i Pasti del Giorno", "no_meals": "Nessun pasto registrato.", "manage_date": "Seleziona la data",
+        "ph_user": "Es: Chef Magico 24 ✨", "ph_pin": "Es: 1234", "ph_name": "Es: Giulia Rossi", "ph_goals": "Es: Mangiare più sano, mettere su muscoli...", "ph_rest": "Es: Senza glutine, allergia al kiwi..."
     }
 }
 
@@ -644,110 +648,169 @@ t = TRANSLATIONS[st.session_state.selected_lang]
 lang_code = t["lang_code"]
 
 # ==========================================
-# PANTALLA DE AUTENTICACIÓN REDISEÑADA
+# PANTALLA DE AUTENTICACIÓN PREMIUM (Split Screen + Glassmorphism)
 # ==========================================
 if not st.session_state.current_username:
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown(f"<h1 class='brand-logo'>{t['auth_app_name']}</h1>", unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align:center; color:#64748B; font-size: 1.1rem; margin-bottom: 30px;'>{t['auth_subtitle']}</p>", unsafe_allow_html=True)
+    # 1. Inyectamos el CSS exclusivo para el fondo animado y los inputs estilo Apple
+    st.markdown("""
+    <style>
+    /* Fondo animado relajante a pantalla completa */
+    .stApp {
+        background: linear-gradient(-45deg, #FDFBF7, #D1FAE5, #E0F2FE, #FAF6ED) !important;
+        background-size: 400% 400% !important;
+        animation: gradientBG 15s ease infinite !important;
+    }
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
     
-    col_auth1, col_auth2, col_auth3 = st.columns([1, 2, 1])
-    with col_auth2:
-        # Usamos un contenedor visual moderno (tarjeta flotante)
-        with st.container():
-            st.markdown("""
-            <style>[data-testid="stVerticalBlock"] > [style*="flex-direction: column"] > [data-testid="stVerticalBlock"] {
-                background: #FFFFFF; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.06); border: 1px solid #F1F5F9;
-            }
-            </style>
-            """, unsafe_allow_html=True)
-            
-            tab1, tab2, tab3 = st.tabs(["🔑 " + t["tab_login"].replace("🔑 ", ""), "📝 " + t["tab_register"].replace("📝 ", ""), "🆘 " + t["tab_recover"].replace("🆘 ", "")])
-            
-            with tab1:
-                st.markdown("<br>", unsafe_allow_html=True)
-                log_user = st.text_input(t["username_label_login"], key="log_user")
-                log_pin = st.text_input(t["pin_label_login"], type="password", key="log_pin")
-                keep_in = st.checkbox(t["keep_logged_in"], value=True)
-                st.markdown("<br>", unsafe_allow_html=True)
-                if st.button(t["login_btn"], type="primary", use_container_width=True):
-                    # Usamos .strip() por seguridad por si se cuelan espacios al inicio o final
-                    res = supabase.table("app_users_2").select("*").eq("username", log_user.strip()).eq("pin", log_pin).execute()
-                    if res.data:
-                        st.session_state.current_username = log_user.strip()
-                        st.session_state.keep_in = keep_in
-                        st.session_state.do_login_js = True
-                        st.rerun()
-                    else: 
-                        st.error(t["login_error"])
-                        
-            with tab2:
-                st.markdown("<br>", unsafe_allow_html=True)
-                st.info("💡 Puedes usar letras, números, espacios y símbolos en tu Usuario.")
-                st.markdown(f"**{t['reg_section1']}**")
-                # El .strip() limpia los espacios accidentales del principio y el final, pero permite todos los símbolos interiores
-                reg_user_input = st.text_input(t["create_user_label"], key="reg_user")
-                reg_pin = st.text_input(t["create_pin_label"], type="password", key="reg_pin")
-                reg_sq = st.selectbox(t["security_question_label"], t["security_options"])
-                reg_sa = st.text_input(t["security_answer_label"])
-                
-                st.markdown(f"<br>**{t['reg_section2']}**", unsafe_allow_html=True)
-                reg_name = st.text_input(t["name_label"])
-                col1, col2, col3 = st.columns(3)
-                reg_age = col1.number_input(t["age_label"], min_value=10, max_value=100, step=1, value=25)
-                reg_weight = col2.number_input(t["weight_label"], min_value=30.0, max_value=200.0, step=0.1, value=70.0)
-                reg_height = col3.number_input(t["height_label"], min_value=100, max_value=250, step=1, value=170)
-                reg_gender = st.selectbox(t["gender_label"], t["gender_options"])
-                
-                st.markdown(f"<br>**{t['reg_section3']}**", unsafe_allow_html=True)
-                reg_goals = st.text_area(t["goals_label"])
-                reg_rest = st.text_input(t["rest_label"])
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                if st.button(t["create_account_btn"], type="primary", use_container_width=True):
-                    reg_user = reg_user_input.strip() # Limpieza definitiva de espacios residuales
-                    if reg_user and reg_pin and reg_sa and reg_name:
-                        check = supabase.table("app_users_2").select("username").eq("username", reg_user).execute()
-                        if check.data: 
-                            st.error(t["username_taken"])
-                        else:
-                            new_user = {"username": reg_user, "pin": reg_pin, "security_question": reg_sq, "security_answer": reg_sa.lower().strip(), "name": reg_name.strip(), "age": reg_age, "weight": reg_weight, "height": reg_height, "gender": reg_gender, "goals": reg_goals, "restrictions": reg_rest, "favorites":[], "daily_logs":{}, "weekly_planner":{}, "shopping_list":[], "meal_calendar":{}}
-                            supabase.table("app_users_2").insert(new_user).execute()
-                            st.session_state.current_username = reg_user
-                            st.session_state.keep_in = True
-                            st.session_state.do_login_js = True
-                            st.success(t["account_created"])
-                            st.rerun()
-                    else: 
-                        st.warning(t["fill_required"])
-            
-            with tab3:
-                st.markdown("<br>", unsafe_allow_html=True)
-                st.markdown(t["forgot_pin_text"])
-                rec_user = st.text_input(t["search_user_label"], key="rec_user")
-                if st.button(t["search_user_btn"], use_container_width=True):
-                    res = supabase.table("app_users_2").select("security_question").eq("username", rec_user.strip()).execute()
-                    if res.data:
-                        st.session_state.recover_user = rec_user.strip()
-                        st.session_state.recover_q = res.data[0]["security_question"]
-                        st.success(t["user_found"])
-                    else: 
-                        st.error(t["user_not_found"])
-                        
-                if "recover_user" in st.session_state:
-                    st.info(f"{t['recover_question_prefix']} **{st.session_state.recover_q}**")
-                    rec_ans = st.text_input(t["your_answer_label"])
-                    new_pin = st.text_input(t["new_pin_label"], type="password")
-                    if st.button(t["change_pin_btn"], type="primary", use_container_width=True):
-                        res = supabase.table("app_users_2").select("security_answer").eq("username", st.session_state.recover_user).execute()
-                        if res.data and res.data[0]["security_answer"] == rec_ans.lower().strip():
-                            supabase.table("app_users_2").update({"pin": new_pin}).eq("username", st.session_state.recover_user).execute()
-                            st.success(t["pin_changed_success"])
-                            del st.session_state.recover_user
-                        else: 
-                            st.error(t["wrong_answer"])
-    st.stop()
+    /* Efecto Tarjeta de Cristal (Glassmorphism) para el formulario */
+    .auth-glass-card {
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border-radius: 28px !important;
+        padding: 35px !important;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    }
+    [data-testid="stVerticalBlock"] > [style*="flex-direction: column"] >[data-testid="stVerticalBlock"] {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
 
+    /* Inputs Minimalistas Estilo Apple */
+    div[data-baseweb="input"] > div, 
+    div[data-baseweb="textarea"] > div,
+    div[data-baseweb="select"] > div {
+        background-color: #F5F5F7 !important; /* Gris ultra claro Apple */
+        border: 1px solid transparent !important; 
+        border-radius: 12px !important;
+        padding: 4px 8px !important;
+        transition: all 0.3s ease !important;
+    }
+    div[data-baseweb="input"] > div:focus-within, 
+    div[data-baseweb="textarea"] > div:focus-within,
+    div[data-baseweb="select"] > div:focus-within {
+        background-color: #FFFFFF !important;
+        border-color: transparent !important;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15), inset 0 1px 3px rgba(0,0,0,0.02) !important;
+    }
+    div[data-baseweb="input"] input, 
+    div[data-baseweb="textarea"] textarea,
+    div[data-baseweb="select"] div { color: #1D1D1F !important; font-weight: 500 !important; }
+    
+    /* Placeholders en Gris Apple */
+    div[data-baseweb="input"] input::placeholder, 
+    div[data-baseweb="textarea"] textarea::placeholder {
+        color: #86868B !important; opacity: 1 !important; font-weight: normal !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # 2. Layout de Pantalla Dividida
+    st.markdown("<div style='height: 4vh;'></div>", unsafe_allow_html=True)
+    col_left, col_right = st.columns([1.1, 1], gap="large")
+    
+    # Mitad Izquierda: Branding y Chef Animado
+    with col_left:
+        st.markdown("<div style='height: 5vh;'></div>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='font-size: 4.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10B981, #3B82F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{t['auth_app_name']}</h1>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 1.5rem; color: #475569; font-weight: 500; margin-top: 10px;'>{t['auth_subtitle']}</p>", unsafe_allow_html=True)
+        if lottie_cooking: 
+            st_lottie(lottie_cooking, height=450, key="auth_chef_lottie")
+
+    # Mitad Derecha: Formulario Glassmorphism
+    with col_right:
+        st.markdown("<div class='auth-glass-card'>", unsafe_allow_html=True)
+        
+        tab1, tab2, tab3 = st.tabs([t["tab_login"], t["tab_register"], t["tab_recover"]])
+        
+        with tab1:
+            st.markdown("<br>", unsafe_allow_html=True)
+            log_user = st.text_input(t["username_label_login"], placeholder=t["ph_user"], key="log_user")
+            log_pin = st.text_input(t["pin_label_login"], placeholder=t["ph_pin"], type="password", key="log_pin")
+            keep_in = st.checkbox(t["keep_logged_in"], value=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button(t["login_btn"], type="primary", use_container_width=True):
+                res = supabase.table("app_users_2").select("*").eq("username", log_user.strip()).eq("pin", log_pin).execute()
+                if res.data:
+                    st.session_state.current_username = log_user.strip()
+                    st.session_state.keep_in = keep_in
+                    st.session_state.do_login_js = True
+                    st.rerun()
+                else: 
+                    st.error(t["login_error"])
+                    
+        with tab2:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(f"**{t['reg_section1']}**")
+            reg_user_input = st.text_input(t["create_user_label"], placeholder=t["ph_user"], key="reg_user")
+            reg_pin = st.text_input(t["create_pin_label"], placeholder=t["ph_pin"], type="password", key="reg_pin")
+            reg_sq = st.selectbox(t["security_question_label"], t["security_options"])
+            reg_sa = st.text_input(t["security_answer_label"])
+            
+            st.markdown(f"<br>**{t['reg_section2']}**", unsafe_allow_html=True)
+            reg_name = st.text_input(t["name_label"], placeholder=t["ph_name"])
+            col1, col2, col3 = st.columns(3)
+            reg_age = col1.number_input(t["age_label"], min_value=10, max_value=100, step=1, value=25)
+            reg_weight = col2.number_input(t["weight_label"], min_value=30.0, max_value=200.0, step=0.1, value=70.0)
+            reg_height = col3.number_input(t["height_label"], min_value=100, max_value=250, step=1, value=170)
+            reg_gender = st.selectbox(t["gender_label"], t["gender_options"])
+            
+            st.markdown(f"<br>**{t['reg_section3']}**", unsafe_allow_html=True)
+            reg_goals = st.text_area(t["goals_label"], placeholder=t["ph_goals"])
+            reg_rest = st.text_input(t["rest_label"], placeholder=t["ph_rest"])
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button(t["create_account_btn"], type="primary", use_container_width=True):
+                reg_user = reg_user_input.strip()
+                if reg_user and reg_pin and reg_sa and reg_name:
+                    check = supabase.table("app_users_2").select("username").eq("username", reg_user).execute()
+                    if check.data: 
+                        st.error(t["username_taken"])
+                    else:
+                        new_user = {"username": reg_user, "pin": reg_pin, "security_question": reg_sq, "security_answer": reg_sa.lower().strip(), "name": reg_name.strip(), "age": reg_age, "weight": reg_weight, "height": reg_height, "gender": reg_gender, "goals": reg_goals, "restrictions": reg_rest, "favorites":[], "daily_logs":{}, "weekly_planner":{}, "shopping_list":[], "meal_calendar":{}}
+                        supabase.table("app_users_2").insert(new_user).execute()
+                        st.session_state.current_username = reg_user
+                        st.session_state.keep_in = True
+                        st.session_state.do_login_js = True
+                        st.success(t["account_created"])
+                        st.rerun()
+                else: 
+                    st.warning(t["fill_required"])
+        
+        with tab3:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(t["forgot_pin_text"])
+            rec_user = st.text_input(t["search_user_label"], placeholder=t["ph_user"], key="rec_user")
+            if st.button(t["search_user_btn"], use_container_width=True):
+                res = supabase.table("app_users_2").select("security_question").eq("username", rec_user.strip()).execute()
+                if res.data:
+                    st.session_state.recover_user = rec_user.strip()
+                    st.session_state.recover_q = res.data[0]["security_question"]
+                    st.success(t["user_found"])
+                else: 
+                    st.error(t["user_not_found"])
+                    
+            if "recover_user" in st.session_state:
+                st.info(f"{t['recover_question_prefix']} **{st.session_state.recover_q}**")
+                rec_ans = st.text_input(t["your_answer_label"])
+                new_pin = st.text_input(t["new_pin_label"], type="password")
+                if st.button(t["change_pin_btn"], type="primary", use_container_width=True):
+                    res = supabase.table("app_users_2").select("security_answer").eq("username", st.session_state.recover_user).execute()
+                    if res.data and res.data[0]["security_answer"] == rec_ans.lower().strip():
+                        supabase.table("app_users_2").update({"pin": new_pin}).eq("username", st.session_state.recover_user).execute()
+                        st.success(t["pin_changed_success"])
+                        del st.session_state.recover_user
+                    else: 
+                        st.error(t["wrong_answer"])
+                        
+        st.markdown("</div>", unsafe_allow_html=True)
+    st.stop()
 # ==========================================
 # CARGAR PERFIL DEL USUARIO ACTIVO
 # ==========================================
