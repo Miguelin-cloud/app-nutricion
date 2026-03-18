@@ -880,51 +880,70 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    # 3. EXPANDER: RECETAS FAVORITAS (DISEÑO BLINDADO)
+    # 3. EXPANDER: RECETAS FAVORITAS (DISEÑO BLINDADO "PLAN B")
     with st.expander(t["favs"], expanded=False):
+        
+        # CSS INFALIBLE: 
+        # 1. Ocultamos los verdaderos botones de Streamlit (se quedan en el DOM pero no ocupan espacio)
+        # 2. Le damos los estilos limpios a nuestros botones HTML Puros.
+        st.markdown("""
+        <style>
+        div[class*="st-key-real_load_"], div[class*="st-key-real_del_"] {
+            position: absolute !important;
+            opacity: 0 !important;
+            height: 0px !important;
+            width: 0px !important;
+            overflow: hidden !important;
+            pointer-events: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .pure-btn-sarten:hover { background: #F1F5F9 !important; border-color: #94A3B8 !important; transform: scale(1.05); }
+        .pure-btn-basura:hover { background: #FECACA !important; border-color: #DC2626 !important; transform: scale(1.05); }
+        </style>
+        """, unsafe_allow_html=True)
+
         favs = user_profile.get("favorites",[])
         if favs:
             for idx, f in enumerate(favs):
                 r_name = f.get('recipe_name', f.get('name', 'Receta'))
                 
-                col_c, col_d = st.columns([4, 1])
+                # --- 1. BOTONES INVISIBLES DE STREAMLIT (El puente hacia Python) ---
+                if st.button("load", key=f"real_load_{idx}"):
+                    if "ingredients" in f:
+                        st.session_state.full_recipe = f
+                        st.session_state.current_page = "mod1"
+                        st.session_state.step = "recipe_view"
+                        st.rerun()
+                    else:
+                        st.toast("⚠️ Receta antigua. Faltan pasos. Por favor, elimínala.", icon="⚠️")
+                        
+                if st.button("del", key=f"real_del_{idx}"):
+                    favs.pop(idx)
+                    update_user_data(user_profile["username"], {"favorites": favs})
+                    st.rerun()
                 
-                with col_c:
-                    # Casetilla izquierda adaptada matemáticamente a la altura de los botones (75px)
-                    st.markdown(f"""
-                    <div style="
-                        background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; 
-                        padding: 8px 12px; height: 75px; display: flex; align-items: center; 
-                        box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                        <span style="font-size: 13px; font-weight: 600; color: #1E293B; line-height: 1.2; 
-                                     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                # --- 2. LA UI DE LA RECETA EN HTML PURO (Inmune a los stColumn) ---
+                # Usamos Javascript en los onclick para "pulsar" los botones de Streamlit de arriba.
+                st.markdown(f"""
+                <div style="display: flex; justify-content: space-between; align-items: center; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <div style="flex-grow: 1; margin-right: 15px;">
+                        <span style="font-size: 13px; font-weight: 600; color: #1E293B; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                             {r_name}
                         </span>
                     </div>
-                    """, unsafe_allow_html=True)
-                
-                with col_d:
-                    # SARTÉN - Type="secondary" obliga a que el CSS la fije en blanco
-                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, type="secondary"):
-                        if "ingredients" in f:
-                            st.session_state.full_recipe = f
-                            st.session_state.current_page = "mod1"
-                            st.session_state.step = "recipe_view"
-                            st.rerun()
-                        else:
-                            # SUSTITUIDO st.warning POR st.toast PARA QUE NO ROMPA EL DISEÑO
-                            st.toast("⚠️ Receta antigua. Faltan pasos. Por favor, elimínala.", icon="⚠️")
-                            
-                    # SEPARADOR EXACTO
-                    st.markdown("<div style='height: 11px;'></div>", unsafe_allow_html=True)
-                            
-                    # BASURA - Type="primary" obliga a que el CSS la fije en ROJO
-                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, type="primary"):
-                        favs.pop(idx)
-                        update_user_data(user_profile["username"], {"favorites": favs})
-                        st.rerun()
-                
-                st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+                    <div style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;">
+                        <button class="pure-btn-sarten" onclick="document.querySelector('.st-key-real_load_{idx} button').click()" 
+                                style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; height: 32px; width: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding:0; margin:0;">
+                            🍳
+                        </button>
+                        <button class="pure-btn-basura" onclick="document.querySelector('.st-key-real_del_{idx} button').click()" 
+                                style="background: #FEE2E2; border: 1px solid #EF4444; border-radius: 6px; height: 32px; width: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding:0; margin:0;">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
         else: 
             st.info(t["no_favs"])
 
