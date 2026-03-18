@@ -696,75 +696,100 @@ if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 # ==========================================
 with st.sidebar:
     # ESCUDO CSS: Evita que las tarjetas gigantes del Home afecten a la barra lateral
+    # Y elimina TODAS las animaciones globales de la barra lateral
     st.markdown("""
-    <style>[data-testid="stSidebar"] button {
+    <style>
+    [data-testid="stSidebar"] button {
         min-height: 0px !important;
         padding-top: 5px !important;
         padding-bottom: 5px !important;
         background-image: none !important;
         box-shadow: none !important;
-    }[data-testid="stSidebar"] button p { transform: none !important; color: inherit !important; margin: 0 !important; font-weight: normal !important; }
+    }
+    [data-testid="stSidebar"] button p { 
+        transform: none !important; 
+        color: inherit !important; 
+        margin: 0 !important; 
+        font-weight: normal !important; 
+    }
+    /* Eliminada la animación global de hover para la sidebar */
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
-    # FUNCIÓN AUXILIAR: Botones Circulares con Tooltip CSS (Inyección dinámica segura)
+    # FUNCIÓN AUXILIAR: Botones Circulares con Bocadillo CSS (Sin relleno y círculos perfectos)
     def render_circle_btn(emoji, key, tooltip_text, is_selected=False):
         marker_class = f"btn-marker-{key}"
-        border_color = "#10B981" if is_selected else "#E2E8F0"
-        bg_color = "rgba(16, 185, 129, 0.1)" if is_selected else "#FFFFFF"
-        shadow = "0 4px 15px rgba(16, 185, 129, 0.2)" if is_selected else "none"
+        # Si está seleccionado el borde es Dorado, sino gris claro. Fondo SIEMPRE transparente.
+        border_color = "#FFD700" if is_selected else "#CBD5E1"
         
         st.markdown(f"""
         <style>
-        /* Centrar el botón dentro de la columna */
+        /* Desactiva la deformación de Streamlit forzando medidas exactas y márgenes centrados */
         div.element-container:has(.{marker_class}) + div.element-container > div.stButton {{
             display: flex !important; justify-content: center !important;
         }}
-        /* Diseño Circular Estético */
         div.element-container:has(.{marker_class}) + div.element-container button {{
-            width: 45px !important; min-width: 45px !important; height: 45px !important;
-            border-radius: 50% !important; padding: 0 !important;
+            width: 40px !important; min-width: 40px !important; max-width: 40px !important;
+            height: 40px !important; min-height: 40px !important; max-height: 40px !important;
+            border-radius: 50% !important; padding: 0 !important; margin: 0 auto !important;
             display: flex !important; align-items: center !important; justify-content: center !important;
-            font-size: 22px !important; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-            border: 2px solid {border_color} !important; background: {bg_color} !important;
-            position: relative !important; overflow: visible !important; box-shadow: {shadow} !important;
+            font-size: 20px !important;
+            background: transparent !important; background-color: transparent !important; /* Sin Relleno */
+            border: 2px solid {border_color} !important;
+            position: relative !important; overflow: visible !important; box-shadow: none !important;
             color: #1E293B !important;
+            transform: none !important; transition: border-color 0.2s ease !important; /* Solo animación de color */
         }}
-        /* Hover: Más grande y Borde Dorado */
+        
+        /* Hover: Solo cambia el borde a Dorado, sin alterar tamaño ni fondo */
         div.element-container:has(.{marker_class}) + div.element-container button:hover {{
-            transform: scale(1.15) !important; border-color: #FFD700 !important;
-            box-shadow: 0 6px 15px rgba(255, 215, 0, 0.3) !important; background: #FFFFFF !important;
-            z-index: 999 !important;
+            border-color: #FFD700 !important;
+            background: transparent !important; background-color: transparent !important;
+            transform: none !important;
         }}
-        /* Tooltip 100% Personalizado (Caja) */
+
+        /* BOCADILLO DE TEXTO (Cuerpo centrado arriba) */
         div.element-container:has(.{marker_class}) + div.element-container button::after {{
-            content: "{tooltip_text}"; position: absolute !important; bottom: -35px !important; left: 50% !important;
-            transform: translateX(-50%) translateY(10px) !important; background: #1E293B !important; color: #FFFFFF !important;
-            padding: 6px 12px !important; border-radius: 8px !important; font-size: 12px !important; font-weight: 700 !important;
-            white-space: nowrap !important; opacity: 0 !important; visibility: hidden !important;
-            transition: all 0.3s ease !important; z-index: 9999 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-            pointer-events: none !important;
+            content: "{tooltip_text}";
+            position: absolute !important;
+            bottom: calc(100% + 8px) !important; /* Posicionado encima del botón */
+            left: 50% !important;
+            transform: translateX(-50%) !important; /* Centrado perfecto */
+            background: #1E293B !important; color: #FFFFFF !important;
+            padding: 5px 10px !important; border-radius: 6px !important;
+            font-size: 11px !important; font-weight: 700 !important;
+            white-space: nowrap !important;
+            opacity: 0 !important; visibility: hidden !important;
+            z-index: 99999 !important; pointer-events: none !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
         }}
-        /* Tooltip (Punta de Flecha) */
+        
+        /* BOCADILLO DE TEXTO (Punta de flecha apuntando al botón) */
         div.element-container:has(.{marker_class}) + div.element-container button::before {{
-            content: '' !important; position: absolute !important; bottom: -9px !important; left: 50% !important;
-            transform: translateX(-50%) translateY(10px) !important; border-width: 5px !important; border-style: solid !important;
-            border-color: transparent transparent #1E293B transparent !important; opacity: 0 !important; visibility: hidden !important;
-            transition: all 0.3s ease !important; z-index: 9999 !important; pointer-events: none !important;
+            content: '' !important;
+            position: absolute !important;
+            bottom: 100% !important; /* Justo debajo del cuerpo del tooltip */
+            left: 50% !important;
+            transform: translateX(-50%) !important; /* Centrado perfecto */
+            border-width: 5px !important; border-style: solid !important;
+            border-color: #1E293B transparent transparent transparent !important; /* Triángulo apuntando abajo */
+            opacity: 0 !important; visibility: hidden !important;
+            z-index: 99999 !important; pointer-events: none !important;
         }}
-        /* Animación de Aparición del Tooltip */
+
+        /* Mostrar el bocadillo completo en hover */
         div.element-container:has(.{marker_class}) + div.element-container button:hover::after,
         div.element-container:has(.{marker_class}) + div.element-container button:hover::before {{
-            opacity: 1 !important; visibility: visible !important; transform: translateX(-50%) translateY(0) !important;
+            opacity: 1 !important; visibility: visible !important;
         }}
         </style>
         <div class="{marker_class}" style="display:none;"></div>
         """, unsafe_allow_html=True)
         return st.button(emoji, key=key)
 
-    # 1. EXPANDER: PUNTERO MÁGICO (CARRUSEL SIN LAG)
+    # 1. EXPANDER: PUNTERO MÁGICO (CARRUSEL)
     with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
         if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
         if "ptr_page" not in st.session_state: st.session_state.ptr_page = 0
@@ -851,10 +876,10 @@ with st.sidebar:
         else: 
             st.info(t["no_favs"])
 
-    # 4. EXPANDER: TENDENCIAS NUTRICIONALES (BOTONES CIRCULARES)
+    # 4. EXPANDER: TENDENCIAS NUTRICIONALES
     with st.expander(t.get("news_title", "Tendencias"), expanded=True):
         trend_keys =["trend_sweets", "trend_salty", "trend_snacks", "trend_breakfast", "trend_drinks"]
-        trend_emojis = ["🍰", "🥨", "🥪", "🥣", "🥤"]
+        trend_emojis =["🍰", "🥨", "🥪", "🥣", "🥤"]
         if "trend_idx" not in st.session_state: st.session_state.trend_idx = 0
         
         # Generar los botones circulares usando la función auxiliar CSS
