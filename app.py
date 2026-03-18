@@ -851,8 +851,12 @@ if not st.session_state.get('current_username'):
         with tab3:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(t["forgot_pin_text"])
+            
+            # El input de usuario ya tenía key="rec_user", por eso no fallaba
             rec_user = st.text_input(t["search_user_label"], placeholder=t["ph_user"], key="rec_user")
-            if st.button(t["search_user_btn"], use_container_width=True):
+            
+            # Le añadimos un key al botón por seguridad
+            if st.button(t["search_user_btn"], use_container_width=True, key="btn_search_user_recover"):
                 res = supabase.table("app_users_2").select("security_question").eq("username", rec_user.strip()).execute()
                 if res.data:
                     st.session_state.recover_user = rec_user.strip()
@@ -863,14 +867,19 @@ if not st.session_state.get('current_username'):
                     
             if "recover_user" in st.session_state:
                 st.info(f"{t['recover_question_prefix']} **{st.session_state.recover_q}**")
-                rec_ans = st.text_input(t["your_answer_label"])
-                new_pin = st.text_input(t["new_pin_label"], type="password")
-                if st.button(t["change_pin_btn"], type="primary", use_container_width=True):
+                
+                # --- SOLUCIÓN: AÑADIDOS LOS 'key' A ESTOS INPUTS ---
+                rec_ans = st.text_input(t["your_answer_label"], key="recover_answer_input_unique")
+                new_pin = st.text_input(t["new_pin_label"], type="password", key="recover_new_pin_input_unique")
+                
+                # Le añadimos un key al botón también
+                if st.button(t["change_pin_btn"], type="primary", use_container_width=True, key="btn_change_pin_recover"):
                     res = supabase.table("app_users_2").select("security_answer").eq("username", st.session_state.recover_user).execute()
                     if res.data and res.data[0]["security_answer"] == rec_ans.lower().strip():
                         supabase.table("app_users_2").update({"pin": new_pin}).eq("username", st.session_state.recover_user).execute()
                         st.success(t["pin_changed_success"])
-                        del st.session_state.recover_user
+                        del st.session_state.recover_user # Limpiamos la sesión
+                        st.rerun() # Refrescamos para que el usuario pueda volver al Login tranquilamente
                     else: 
                         st.error(t["wrong_answer"])
                         
