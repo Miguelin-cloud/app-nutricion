@@ -648,18 +648,31 @@ t = TRANSLATIONS[st.session_state.selected_lang]
 lang_code = t["lang_code"]
 
 # ==========================================
-# PANTALLA DE AUTENTICACIÓN PREMIUM (Split Screen + Glassmorphism)
+# FUNCIÓN PARA CARGAR LA ANIMACIÓN LOTTIE (CHEF)
 # ==========================================
-if not st.session_state.current_username:
-    # 1. Inyectamos el CSS exclusivo para el fondo animado y los inputs estilo Apple
+def load_lottieurl(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+# Cargamos una animación de un chef cocinando (puedes cambiar la URL por otra de LottieFiles)
+lottie_cooking = load_lottieurl("https://lottie.host/880a442e-cfcc-4da5-9610-ed498dbfb92c/M0HqG3dGZ9.json")
+
+# ==========================================
+# PANTALLA DE AUTENTICACIÓN PREMIUM
+# ==========================================
+if not st.session_state.get('current_username'):
+    
+    # 1. CSS CORREGIDO (Fondo visible y Selectbox sin cortar)
     st.markdown("""
     <style>
-    /* Fondo animado relajante a pantalla completa */
-    .stApp {
+    /* Fondo animado relajante aplicado a los contenedores correctos de Streamlit */[data-testid="stAppViewContainer"], [data-testid="stMain"], .stApp {
         background: linear-gradient(-45deg, #FDFBF7, #D1FAE5, #E0F2FE, #FAF6ED) !important;
         background-size: 400% 400% !important;
         animation: gradientBG 15s ease infinite !important;
     }
+    
     @keyframes gradientBG {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
@@ -668,7 +681,7 @@ if not st.session_state.current_username:
     
     /* Efecto Tarjeta de Cristal (Glassmorphism) para el formulario */
     .auth-glass-card {
-        background: rgba(255, 255, 255, 0.7) !important;
+        background: rgba(255, 255, 255, 0.6) !important;
         backdrop-filter: blur(20px) !important;
         -webkit-backdrop-filter: blur(20px) !important;
         border-radius: 28px !important;
@@ -676,22 +689,32 @@ if not st.session_state.current_username:
         box-shadow: 0 25px 50px rgba(0,0,0,0.06) !important;
         border: 1px solid rgba(255, 255, 255, 0.8) !important;
     }
-    [data-testid="stVerticalBlock"] > [style*="flex-direction: column"] >[data-testid="stVerticalBlock"] {
+    
+    /* Hacer transparente el contenedor interno de Streamlit para que funcione el Glassmorphism */[data-testid="stVerticalBlock"] > [style*="flex-direction: column"] > [data-testid="stVerticalBlock"] {
         background: transparent !important;
         box-shadow: none !important;
         border: none !important;
     }
 
-    /* Inputs Minimalistas Estilo Apple */
+    /* Inputs y Textareas Minimalistas Estilo Apple (CON padding) */
     div[data-baseweb="input"] > div, 
-    div[data-baseweb="textarea"] > div,
-    div[data-baseweb="select"] > div {
-        background-color: #F5F5F7 !important; /* Gris ultra claro Apple */
+    div[data-baseweb="textarea"] > div {
+        background-color: #F5F5F7 !important;
         border: 1px solid transparent !important; 
         border-radius: 12px !important;
-        padding: 4px 8px !important;
+        padding: 8px 12px !important; /* Padding ampliado para que no se vea apretado */
         transition: all 0.3s ease !important;
     }
+
+    /* SELECTBOX Estilo Apple (SIN tocar el padding para que no se corte el texto) */
+    div[data-baseweb="select"] > div {
+        background-color: #F5F5F7 !important;
+        border: 1px solid transparent !important; 
+        border-radius: 12px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    /* Efecto Focus para todos los inputs */
     div[data-baseweb="input"] > div:focus-within, 
     div[data-baseweb="textarea"] > div:focus-within,
     div[data-baseweb="select"] > div:focus-within {
@@ -699,9 +722,13 @@ if not st.session_state.current_username:
         border-color: transparent !important;
         box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15), inset 0 1px 3px rgba(0,0,0,0.02) !important;
     }
+    
     div[data-baseweb="input"] input, 
     div[data-baseweb="textarea"] textarea,
-    div[data-baseweb="select"] div { color: #1D1D1F !important; font-weight: 500 !important; }
+    div[data-baseweb="select"] div { 
+        color: #1D1D1F !important; 
+        font-weight: 500 !important; 
+    }
     
     /* Placeholders en Gris Apple */
     div[data-baseweb="input"] input::placeholder, 
@@ -720,8 +747,12 @@ if not st.session_state.current_username:
         st.markdown("<div style='height: 5vh;'></div>", unsafe_allow_html=True)
         st.markdown(f"<h1 style='font-size: 4.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10B981, #3B82F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{t['auth_app_name']}</h1>", unsafe_allow_html=True)
         st.markdown(f"<p style='font-size: 1.5rem; color: #475569; font-weight: 500; margin-top: 10px;'>{t['auth_subtitle']}</p>", unsafe_allow_html=True)
+        
+        # AQUÍ SE MUESTRA LA ANIMACIÓN
         if lottie_cooking: 
-            st_lottie(lottie_cooking, height=450, key="auth_chef_lottie")
+            st_lottie(lottie_cooking, height=400, key="auth_chef_lottie")
+        else:
+            st.warning("Cargando animación del chef...")
 
     # Mitad Derecha: Formulario Glassmorphism
     with col_right:
@@ -729,6 +760,7 @@ if not st.session_state.current_username:
         
         tab1, tab2, tab3 = st.tabs([t["tab_login"], t["tab_register"], t["tab_recover"]])
         
+        # --- TAB 1: LOGIN ---
         with tab1:
             st.markdown("<br>", unsafe_allow_html=True)
             log_user = st.text_input(t["username_label_login"], placeholder=t["ph_user"], key="log_user")
@@ -745,11 +777,13 @@ if not st.session_state.current_username:
                 else: 
                     st.error(t["login_error"])
                     
+        # --- TAB 2: REGISTRO ---
         with tab2:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(f"**{t['reg_section1']}**")
             reg_user_input = st.text_input(t["create_user_label"], placeholder=t["ph_user"], key="reg_user")
             reg_pin = st.text_input(t["create_pin_label"], placeholder=t["ph_pin"], type="password", key="reg_pin")
+            # El selectbox ahora se verá perfecto
             reg_sq = st.selectbox(t["security_question_label"], t["security_options"])
             reg_sa = st.text_input(t["security_answer_label"])
             
@@ -759,6 +793,7 @@ if not st.session_state.current_username:
             reg_age = col1.number_input(t["age_label"], min_value=10, max_value=100, step=1, value=25)
             reg_weight = col2.number_input(t["weight_label"], min_value=30.0, max_value=200.0, step=0.1, value=70.0)
             reg_height = col3.number_input(t["height_label"], min_value=100, max_value=250, step=1, value=170)
+            # El selectbox de género también se verá perfecto
             reg_gender = st.selectbox(t["gender_label"], t["gender_options"])
             
             st.markdown(f"<br>**{t['reg_section3']}**", unsafe_allow_html=True)
@@ -783,6 +818,7 @@ if not st.session_state.current_username:
                 else: 
                     st.warning(t["fill_required"])
         
+        # --- TAB 3: RECUPERAR CONTRASEÑA ---
         with tab3:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(t["forgot_pin_text"])
