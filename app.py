@@ -800,7 +800,7 @@ with st.sidebar:
         return st.button(emoji, key=key, use_container_width=False)
 
     # 1. EXPANDER: PUNTERO MÁGICO (Con tooltips traducidos)
-    with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
+    with st.expander(t.get("magic_pointer", "Puntero Mágico"), expanded=False):
         if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
         
         # Utilizamos t.get() para asegurar la traducción
@@ -839,7 +839,7 @@ with st.sidebar:
             st.markdown(f"<style>* {{ cursor: url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{st.session_state.cursor_val}</text></svg>\"), auto !important; }}</style>", unsafe_allow_html=True)
 
     # 2. EXPANDER: PERFIL
-    with st.expander("👤 " + t["profile"], expanded=False):
+    with st.expander(t["profile"], expanded=False):
         upd_weight = st.number_input(t["current_weight_label"], value=float(user_profile.get("weight",70)))
         upd_goals = st.text_area(t["profile_goals_label"], value=user_profile.get("goals",""))
         upd_rest = st.text_input(t["profile_restrictions_label"], value=user_profile.get("restrictions",""))
