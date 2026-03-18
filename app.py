@@ -698,92 +698,81 @@ with st.sidebar:
     # 1. ESCUDO CSS ABSOLUTO: Bloquea cualquier CSS de la pantalla principal
     st.markdown("""
     <style>
-    /* Resetear botones en la barra lateral */
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:hover,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:active,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:focus {
-        background-image: none !important; /* Mata la imagen del stickman/varita */
-        padding-top: 0 !important;
+    /* Resetear botones base en la barra lateral */
+    section[data-testid="stSidebar"] div.stButton > button {
+        background-image: none !important;
         box-shadow: none !important;
     }
     
-    /* ELIMINAR las etiquetas filtradas del Home en la barra lateral (incluso en hover) */
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button::after,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button::before,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:hover::after,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:hover::before {
+    /* ELIMINAR textos fantasma filtrados del Home (Como el 'Reporte clínico') en TODA la barra lateral */
+    section[data-testid="stSidebar"] div.stButton > button::after,
+    section[data-testid="stSidebar"] div.stButton > button::before {
         content: none !important;
         display: none !important;
+        background-image: none !important;
     }
     
     /* Quitar animaciones base que estiran botones */
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button p {
+    section[data-testid="stSidebar"] div.stButton > button p {
         transform: none !important; margin: 0 !important; font-weight: normal !important;
     }
 
     /* ========================================================================= */
-    /* 2. DISEÑO 100% ESTÁTICO Y FIJO PARA LOS BOTONES DE FAVORITOS              */
+    /* 2. PROTECCIÓN MILITAR PARA EL EXPANDER DE FAVORITOS (El 3º Expander)      */
     /* ========================================================================= */
     
-    /* Apilar correctamente los mini-botones */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div[data-testid="stColumn"]:nth-child(2) {
-        display: flex !important; flex-direction: column !important; gap: 6px !important;
+    /* Ajuste de márgenes para que los botones se apilen compactos */
+    section[data-testid="stSidebar"] details:nth-of-type(3) div[data-testid="stColumn"]:nth-child(2) > div {
+        margin-bottom: 6px !important;
     }
 
-    /* Ocultar las etiquetas marcadoras para que no ocupen espacio visual */
-    section[data-testid="stSidebar"] div.element-container:has(.btn-cook-wrap),
-    section[data-testid="stSidebar"] div.element-container:has(.btn-trash-wrap) {
-        display: none !important;
+    /* FORZAR TAMAÑO Y FORMA (Prohibido estirarse) */
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button {
+        height: 32px !important; 
+        min-height: 32px !important; 
+        max-height: 32px !important; /* <- Esto evita la píldora gigante */
+        width: 100% !important;
+        padding: 0 !important; 
+        margin: 0 !important;
+        border-radius: 6px !important;
+        transform: none !important; 
+        transition: none !important; 
+        animation: none !important;
+        display: flex !important; 
+        align-items: center !important; 
+        justify-content: center !important;
     }
 
-    /* REGLAS MAESTRAS: Bloquear animaciones y fijar la forma cuadrada */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button {
-        height: 30px !important; min-height: 30px !important; width: 100% !important;
-        padding: 0 !important; margin: 0 !important; border-radius: 6px !important;
-        display: flex !important; align-items: center !important; justify-content: center !important;
+    /* MATAR POR COMPLETO EL FONDO MÉDICO Y LAS ANIMACIONES DEL HOME */
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button::before,
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button::after,
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button:hover::before,
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button:hover::after {
+        content: none !important; display: none !important; background: none !important; animation: none !important;
+    }
+
+    /* CONGELAR EL EMOJI (Cero zoom) */
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button p {
         transform: scale(1) translate3d(0,0,0) !important; 
-        transition: none !important; animation: none !important;
-        box-shadow: none !important; background-image: none !important;
+        animation: none !important; 
+        font-size: 15px !important;
     }
 
-    /* CONGELAR EL EMOJI: Cero zoom, cero movimientos */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button p,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover p {
-        transform: scale(1) translate3d(0,0,0) !important; 
-        transition: none !important; animation: none !important;
-        margin: 0 !important; padding: 0 !important; font-size: 14px !important;
-    }
-
-    /* MATAR CUALQUIER CAMBIO AL PASAR EL RATÓN (Hover) */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:active {
-        transform: scale(1) translate3d(0,0,0) !important; 
-        transition: none !important; box-shadow: none !important;
-    }
-
-    /* BOTÓN SARTÉN: Blanco Permanente */
-    section[data-testid="stSidebar"] div.element-container:has(.btn-cook-wrap) + div.element-container div.stButton > button,
-    section[data-testid="stSidebar"] div.element-container:has(.btn-cook-wrap) + div.element-container div.stButton > button:hover,
-    section[data-testid="stSidebar"] div.element-container:has(.btn-cook-wrap) + div.element-container div.stButton > button:active {
+    /* BOTÓN SARTÉN (Marcado como Secondary) -> SIEMPRE BLANCO */
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"],
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"]:hover,
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"]:active {
         background-color: #FFFFFF !important;
         border: 1px solid #CBD5E1 !important;
+        color: #000 !important;
     }
 
-    /* BOTÓN BASURA: Rojo Permanente */
-    section[data-testid="stSidebar"] div.element-container:has(.btn-trash-wrap) + div.element-container div.stButton > button,
-    section[data-testid="stSidebar"] div.element-container:has(.btn-trash-wrap) + div.element-container div.stButton > button:hover,
-    section[data-testid="stSidebar"] div.element-container:has(.btn-trash-wrap) + div.element-container div.stButton > button:active {
-        background-color: #FEE2E2 !important; /* Fondo rojo estático */
-        border: 1px solid #EF4444 !important; /* Contorno rojo estático */
-    }
-
-    /* Matar sombras/bocadillos filtrados */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button::before,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button::after,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover::before,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover::after {
-        display: none !important; content: none !important; animation: none !important;
+    /* BOTÓN BASURA (Marcado como Primary) -> SIEMPRE ROJO */
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"],
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"]:hover,
+    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"]:active {
+        background-color: #FEE2E2 !important; 
+        border: 1px solid #EF4444 !important;
     }
     /* ========================================================================= */
     </style>
@@ -798,59 +787,38 @@ with st.sidebar:
         
         st.markdown(f"""
         <style>
-        /* Forzar visibilidad para evitar que se corten los tooltips */
         div:has(>.btn-marker-{key}),
         div:has(>.btn-marker-{key}) + div.element-container,
         div:has(>.btn-marker-{key}) + div.element-container > div.stButton {{
-            overflow: visible !important;
-            display: flex !important; justify-content: center !important;
+            overflow: visible !important; display: flex !important; justify-content: center !important;
         }}
-        
-        /* Círculos matemáticamente perfectos */
         section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button {{
             width: 42px !important; min-width: 42px !important; max-width: 42px !important;
             height: 42px !important; min-height: 42px !important; max-height: 42px !important;
             border-radius: 50% !important; padding: 0 !important; margin: 0 auto !important;
-            flex: 0 0 auto !important; /* Previene el estiramiento ovalado */
-            background-color: {bg} !important; border: 2px solid {border} !important;
+            flex: 0 0 auto !important; background-color: {bg} !important; border: 2px solid {border} !important;
             font-size: 20px !important; color: #1E293B !important;
             display: flex !important; align-items: center !important; justify-content: center !important;
             position: relative !important; overflow: visible !important; 
-            /* Transición dinámica y suave para el hover */
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s ease, background-color 0.2s ease !important;
             transform: scale(1) !important;
         }}
-        
-        /* Hover Dinámico: Agrandar círculo, borde dorado, sin imágenes fantasma */
         section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover {{
-            border-color: #FFD700 !important; 
-            transform: scale(1.15) !important; /* Efecto de crecimiento estético */
-            z-index: 9999 !important;
-            background-image: none !important;
+            border-color: #FFD700 !important; transform: scale(1.15) !important; z-index: 9999 !important; background-image: none !important;
         }}
-
-        /* BOCADILLO DE TEXTO (Etiqueta Centrada Arriba) */
         section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::after {{
-            content: "{tooltip_text}" !important;
-            display: block !important; position: absolute !important;
-            bottom: calc(100% + 10px) !important; left: 50% !important;
-            transform: translateX(-50%) !important;
-            background: #1E293B !important; color: #FFFFFF !important;
-            padding: 6px 12px !important; border-radius: 6px !important;
-            font-size: 11px !important; font-weight: 700 !important;
-            white-space: nowrap !important; width: max-content !important; 
+            content: "{tooltip_text}" !important; display: block !important; position: absolute !important;
+            bottom: calc(100% + 10px) !important; left: 50% !important; transform: translateX(-50%) !important;
+            background: #1E293B !important; color: #FFFFFF !important; padding: 6px 12px !important; border-radius: 6px !important;
+            font-size: 11px !important; font-weight: 700 !important; white-space: nowrap !important; width: max-content !important; 
             opacity: 1 !important; visibility: visible !important; pointer-events: none !important;
             z-index: 99999 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
         }}
-        /* Triángulo del Bocadillo */
         section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::before {{
             content: "" !important; display: block !important; position: absolute !important;
-            bottom: calc(100% + 5px) !important; left: 50% !important;
-            transform: translateX(-50%) !important;
-            border-width: 5px !important; border-style: solid !important;
-            border-color: #1E293B transparent transparent transparent !important;
-            opacity: 1 !important; visibility: visible !important; pointer-events: none !important;
-            z-index: 99999 !important;
+            bottom: calc(100% + 5px) !important; left: 50% !important; transform: translateX(-50%) !important;
+            border-width: 5px !important; border-style: solid !important; border-color: #1E293B transparent transparent transparent !important;
+            opacity: 1 !important; visibility: visible !important; pointer-events: none !important; z-index: 99999 !important;
         }}
         </style>
         <div class="btn-marker-{key}" data-emoji="{emoji}"></div>
@@ -862,7 +830,6 @@ with st.sidebar:
     with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
         if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
         
-        # 10 cursores en total
         cursors =[
             ("default", "🖱️", t.get("ptr_default", "Predeterminado")),
             ("🍗", "🍗", t.get("ptr_drumstick", "Muslito")),
@@ -876,7 +843,6 @@ with st.sidebar:
             ("☕", "☕", t.get("ptr_coffee", "Café"))   
         ]
         
-        # FILA 1 (Iconos del 0 al 4)
         cols_ptr_1 = st.columns(5)
         for i in range(5):
             with cols_ptr_1[i]:
@@ -885,9 +851,8 @@ with st.sidebar:
                     st.session_state.cursor_val = p_val
                     st.rerun()
 
-        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True) # Espacio entre filas
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
 
-        # FILA 2 (Iconos del 5 al 9)
         cols_ptr_2 = st.columns(5)
         for i in range(5, 10):
             with cols_ptr_2[i-5]:
@@ -896,7 +861,6 @@ with st.sidebar:
                     st.session_state.cursor_val = p_val
                     st.rerun()
 
-        # JS PARA CAMBIO INSTANTÁNEO DE PUNTERO
         st.components.v1.html("""
         <script>
         const doc = window.parent.document;
@@ -916,9 +880,7 @@ with st.sidebar:
                         let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size: 24px"><text y="24">${emoji}</text></svg>`;
                         let css = `* { cursor: url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}'), auto !important; }`;
                         let style = doc.createElement('style');
-                        style.id = styleId;
-                        style.innerHTML = css;
-                        doc.head.appendChild(style);
+                        style.id = styleId; style.innerHTML = css; doc.head.appendChild(style);
                     }
                 }
             }
@@ -927,11 +889,7 @@ with st.sidebar:
         """, height=0, width=0)
 
         if st.session_state.cursor_val != "default":
-            st.markdown(f"""
-            <style>
-            * {{ cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{st.session_state.cursor_val}</text></svg>"), auto !important; }}
-            </style>
-            """, unsafe_allow_html=True)
+            st.markdown(f"<style>* {{ cursor: url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{st.session_state.cursor_val}</text></svg>\"), auto !important; }}</style>", unsafe_allow_html=True)
 
     # 2. EXPANDER: PERFIL
     with st.expander("👤 " + t["profile"], expanded=False):
@@ -943,11 +901,8 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    # 3. EXPANDER: RECETAS FAVORITAS (DISEÑO BLINDADO Y 100% INAMOVIBLE)
+    # 3. EXPANDER: RECETAS FAVORITAS (AHORA 100% BLINDADO Y CUADRADO)
     with st.expander(t["favs"], expanded=False):
-        # Marcador maestro que protege esta sección
-        st.markdown('<div class="fav-container-marker" style="display:none;"></div>', unsafe_allow_html=True)
-        
         favs = user_profile.get("favorites",[])
         if favs:
             for idx, f in enumerate(favs):
@@ -956,16 +911,11 @@ with st.sidebar:
                 col_c, col_d = st.columns([4, 1])
                 
                 with col_c:
-                    # Casetilla izquierda (80%)
+                    # Casetilla izquierda con la receta
                     st.markdown(f"""
                     <div style="
-                        background-color: #F8FAFC; 
-                        border: 1px solid #E2E8F0; 
-                        border-radius: 8px; 
-                        padding: 8px 12px; 
-                        height: 66px; 
-                        display: flex; 
-                        align-items: center; 
+                        background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; 
+                        padding: 8px 12px; height: 70px; display: flex; align-items: center; 
                         box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                         <span style="font-size: 13px; font-weight: 600; color: #1E293B; line-height: 1.2; 
                                      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
@@ -975,9 +925,8 @@ with st.sidebar:
                     """, unsafe_allow_html=True)
                 
                 with col_d:
-                    # MARCADO EXPRESO: Obliga al primer botón a ser Blanco (Sartén)
-                    st.markdown('<div class="btn-cook-wrap"></div>', unsafe_allow_html=True)
-                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar esta receta"):
+                    # SARTÉN - Usamos type="secondary" para que el CSS la fije en blanco
+                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar esta receta", type="secondary"):
                         if "ingredients" in f:
                             st.session_state.full_recipe = f
                             st.session_state.current_page = "mod1"
@@ -986,15 +935,13 @@ with st.sidebar:
                         else:
                             st.warning("Receta antigua. Faltan pasos.")
                             
-                    # MARCADO EXPRESO: Obliga al segundo botón a ser Rojo Fijo (Basura)
-                    st.markdown('<div class="btn-trash-wrap"></div>', unsafe_allow_html=True)
-                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help=t["btn_delete"]):
+                    # BASURA - Usamos type="primary" para que el CSS la fije en rojo 
+                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help=t["btn_delete"], type="primary"):
                         favs.pop(idx)
                         update_user_data(user_profile["username"], {"favorites": favs})
                         st.rerun()
                 
-                # Espacio en blanco entre recetas
-                st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
         else: 
             st.info(t["no_favs"])
 
