@@ -794,7 +794,7 @@ with st.sidebar:
 
 
     # 1. EXPANDER: PUNTERO MÁGICO (Cuadrícula 2x5)
-    with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
+    with st.expander(t.get("magic_pointer", "Puntero Mágico"), expanded=False):
         if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
         
         # 10 cursores en total
@@ -870,7 +870,7 @@ with st.sidebar:
             """, unsafe_allow_html=True)
 
     # 2. EXPANDER: PERFIL
-    with st.expander("👤 " + t["profile"], expanded=False):
+    with st.expander(t["profile"], expanded=False):
         upd_weight = st.number_input(t["current_weight_label"], value=float(user_profile.get("weight",70)))
         upd_goals = st.text_area(t["profile_goals_label"], value=user_profile.get("goals",""))
         upd_rest = st.text_input(t["profile_restrictions_label"], value=user_profile.get("restrictions",""))
