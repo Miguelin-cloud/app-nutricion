@@ -723,54 +723,67 @@ with st.sidebar:
     }
 
     /* ========================================================================= */
-    /* 2. DISEÑO ESTÁTICO DE CASETILLAS Y MINI-BOTONES PARA FAVORITOS (80/20)    */
+    /* 2. DISEÑO 100% ESTÁTICO Y FIJO PARA LOS BOTONES DE FAVORITOS              */
     /* ========================================================================= */
     
-    /* Reducir espacio entre botones para apilarlos perfectamente */
+    /* Apilar correctamente los mini-botones */
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div[data-testid="stColumn"]:nth-child(2) {
         display: flex !important; flex-direction: column !important; gap: 6px !important;
     }
 
-    /* ESTADO BASE DE LOS MINI-BOTONES (Fijar altura y forma, 100% inamovibles) */
+    /* Ocultar las etiquetas marcadoras para que no ocupen espacio visual */
+    section[data-testid="stSidebar"] div.element-container:has(.btn-cook-wrap),
+    section[data-testid="stSidebar"] div.element-container:has(.btn-trash-wrap) {
+        display: none !important;
+    }
+
+    /* REGLAS MAESTRAS: Bloquear animaciones y fijar la forma cuadrada */
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button {
-        background-color: #FFFFFF !important; border: 1px solid #CBD5E1 !important;
-        border-radius: 6px !important; height: 30px !important; min-height: 30px !important;
-        padding: 0 !important; margin: 0 !important; width: 100% !important;
+        height: 30px !important; min-height: 30px !important; width: 100% !important;
+        padding: 0 !important; margin: 0 !important; border-radius: 6px !important;
         display: flex !important; align-items: center !important; justify-content: center !important;
-        background-image: none !important; box-shadow: none !important; 
-        transform: scale(1) !important; transition: background-color 0.2s, border-color 0.2s !important;
+        transform: scale(1) translate3d(0,0,0) !important; 
+        transition: none !important; animation: none !important;
+        box-shadow: none !important; background-image: none !important;
     }
 
-    /* BLOQUEAR CUALQUIER CRECIMIENTO EN HOVER PARA EL BOTÓN */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:active {
-        transform: scale(1) !important; height: 30px !important; min-height: 30px !important;
-        background-image: none !important; box-shadow: none !important;
-    }
-
-    /* CONGELAR EL EMOJI DENTRO DEL BOTÓN (Esta era la causa del zoom por el Home) */
+    /* CONGELAR EL EMOJI: Cero zoom, cero movimientos */
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button p,
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover p {
-        transform: scale(1) translate3d(0,0,0) !important; font-size: 14px !important; 
-        animation: none !important; margin: 0 !important; padding: 0 !important;
+        transform: scale(1) translate3d(0,0,0) !important; 
+        transition: none !important; animation: none !important;
+        margin: 0 !important; padding: 0 !important; font-size: 14px !important;
     }
 
-    /* ANULAR FONDOS/BOCADILLOS DEL HOME */
+    /* MATAR CUALQUIER CAMBIO AL PASAR EL RATÓN (Hover) */
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover,
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:active {
+        transform: scale(1) translate3d(0,0,0) !important; 
+        transition: none !important; box-shadow: none !important;
+    }
+
+    /* BOTÓN SARTÉN: Blanco Permanente */
+    section[data-testid="stSidebar"] div.element-container:has(.btn-cook-wrap) + div.element-container div.stButton > button,
+    section[data-testid="stSidebar"] div.element-container:has(.btn-cook-wrap) + div.element-container div.stButton > button:hover,
+    section[data-testid="stSidebar"] div.element-container:has(.btn-cook-wrap) + div.element-container div.stButton > button:active {
+        background-color: #FFFFFF !important;
+        border: 1px solid #CBD5E1 !important;
+    }
+
+    /* BOTÓN BASURA: Rojo Permanente */
+    section[data-testid="stSidebar"] div.element-container:has(.btn-trash-wrap) + div.element-container div.stButton > button,
+    section[data-testid="stSidebar"] div.element-container:has(.btn-trash-wrap) + div.element-container div.stButton > button:hover,
+    section[data-testid="stSidebar"] div.element-container:has(.btn-trash-wrap) + div.element-container div.stButton > button:active {
+        background-color: #FEE2E2 !important; /* Fondo rojo estático */
+        border: 1px solid #EF4444 !important; /* Contorno rojo estático */
+    }
+
+    /* Matar sombras/bocadillos filtrados */
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button::before,
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button::after,
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover::before,
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover::after {
-        display: none !important; content: none !important; background-image: none !important; animation: none !important;
-    }
-
-    /* HOVER COLOR SARTÉN (Verde esmeralda plano para el 1º Botón) */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-of-type(1) div.stButton > button:hover {
-        background-color: #D1FAE5 !important; border-color: #10B981 !important;
-    }
-
-    /* HOVER COLOR BASURA (Rojo plano para el 2º Botón) */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div[data-testid="stColumn"]:nth-child(2) div.element-container:nth-of-type(2) div.stButton > button:hover {
-        background-color: #FEE2E2 !important; border-color: #EF4444 !important;
+        display: none !important; content: none !important; animation: none !important;
     }
     /* ========================================================================= */
     </style>
@@ -930,7 +943,7 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    # 3. EXPANDER: RECETAS FAVORITAS (NUEVO DISEÑO 100% ESTÁTICO)
+    # 3. EXPANDER: RECETAS FAVORITAS (DISEÑO BLINDADO Y 100% INAMOVIBLE)
     with st.expander(t["favs"], expanded=False):
         # Marcador maestro que protege esta sección
         st.markdown('<div class="fav-container-marker" style="display:none;"></div>', unsafe_allow_html=True)
@@ -962,8 +975,8 @@ with st.sidebar:
                     """, unsafe_allow_html=True)
                 
                 with col_d:
-                    # SÓLO LOS BOTONES, SIN MARCADORES EXTRA. 
-                    # El primero es la sartén, el segundo la basura. El CSS los identifica solos.
+                    # MARCADO EXPRESO: Obliga al primer botón a ser Blanco (Sartén)
+                    st.markdown('<div class="btn-cook-wrap"></div>', unsafe_allow_html=True)
                     if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar esta receta"):
                         if "ingredients" in f:
                             st.session_state.full_recipe = f
@@ -973,6 +986,8 @@ with st.sidebar:
                         else:
                             st.warning("Receta antigua. Faltan pasos.")
                             
+                    # MARCADO EXPRESO: Obliga al segundo botón a ser Rojo Fijo (Basura)
+                    st.markdown('<div class="btn-trash-wrap"></div>', unsafe_allow_html=True)
                     if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help=t["btn_delete"]):
                         favs.pop(idx)
                         update_user_data(user_profile["username"], {"favorites": favs})
