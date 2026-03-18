@@ -649,8 +649,10 @@ lang_code = t["lang_code"]
 
 import streamlit as st
 
+import streamlit as st
+
 # ==========================================
-# ANIMACIÓN VECTORIAL DEL CHEF (Corregido para Markdown)
+# ANIMACIÓN VECTORIAL DEL CHEF (Corregida para Streamlit)
 # ==========================================
 svg_animado = """<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; padding-top: 20px;">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="450px">
@@ -720,11 +722,10 @@ svg_animado = """<div style="display: flex; justify-content: center; align-items
 # ==========================================
 if not st.session_state.get('current_username'):
     
-    # CSS: Fondo visible general, Fix de los selectbox y Glassmorphism
+    # 1. CSS (Fondo, Glassmorphism y Selectbox corregido)
     st.markdown("""
     <style>
-    /* Fondo animado relajante general de la app */
-    [data-testid="stAppViewContainer"],[data-testid="stMain"], .stApp {
+    [data-testid="stAppViewContainer"], [data-testid="stMain"], .stApp {
         background: linear-gradient(-45deg, #FDFBF7, #D1FAE5, #E0F2FE, #FAF6ED) !important;
         background-size: 400% 400% !important;
         animation: gradientBG 15s ease infinite !important;
@@ -734,8 +735,6 @@ if not st.session_state.get('current_username'):
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
     }
-    
-    /* Efecto Tarjeta de Cristal (Glassmorphism) */
     .auth-glass-card {
         background: rgba(255, 255, 255, 0.6) !important;
         backdrop-filter: blur(20px) !important;
@@ -744,24 +743,17 @@ if not st.session_state.get('current_username'):
         padding: 35px !important;
         box-shadow: 0 25px 50px rgba(0,0,0,0.06) !important;
         border: 1px solid rgba(255, 255, 255, 0.8) !important;
-    }
-    [data-testid="stVerticalBlock"] > [style*="flex-direction: column"] > [data-testid="stVerticalBlock"] {
+    }[data-testid="stVerticalBlock"] > [style*="flex-direction: column"] > [data-testid="stVerticalBlock"] {
         background: transparent !important; box-shadow: none !important; border: none !important;
     }
-
-    /* Inputs Minimalistas Estilo Apple */
     div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div {
         background-color: #F5F5F7 !important; border: 1px solid transparent !important; 
         border-radius: 12px !important; padding: 8px 12px !important; transition: all 0.3s ease !important;
     }
-
-    /* SELECTBOX Estilo Apple (Soluciona el problema de que se cortaba) */
     div[data-baseweb="select"] > div {
         background-color: #F5F5F7 !important; border: 1px solid transparent !important; 
         border-radius: 12px !important; transition: all 0.3s ease !important;
     }
-
-    /* Efecto Focus */
     div[data-baseweb="input"] > div:focus-within, div[data-baseweb="textarea"] > div:focus-within, div[data-baseweb="select"] > div:focus-within {
         background-color: #FFFFFF !important; border-color: transparent !important;
         box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15), inset 0 1px 3px rgba(0,0,0,0.02) !important;
@@ -775,53 +767,52 @@ if not st.session_state.get('current_username'):
     </style>
     """, unsafe_allow_html=True)
     
-    # 2. Layout de Pantalla Dividida
-    st.markdown("<div style='height: 4vh;'></div>", unsafe_allow_html=True)
+    # ==========================================
+    # 2. AVISOS SUPERIORES (Banners)
+    # ==========================================
+    st.markdown("<div style='height: 2vh;'></div>", unsafe_allow_html=True)
+    col_aviso1, col_aviso2 = st.columns(2, gap="large")
+    
+    # VENTANA 1: Fase Beta (Morada)
+    with col_aviso1:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #A855F7 0%, #7E22CE 100%); border-radius: 14px; padding: 18px; border: 1px solid #C084FC; box-shadow: 0 10px 25px rgba(126, 34, 206, 0.2); height: 100%;">
+            <h4 style="margin-top: 0; color: #FFFFFF; font-size: 1.05rem; font-weight: 800; margin-bottom: 8px;">🚀 App en Fase Beta</h4>
+            <p style="color: #E9D5FF; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px;">Próximas actualizaciones:</p>
+            <ul style="color: #F3E8FF; font-size: 0.85rem; padding-left: 18px; margin-bottom: 0; line-height: 1.4;">
+                <li style="margin-bottom: 5px;"><b>Ranking Social:</b> Compara tu progreso (ej: <i>"Comes mejor que el 84% de los usuarios"</i>).</li>
+                <li style="margin-bottom: 5px;"><b>Gráficos de Estudio:</b> Analíticas y estadísticas avanzadas de tu evolución.</li>
+                <li><b>IA Mejorada:</b> Razonamiento aún más detallado con estudio profundo de macronutrientes.</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    # VENTANA 2: Novedades (Dorada)
+    with col_aviso2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); border-radius: 14px; padding: 18px; border: 1px solid #FCD34D; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.2); height: 100%; display: flex; flex-direction: column; justify-content: center;">
+            <h4 style="margin-top: 0; color: #78350F; font-size: 1.05rem; font-weight: 900; margin-bottom: 8px; text-transform: uppercase;">✨ Novedades</h4>
+            <p style="color: #92400E; font-size: 0.95rem; font-weight: 600; line-height: 1.5; margin-bottom: 0;">
+                ¡Nuestra app ya está disponible para descargar en <b>Android</b> e <b>iOS</b>! <br><br>
+                <span style="background: rgba(255,255,255,0.4); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; color: #78350F;">(Fase Beta)</span>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ==========================================
+    # 3. LAYOUT PRINCIPAL (Pantalla Dividida)
+    # ==========================================
+    st.markdown("<div style='height: 3vh;'></div>", unsafe_allow_html=True)
     col_left, col_right = st.columns([1.1, 1], gap="large")
     
-    # Mitad Izquierda: Branding y NUEVA Animación Vectorial
-    # Mitad Izquierda: Branding, Animación y Novedades
+    # Mitad Izquierda: Branding y Chef Animado
     with col_left:
-        st.markdown("<div style='height: 5vh;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 2vh;'></div>", unsafe_allow_html=True)
         st.markdown(f"<h1 style='font-size: 4.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10B981, #3B82F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{t['auth_app_name']}</h1>", unsafe_allow_html=True)
         st.markdown(f"<p style='font-size: 1.5rem; color: #475569; font-weight: 500; margin-top: 10px;'>{t['auth_subtitle']}</p>", unsafe_allow_html=True)
         
-        # AQUÍ RENDERIZAMOS LA ANIMACIÓN DEL CHEF
+        # Animación vectorial del chef
         st.markdown(svg_animado, unsafe_allow_html=True)
-
-        # ==========================================
-        # NUEVAS MINI-VENTANAS (Fase Beta y Novedades)
-        # ==========================================
-        st.markdown("<br>", unsafe_allow_html=True) # Pequeño espacio
-        
-        # Sub-columnas para poner las cajitas una al lado de la otra
-        info_col1, info_col2 = st.columns(2)
-        
-        # VENTANA 1: Fase Beta y Próximas Actualizaciones (Estilo Glassmorphism)
-        with info_col1:
-            st.markdown("""
-            <div style="background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 16px; padding: 18px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.04); height: 100%;">
-                <h4 style="margin-top: 0; color: #3B82F6; font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">🚀 App en Fase Beta</h4>
-                <p style="color: #64748B; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">Próximas actualizaciones:</p>
-                <ul style="color: #475569; font-size: 0.8rem; padding-left: 18px; margin-bottom: 0; line-height: 1.4;">
-                    <li style="margin-bottom: 6px;"><b>Ranking Social:</b> Compara tu progreso (ej: <i>"Comes mejor que el 84% de los usuarios"</i>).</li>
-                    <li style="margin-bottom: 6px;"><b>Gráficos de Estudio:</b> Analíticas y estadísticas avanzadas de tu evolución.</li>
-                    <li><b>IA Mejorada:</b> Razonamiento aún más detallado con estudio profundo de macronutrientes.</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # VENTANA 2: Novedades (Estilo Dorado Brillante)
-        with info_col2:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); border-radius: 16px; padding: 18px; border: 1px solid #FCD34D; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15); height: 100%; display: flex; flex-direction: column; justify-content: center;">
-                <h4 style="margin-top: 0; color: #78350F; font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase;">✨ Novedades</h4>
-                <p style="color: #92400E; font-size: 0.95rem; font-weight: 600; line-height: 1.4; margin-bottom: 0;">
-                    ¡Nuestra app ya está disponible para descargar en <b>Android</b> e <b>iOS</b>! <br><br>
-                    <span style="background: rgba(255,255,255,0.3); padding: 4px 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;">(Fase Beta)</span>
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
 
     # Mitad Derecha: Formulario Glassmorphism
     with col_right:
@@ -829,6 +820,7 @@ if not st.session_state.get('current_username'):
         
         tab1, tab2, tab3 = st.tabs([t["tab_login"], t["tab_register"], t["tab_recover"]])
         
+        # --- TAB 1: LOGIN ---
         with tab1:
             st.markdown("<br>", unsafe_allow_html=True)
             log_user = st.text_input(t["username_label_login"], placeholder=t["ph_user"], key="log_user")
@@ -845,6 +837,7 @@ if not st.session_state.get('current_username'):
                 else: 
                     st.error(t["login_error"])
                     
+        # --- TAB 2: REGISTRO ---
         with tab2:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(f"**{t['reg_section1']}**")
@@ -883,14 +876,13 @@ if not st.session_state.get('current_username'):
                 else: 
                     st.warning(t["fill_required"])
         
+        # --- TAB 3: RECUPERAR CONTRASEÑA (Corregido el error del ID duplicado) ---
         with tab3:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(t["forgot_pin_text"])
             
-            # El input de usuario ya tenía key="rec_user", por eso no fallaba
             rec_user = st.text_input(t["search_user_label"], placeholder=t["ph_user"], key="rec_user")
             
-            # Le añadimos un key al botón por seguridad
             if st.button(t["search_user_btn"], use_container_width=True, key="btn_search_user_recover"):
                 res = supabase.table("app_users_2").select("security_question").eq("username", rec_user.strip()).execute()
                 if res.data:
@@ -903,18 +895,17 @@ if not st.session_state.get('current_username'):
             if "recover_user" in st.session_state:
                 st.info(f"{t['recover_question_prefix']} **{st.session_state.recover_q}**")
                 
-                # --- SOLUCIÓN: AÑADIDOS LOS 'key' A ESTOS INPUTS ---
+                # Aquí están las keys únicas añadidas para que no salte el error
                 rec_ans = st.text_input(t["your_answer_label"], key="recover_answer_input_unique")
                 new_pin = st.text_input(t["new_pin_label"], type="password", key="recover_new_pin_input_unique")
                 
-                # Le añadimos un key al botón también
                 if st.button(t["change_pin_btn"], type="primary", use_container_width=True, key="btn_change_pin_recover"):
                     res = supabase.table("app_users_2").select("security_answer").eq("username", st.session_state.recover_user).execute()
                     if res.data and res.data[0]["security_answer"] == rec_ans.lower().strip():
                         supabase.table("app_users_2").update({"pin": new_pin}).eq("username", st.session_state.recover_user).execute()
                         st.success(t["pin_changed_success"])
-                        del st.session_state.recover_user # Limpiamos la sesión
-                        st.rerun() # Refrescamos para que el usuario pueda volver al Login tranquilamente
+                        del st.session_state.recover_user
+                        st.rerun()
                     else: 
                         st.error(t["wrong_answer"])
                         
