@@ -647,39 +647,138 @@ with cols_top[2]:
 t = TRANSLATIONS[st.session_state.selected_lang]
 lang_code = t["lang_code"]
 
-# ==========================================
-# FUNCIÓN PARA CARGAR LA ANIMACIÓN LOTTIE (CHEF)
-# ==========================================
-def load_lottieurl(url: str):
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
+import streamlit as st
 
-# Cargamos una animación de un chef cocinando (puedes cambiar la URL por otra de LottieFiles)
-lottie_cooking = load_lottieurl("https://lottie.host/880a442e-cfcc-4da5-9610-ed498dbfb92c/M0HqG3dGZ9.json")
+# ==========================================
+# ANIMACIÓN VECTORIAL DEL CHEF (No requiere internet ni librerías extra)
+# ==========================================
+svg_animado = """
+<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; padding-top: 20px;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="450px">
+        <defs>
+            <!-- Gradientes para el fondo animado -->
+            <linearGradient id="blobGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#34D399" />
+                <stop offset="100%" stop-color="#3B82F6" />
+            </linearGradient>
+            <linearGradient id="blobGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#FBBF24" />
+                <stop offset="100%" stop-color="#F87171" />
+            </linearGradient>
+            <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="35" />
+            </filter>
+        </defs>
+        <style>
+            /* Movimiento suave del fondo */
+            .blob1 { animation: moveBlob1 8s infinite alternate ease-in-out; transform-origin: center; }
+            .blob2 { animation: moveBlob2 10s infinite alternate ease-in-out; transform-origin: center; }
+            @keyframes moveBlob1 {
+                0% { transform: translate(0, 0) scale(1); }
+                100% { transform: translate(30px, -50px) scale(1.2); }
+            }
+            @keyframes moveBlob2 {
+                0% { transform: translate(0, 0) scale(1); }
+                100% { transform: translate(-40px, 40px) scale(0.9); }
+            }
+
+            /* Animación del Chef (Sartén y Comida) */
+            .arm { transform-origin: 150px 220px; animation: toss 2s infinite ease-in-out; }
+            .food { transform-origin: 300px 245px; animation: jump 2s infinite ease-in-out; }
+            .steam { animation: rise 2s infinite ease-in-out; opacity: 0; }
+            .steam-1 { animation-delay: 0.2s; }
+            .steam-2 { animation-delay: 0.6s; }
+            .steam-3 { animation-delay: 1s; }
+
+            @keyframes toss {
+                0%, 100% { transform: rotate(0deg); }
+                20% { transform: rotate(8deg); } /* Baja un poco para tomar impulso */
+                40%, 50% { transform: rotate(-30deg); } /* Lanza hacia arriba */
+                70% { transform: rotate(0deg); } /* Recoge */
+            }
+            @keyframes jump {
+                0%, 25% { transform: translateY(0) rotate(0deg); }
+                45%, 50% { transform: translateY(-140px) rotate(180deg); } /* Vuela en el aire */
+                70%, 100% { transform: translateY(0) rotate(360deg); } /* Cae en la sartén */
+            }
+            @keyframes rise {
+                0% { transform: translateY(0) scale(0.8); opacity: 0; }
+                50% { opacity: 0.7; }
+                100% { transform: translateY(-60px) scale(1.3); opacity: 0; }
+            }
+        </style>
+
+        <!-- Fondo difuminado en movimiento -->
+        <circle cx="150" cy="200" r="120" fill="url(#blobGrad1)" filter="url(#blur)" class="blob1" opacity="0.45"/>
+        <circle cx="280" cy="180" r="100" fill="url(#blobGrad2)" filter="url(#blur)" class="blob2" opacity="0.45"/>
+
+        <!-- Cuerpo del Chef -->
+        <rect x="100" y="220" width="100" height="180" rx="30" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="4"/>
+        <path d="M150 220 L150 400" stroke="#CBD5E1" stroke-width="4" stroke-dasharray="8 8"/>
+        <circle cx="150" cy="250" r="4" fill="#94A3B8"/><circle cx="150" cy="280" r="4" fill="#94A3B8"/><circle cx="150" cy="310" r="4" fill="#94A3B8"/>
+
+        <!-- Cabeza -->
+        <circle cx="150" cy="150" r="45" fill="#FFCDB2"/>
+        <circle cx="135" cy="145" r="5" fill="#334155"/><circle cx="165" cy="145" r="5" fill="#334155"/>
+        <path d="M140 160 Q150 175 160 160" fill="none" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="125" cy="155" r="6" fill="#FFB4A2" opacity="0.6"/><circle cx="175" cy="155" r="6" fill="#FFB4A2" opacity="0.6"/>
+
+        <!-- Gorro -->
+        <path d="M 110 110 C 90 90, 110 50, 140 60 C 150 30, 190 40, 180 70 C 210 70, 200 110, 180 110 Z" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="4" stroke-linejoin="round"/>
+        <rect x="115" y="105" width="70" height="25" rx="5" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="4"/>
+        <rect x="119" y="128" width="62" height="4" fill="#FFFFFF"/>
+
+        <!-- Brazo y Sartén (Grupo Animado) -->
+        <g class="arm">
+            <!-- Brazo -->
+            <path d="M 150 220 Q 200 250 230 250" fill="none" stroke="#CBD5E1" stroke-width="28" stroke-linecap="round"/>
+            <path d="M 150 220 Q 200 250 230 250" fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+            <!-- Mano -->
+            <circle cx="230" cy="250" r="12" fill="#FFCDB2"/>
+            <!-- Sartén -->
+            <rect x="230" y="246" width="50" height="8" rx="4" fill="#475569"/>
+            <path d="M 265 250 C 265 270 335 270 335 250 Z" fill="#1E293B"/>
+            <ellipse cx="300" cy="250" rx="35" ry="8" fill="#334155"/>
+        </g>
+
+        <!-- Comida / Tortilla (Grupo Animado) -->
+        <g class="food">
+            <ellipse cx="300" cy="245" rx="25" ry="6" fill="#FBBF24"/>
+            <ellipse cx="300" cy="243" rx="10" ry="3" fill="#FDE68A"/>
+            <circle cx="290" cy="244" r="1.5" fill="#B45309"/>
+            <circle cx="310" cy="246" r="1.5" fill="#B45309"/>
+            <circle cx="305" cy="242" r="1.5" fill="#65A30D"/>
+        </g>
+
+        <!-- Humo -->
+        <path d="M 285 220 Q 295 190 285 160" fill="none" stroke="#94A3B8" stroke-width="4" stroke-linecap="round" class="steam steam-1"/>
+        <path d="M 300 225 Q 310 190 300 150" fill="none" stroke="#94A3B8" stroke-width="4" stroke-linecap="round" class="steam steam-2"/>
+        <path d="M 315 220 Q 325 195 315 170" fill="none" stroke="#94A3B8" stroke-width="4" stroke-linecap="round" class="steam steam-3"/>
+    </svg>
+</div>
+"""
 
 # ==========================================
 # PANTALLA DE AUTENTICACIÓN PREMIUM
 # ==========================================
 if not st.session_state.get('current_username'):
     
-    # 1. CSS CORREGIDO (Fondo visible y Selectbox sin cortar)
+    # CSS: Fondo visible general, Fix de los selectbox y Glassmorphism
     st.markdown("""
     <style>
-    /* Fondo animado relajante aplicado a los contenedores correctos de Streamlit */[data-testid="stAppViewContainer"], [data-testid="stMain"], .stApp {
+    /* Fondo animado relajante general de la app */
+    [data-testid="stAppViewContainer"],[data-testid="stMain"], .stApp {
         background: linear-gradient(-45deg, #FDFBF7, #D1FAE5, #E0F2FE, #FAF6ED) !important;
         background-size: 400% 400% !important;
         animation: gradientBG 15s ease infinite !important;
     }
-    
     @keyframes gradientBG {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
     }
     
-    /* Efecto Tarjeta de Cristal (Glassmorphism) para el formulario */
+    /* Efecto Tarjeta de Cristal (Glassmorphism) */
     .auth-glass-card {
         background: rgba(255, 255, 255, 0.6) !important;
         backdrop-filter: blur(20px) !important;
@@ -689,50 +788,31 @@ if not st.session_state.get('current_username'):
         box-shadow: 0 25px 50px rgba(0,0,0,0.06) !important;
         border: 1px solid rgba(255, 255, 255, 0.8) !important;
     }
-    
-    /* Hacer transparente el contenedor interno de Streamlit para que funcione el Glassmorphism */[data-testid="stVerticalBlock"] > [style*="flex-direction: column"] > [data-testid="stVerticalBlock"] {
-        background: transparent !important;
-        box-shadow: none !important;
-        border: none !important;
+    [data-testid="stVerticalBlock"] > [style*="flex-direction: column"] > [data-testid="stVerticalBlock"] {
+        background: transparent !important; box-shadow: none !important; border: none !important;
     }
 
-    /* Inputs y Textareas Minimalistas Estilo Apple (CON padding) */
-    div[data-baseweb="input"] > div, 
-    div[data-baseweb="textarea"] > div {
-        background-color: #F5F5F7 !important;
-        border: 1px solid transparent !important; 
-        border-radius: 12px !important;
-        padding: 8px 12px !important; /* Padding ampliado para que no se vea apretado */
-        transition: all 0.3s ease !important;
+    /* Inputs Minimalistas Estilo Apple */
+    div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div {
+        background-color: #F5F5F7 !important; border: 1px solid transparent !important; 
+        border-radius: 12px !important; padding: 8px 12px !important; transition: all 0.3s ease !important;
     }
 
-    /* SELECTBOX Estilo Apple (SIN tocar el padding para que no se corte el texto) */
+    /* SELECTBOX Estilo Apple (Soluciona el problema de que se cortaba) */
     div[data-baseweb="select"] > div {
-        background-color: #F5F5F7 !important;
-        border: 1px solid transparent !important; 
-        border-radius: 12px !important;
-        transition: all 0.3s ease !important;
+        background-color: #F5F5F7 !important; border: 1px solid transparent !important; 
+        border-radius: 12px !important; transition: all 0.3s ease !important;
     }
 
-    /* Efecto Focus para todos los inputs */
-    div[data-baseweb="input"] > div:focus-within, 
-    div[data-baseweb="textarea"] > div:focus-within,
-    div[data-baseweb="select"] > div:focus-within {
-        background-color: #FFFFFF !important;
-        border-color: transparent !important;
+    /* Efecto Focus */
+    div[data-baseweb="input"] > div:focus-within, div[data-baseweb="textarea"] > div:focus-within, div[data-baseweb="select"] > div:focus-within {
+        background-color: #FFFFFF !important; border-color: transparent !important;
         box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15), inset 0 1px 3px rgba(0,0,0,0.02) !important;
     }
-    
-    div[data-baseweb="input"] input, 
-    div[data-baseweb="textarea"] textarea,
-    div[data-baseweb="select"] div { 
-        color: #1D1D1F !important; 
-        font-weight: 500 !important; 
+    div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea, div[data-baseweb="select"] div { 
+        color: #1D1D1F !important; font-weight: 500 !important; 
     }
-    
-    /* Placeholders en Gris Apple */
-    div[data-baseweb="input"] input::placeholder, 
-    div[data-baseweb="textarea"] textarea::placeholder {
+    div[data-baseweb="input"] input::placeholder, div[data-baseweb="textarea"] textarea::placeholder {
         color: #86868B !important; opacity: 1 !important; font-weight: normal !important;
     }
     </style>
@@ -742,17 +822,14 @@ if not st.session_state.get('current_username'):
     st.markdown("<div style='height: 4vh;'></div>", unsafe_allow_html=True)
     col_left, col_right = st.columns([1.1, 1], gap="large")
     
-    # Mitad Izquierda: Branding y Chef Animado
+    # Mitad Izquierda: Branding y NUEVA Animación Vectorial
     with col_left:
         st.markdown("<div style='height: 5vh;'></div>", unsafe_allow_html=True)
         st.markdown(f"<h1 style='font-size: 4.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10B981, #3B82F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{t['auth_app_name']}</h1>", unsafe_allow_html=True)
         st.markdown(f"<p style='font-size: 1.5rem; color: #475569; font-weight: 500; margin-top: 10px;'>{t['auth_subtitle']}</p>", unsafe_allow_html=True)
         
-        # AQUÍ SE MUESTRA LA ANIMACIÓN
-        if lottie_cooking: 
-            st_lottie(lottie_cooking, height=400, key="auth_chef_lottie")
-        else:
-            st.warning("Cargando animación del chef...")
+        # AQUÍ RENDERIZAMOS LA ANIMACIÓN CREADA EN HTML/CSS 
+        st.markdown(svg_animado, unsafe_allow_html=True)
 
     # Mitad Derecha: Formulario Glassmorphism
     with col_right:
@@ -760,7 +837,6 @@ if not st.session_state.get('current_username'):
         
         tab1, tab2, tab3 = st.tabs([t["tab_login"], t["tab_register"], t["tab_recover"]])
         
-        # --- TAB 1: LOGIN ---
         with tab1:
             st.markdown("<br>", unsafe_allow_html=True)
             log_user = st.text_input(t["username_label_login"], placeholder=t["ph_user"], key="log_user")
@@ -777,13 +853,11 @@ if not st.session_state.get('current_username'):
                 else: 
                     st.error(t["login_error"])
                     
-        # --- TAB 2: REGISTRO ---
         with tab2:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(f"**{t['reg_section1']}**")
             reg_user_input = st.text_input(t["create_user_label"], placeholder=t["ph_user"], key="reg_user")
             reg_pin = st.text_input(t["create_pin_label"], placeholder=t["ph_pin"], type="password", key="reg_pin")
-            # El selectbox ahora se verá perfecto
             reg_sq = st.selectbox(t["security_question_label"], t["security_options"])
             reg_sa = st.text_input(t["security_answer_label"])
             
@@ -793,7 +867,6 @@ if not st.session_state.get('current_username'):
             reg_age = col1.number_input(t["age_label"], min_value=10, max_value=100, step=1, value=25)
             reg_weight = col2.number_input(t["weight_label"], min_value=30.0, max_value=200.0, step=0.1, value=70.0)
             reg_height = col3.number_input(t["height_label"], min_value=100, max_value=250, step=1, value=170)
-            # El selectbox de género también se verá perfecto
             reg_gender = st.selectbox(t["gender_label"], t["gender_options"])
             
             st.markdown(f"<br>**{t['reg_section3']}**", unsafe_allow_html=True)
@@ -818,7 +891,6 @@ if not st.session_state.get('current_username'):
                 else: 
                     st.warning(t["fill_required"])
         
-        # --- TAB 3: RECUPERAR CONTRASEÑA ---
         with tab3:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(t["forgot_pin_text"])
