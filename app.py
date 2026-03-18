@@ -569,7 +569,19 @@ TRANSLATIONS = {
         "alerts_title": "🔔 Alertes Système", "alerts_none": "Aucune alerte récente. Tout fonctionne !", "alerts_clear": "🧹 Effacer l'historique",
         "btn_delete": "🗑️ Supprimer", "btn_edit": "✏️ Modifier", "btn_save": "💾 Enregistrer",
         "manage_meals": "⚙️ Gérer les repas du jour", "no_meals": "Aucun repas enregistré ce jour.", "manage_date": "Sélectionner la date",
-        "ph_user": "Ex : Chef Magique 24 ✨", "ph_pin": "Ex : 1234", "ph_name": "Ex : Sophie Martin", "ph_goals": "Ex : Manger plus sain, gagner du muscle...", "ph_rest": "Ex : Sans gluten, allergie au kiwi..."
+        "ph_user": "Ex : Chef Magique 24 ✨", "ph_pin": "Ex : 1234", "ph_name": "Ex : Sophie Martin", "ph_goals": "Ex : Manger plus sain, gagner du muscle...", "ph_rest": "Ex : Sans gluten, allergie au kiwi...",
+        
+        "beta_title": "App en phase Bêta",
+        "beta_subtitle": "Prochaines mises à jour :",
+        "beta_feat1_title": "Classement Social :",
+        "beta_feat1_desc": "Comparez vos progrès (ex : <i>\"Vous mangez mieux que 84 % des utilisateurs\"</i>).",
+        "beta_feat2_title": "Graphiques d'Étude :",
+        "beta_feat2_desc": "Analyses et statistiques avancées de votre évolution.",
+        "beta_feat3_title": "IA Améliorée :",
+        "beta_feat3_desc": "Raisonnement encore plus détaillé avec étude approfondie des macronutriments.",
+        "news_title": "Nouveautés",
+        "news_desc": "Notre application est maintenant disponible au téléchargement sur <b>Android</b> et <b>iOS</b> !",
+        "news_badge": "Phase Bêta"
     },
     "🇮🇹 Italiano": {
         "lang_code": "Italian", "title": "Ciao {name}!", "subtitle": "Il tuo ecosistema nutrizionale.",
@@ -616,7 +628,19 @@ TRANSLATIONS = {
         "alerts_title": "🔔 Avvisi di Sistema", "alerts_none": "Nessun avviso recente. Tutti i sistemi operativi!", "alerts_clear": "🧹 Cancella cronologia",
         "btn_delete": "🗑️ Elimina", "btn_edit": "✏️ Modifica", "btn_save": "💾 Salva",
         "manage_meals": "⚙️ Gestisci i Pasti del Giorno", "no_meals": "Nessun pasto registrato.", "manage_date": "Seleziona la data",
-        "ph_user": "Es: Chef Magico 24 ✨", "ph_pin": "Es: 1234", "ph_name": "Es: Giulia Rossi", "ph_goals": "Es: Mangiare più sano, mettere su muscoli...", "ph_rest": "Es: Senza glutine, allergia al kiwi..."
+        "ph_user": "Es: Chef Magico 24 ✨", "ph_pin": "Es: 1234", "ph_name": "Es: Giulia Rossi", "ph_goals": "Es: Mangiare più sano, mettere su muscoli...", "ph_rest": "Es: Senza glutine, allergia al kiwi...",
+        
+        "beta_title": "App in fase Beta",
+        "beta_subtitle": "Prossimi aggiornamenti:",
+        "beta_feat1_title": "Classifica Sociale:",
+        "beta_feat1_desc": "Confronta i tuoi progressi (es: <i>\"Mangi meglio dell'84% degli utenti\"</i>).",
+        "beta_feat2_title": "Grafici di Studio:",
+        "beta_feat2_desc": "Analisi e statistiche avanzate della tua evoluzione.",
+        "beta_feat3_title": "IA Migliorata:",
+        "beta_feat3_desc": "Ragionamento ancora più dettagliato con studio approfondito dei macronutrienti.",
+        "news_title": "Novità",
+        "news_desc": "La nostra app è ora disponibile per il download su <b>Android</b> e <b>iOS</b>!",
+        "news_badge": "Fase Beta"
     }
 }
 
