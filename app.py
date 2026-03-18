@@ -406,6 +406,9 @@ def fetch_daily_healthy_recipes(lang_code, category_key="trend_sweets"):
 # ==========================================
 # SISTEMA MULTIDIOMA Y TEXTOS
 # ==========================================
+# ==========================================
+# SISTEMA MULTIDIOMA Y TEXTOS
+# ==========================================
 TRANSLATIONS = {
     "🇪🇸 Español": {
         "lang_code": "Spanish",
@@ -735,49 +738,98 @@ if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 # SIDEBAR REDISEÑADA & PUNTERO MÁGICO
 # ==========================================
 with st.sidebar:
-    # 1. ESCUDO CSS DE LA BARRA LATERAL
+    # 1. ESCUDO CSS ABSOLUTO (El tuyo original que bloquea el CSS del Home)
     st.markdown("""
     <style>
-    [data-testid="stSidebar"] button {
-        min-height: 0px !important;
-        padding-top: 5px !important;
-        padding-bottom: 5px !important;
+    /* Resetear botones base en la barra lateral */
+    html body div#root section[data-testid="stSidebar"] div.stButton > button {
         background-image: none !important;
         box-shadow: none !important;
     }
-    [data-testid="stSidebar"] button::after { display: none !important; content: none !important; }
-    [data-testid="stSidebar"] button p { transform: none !important; color: inherit !important; margin: 0 !important; font-weight: normal !important; }
-    [data-testid="stSidebar"] button:hover { transform: translateY(-2px) scale(1.05) !important; }
+    
+    /* ELIMINAR textos fantasma filtrados del Home en la barra lateral */
+    html body div#root section[data-testid="stSidebar"] div.stButton > button::after,
+    html body div#root section[data-testid="stSidebar"] div.stButton > button::before {
+        content: none !important; display: none !important; background-image: none !important;
+    }
+    
+    /* Quitar animaciones base que estiran botones */
+    html body div#root section[data-testid="stSidebar"] div.stButton > button p {
+        transform: none !important; margin: 0 !important; font-weight: normal !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
-    # 1. EXPANDER: PUNTERO MÁGICO
-    with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
-        cursor_mapping = {
-            "default": t["ptr_default"], "🍗": t["ptr_drumstick"], "🥑": t["ptr_avocado"],
-            "🥘": t["ptr_pan"], "🍕": t["ptr_pizza"], "🪄": t["ptr_wand"], "🍎": t["ptr_apple"]
-        }
-        inv_cursor = {v: k for k, v in cursor_mapping.items()}
+    # FUNCIÓN AUXILIAR: Botones Circulares (Tuya original)
+    def render_circle_btn(emoji, key, tooltip_text, is_selected=False):
+        bg = "rgba(16, 185, 129, 0.15)" if is_selected else "transparent"
+        border = "#FFD700" if is_selected else "#CBD5E1"
         
-        if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
-        
-        options_list = list(cursor_mapping.values())
-        try: current_idx = list(cursor_mapping.keys()).index(st.session_state.cursor_val)
-        except ValueError: current_idx = 0
-            
-        selected_label = st.selectbox(t.get("choose_pointer", "Elige:"), options_list, index=current_idx)
-        st.session_state.cursor_val = inv_cursor[selected_label]
-        
-        if st.session_state.cursor_val != "default":
-            st.markdown(f"""
-            <style>
-            * {{ cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{st.session_state.cursor_val}</text></svg>"), auto !important; }}
-            </style>
-            """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <style>
+        div:has(>.btn-marker-{key}), div:has(>.btn-marker-{key}) + div.element-container, div:has(>.btn-marker-{key}) + div.element-container > div.stButton {{
+            overflow: visible !important; display: flex !important; justify-content: center !important;
+        }}
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button {{
+            width: 42px !important; min-width: 42px !important; max-width: 42px !important;
+            height: 42px !important; min-height: 42px !important; max-height: 42px !important;
+            border-radius: 50% !important; padding: 0 !important; margin: 0 auto !important;
+            flex: 0 0 auto !important; background-color: {bg} !important; border: 2px solid {border} !important;
+            font-size: 20px !important; color: #1E293B !important;
+            display: flex !important; align-items: center !important; justify-content: center !important;
+            position: relative !important; overflow: visible !important; 
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s ease, background-color 0.2s ease !important;
+            transform: scale(1) !important;
+        }}
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover {{
+            border-color: #FFD700 !important; transform: scale(1.15) !important; z-index: 9999 !important; background-image: none !important;
+        }}
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::after {{
+            content: "{tooltip_text}" !important; display: block !important; position: absolute !important;
+            bottom: calc(100% + 10px) !important; left: 50% !important; transform: translateX(-50%) !important;
+            background: #1E293B !important; color: #FFFFFF !important; padding: 6px 12px !important; border-radius: 6px !important;
+            font-size: 11px !important; font-weight: 700 !important; white-space: nowrap !important; width: max-content !important; 
+            opacity: 1 !important; visibility: visible !important; pointer-events: none !important; z-index: 99999 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+        }}
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::before {{
+            content: "" !important; display: block !important; position: absolute !important;
+            bottom: calc(100% + 5px) !important; left: 50% !important; transform: translateX(-50%) !important;
+            border-width: 5px !important; border-style: solid !important; border-color: #1E293B transparent transparent transparent !important;
+            opacity: 1 !important; visibility: visible !important; pointer-events: none !important; z-index: 99999 !important;
+        }}
+        </style>
+        <div class="btn-marker-{key}" data-emoji="{emoji}"></div>
+        """, unsafe_allow_html=True)
+        return st.button(emoji, key=key, use_container_width=False)
 
-    # 2. EXPANDER: PERFIL
+    # 1. EXPANDER: PUNTERO MÁGICO (Tuyo original exacto)
+    with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
+        if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
+        cursors =[("default", "🖱️", t.get("ptr_default", "Predeterminado")), ("🍗", "🍗", t.get("ptr_drumstick", "Muslito")), ("🥑", "🥑", t.get("ptr_avocado", "Aguacate")), ("🥘", "🥘", t.get("ptr_pan", "Sartén")), ("🍕", "🍕", t.get("ptr_pizza", "Pizza")), ("🪄", "🪄", t.get("ptr_wand", "Varita")), ("🍎", "🍎", t.get("ptr_apple", "Manzana")), ("🌮", "🌮", t.get("ptr_taco", "Taco")), ("🍣", "🍣", t.get("ptr_sushi", "Sushi")), ("☕", "☕", t.get("ptr_coffee", "Café"))]
+        cols_ptr_1 = st.columns(5)
+        for i in range(5):
+            with cols_ptr_1[i]:
+                p_val, p_emoji, p_label = cursors[i]
+                if render_circle_btn(p_emoji, f"ptr_btn_{p_val}", p_label, st.session_state.cursor_val == p_val):
+                    st.session_state.cursor_val = p_val; st.rerun()
+
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+
+        cols_ptr_2 = st.columns(5)
+        for i in range(5, 10):
+            with cols_ptr_2[i-5]:
+                p_val, p_emoji, p_label = cursors[i]
+                if render_circle_btn(p_emoji, f"ptr_btn_{p_val}", p_label, st.session_state.cursor_val == p_val):
+                    st.session_state.cursor_val = p_val; st.rerun()
+
+        st.components.v1.html("""<script>const doc = window.parent.document; doc.addEventListener('mousedown', function(e) { let btn = e.target.closest('button'); if(!btn) return; let container = btn.closest('div[data-testid="element-container"]'); if(container && container.previousElementSibling) { let marker = container.previousElementSibling.querySelector('[class^="btn-marker-ptr_btn_"]'); if(marker) { let emoji = marker.getAttribute('data-emoji'); let styleId = 'dynamic-cursor-style'; let oldStyle = doc.getElementById(styleId); if(oldStyle) oldStyle.remove(); if(emoji && emoji !== 'default' && emoji !== '🖱️') { let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size: 24px"><text y="24">${emoji}</text></svg>`; let css = `* { cursor: url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}'), auto !important; }`; let style = doc.createElement('style'); style.id = styleId; style.innerHTML = css; doc.head.appendChild(style); } } } }); </script>""", height=0, width=0)
+
+        if st.session_state.cursor_val != "default":
+            st.markdown(f"<style>* {{ cursor: url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{st.session_state.cursor_val}</text></svg>\"), auto !important; }}</style>", unsafe_allow_html=True)
+
+    # 2. EXPANDER: PERFIL (Tuyo original exacto)
     with st.expander("👤 " + t["profile"], expanded=False):
         upd_weight = st.number_input(t["current_weight_label"], value=float(user_profile.get("weight",70)))
         upd_goals = st.text_area(t["profile_goals_label"], value=user_profile.get("goals",""))
@@ -787,8 +839,10 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    # 3. EXPANDER: RECETAS FAVORITAS (BLINDADO Y MULTIDIOMA)
+    # 3. EXPANDER: RECETAS FAVORITAS (NUEVO DISEÑO BLINDADO CON TRADUCCIÓN)
     with st.expander(t["favs"], expanded=False):
+        
+        # ESCUDO Y ESTILOS NATIVOS: Usamos el ID interno de Streamlit para blindar y estilizar los botones
         st.markdown("""
         <style>
         /* Tarjetita adaptada para el nombre de la receta */
@@ -830,7 +884,7 @@ with st.sidebar:
             transform: scale(1.05) !important;
         }
 
-        /* 🗑️ BOTÓN BASURA */
+        /* 🗑️ BOTÓN BASURA: Blanco normal, Rojo al pasar el ratón */
         div[class*="st-key-del_fav_"] button {
             background: #FFFFFF !important;
             border: 1px solid #CBD5E1 !important;
@@ -866,13 +920,14 @@ with st.sidebar:
             for idx, f in enumerate(favs):
                 r_name = f.get('recipe_name', f.get('name', 'Receta'))
                 
+                # Layout compacto en una línea: [ Nombre de receta ] [ 🍳 ] [ 🗑️ ]
                 col_name, col_sarten, col_basura = st.columns([6, 2, 2])
                 
                 with col_name:
                     st.markdown(f"<div class='fav-card' title='{r_name}'>{r_name}</div>", unsafe_allow_html=True)
                 
                 with col_sarten:
-                    # USAMOS LA VARIABLE DE IDIOMA PARA LA ETIQUETA 'help'
+                    # TRADUCCIÓN APLICADA AL HELP
                     if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help=t["fav_cook_help"]):
                         if "ingredients" in f:
                             st.session_state.full_recipe = f
@@ -880,10 +935,11 @@ with st.sidebar:
                             st.session_state.step = "recipe_view"
                             st.rerun()
                         else:
+                            # TRADUCCIÓN APLICADA AL TOAST
                             st.toast(t["fav_old_recipe"], icon="⚠️")
                 
                 with col_basura:
-                    # USAMOS LA VARIABLE DE IDIOMA PARA LA ETIQUETA 'help'
+                    # TRADUCCIÓN APLICADA AL HELP
                     if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help=t["fav_delete_help"]):
                         favs.pop(idx)
                         update_user_data(user_profile["username"], {"favorites": favs})
@@ -893,18 +949,18 @@ with st.sidebar:
         else: 
             st.info(t["no_favs"])
 
-    # 4. EXPANDER: TENDENCIAS NUTRICIONALES
+    # 4. EXPANDER: TENDENCIAS NUTRICIONALES (Tuyo original exacto + TRADUCCIONES)
     with st.expander(t.get("news_title", "Tendencias"), expanded=True):
         trend_keys =["trend_sweets", "trend_salty", "trend_snacks", "trend_breakfast", "trend_drinks"]
         trend_emojis =["🍰", "🥨", "🥪", "🥣", "🥤"]
         if "trend_idx" not in st.session_state: st.session_state.trend_idx = 0
         
-        cols = st.columns(5)
+        cols_trend = st.columns(5)
         for i, (key, emoji) in enumerate(zip(trend_keys, trend_emojis)):
-            with cols[i]:
+            with cols_trend[i]:
                 is_selected = (st.session_state.trend_idx == i)
-                btn_type = "primary" if is_selected else "secondary"
-                if st.button(emoji, key=f"trend_btn_{i}", help=t.get(key, key), use_container_width=True, type=btn_type):
+                tooltip_text = t.get(key, key)
+                if render_circle_btn(emoji, f"trend_btn_{i}", tooltip_text, is_selected):
                     st.session_state.trend_idx = i
                     st.rerun()
                     
@@ -933,13 +989,13 @@ with st.sidebar:
             fetch_daily_healthy_recipes.clear()
             st.rerun()
 
-    # 5. EXPANDER: ALERTAS Y NOTIFICACIONES
+    # 5. EXPANDER: ALERTAS Y NOTIFICACIONES (TRADUCCIONES APLICADAS)
     with st.expander(t["alerts_title"], expanded=False):
         if not st.session_state.app_alerts:
             # TRADUCCIÓN APLICADA
             st.info(t["alerts_none"])
         else:
-            # TRADUCCIÓN APLICADA
+            # TRADUCCIÓN APLICADA AL BOTÓN DE LIMPIAR
             if st.button(t["alerts_clear"], use_container_width=True):
                 st.session_state.app_alerts =[]
                 st.rerun()
