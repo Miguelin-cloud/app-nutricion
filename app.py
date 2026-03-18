@@ -316,9 +316,28 @@ def execute_groq_with_fallback(system_prompt, user_prompt, temperature=0.3, show
                 return None
 
 def call_ai_json(prompt, expected_format_hint, lang_code, u_prof, avail_ing="", avoid_tdy="", num_recipes=3):
-    # (El interior de esta función déjalo exactamente como lo tienes, hasta llegar al return)
-    # ... tu system_prompt ...
-    # Usa nuestro nuevo motor blindado, por defecto show_ui es True
+    # 1. Construimos el cerebro del Chef (System Prompt) con los datos del usuario
+    final_system_prompt = f"""
+    You are an elite Michelin-star Chef and an expert Clinical Nutritionist.
+    You must reply STRICTLY in valid JSON format.
+    Translate all the output content to {lang_code.upper()}.
+    
+    USER PROFILE:
+    - Name: {u_prof.get('name', 'User')}
+    - Age: {u_prof.get('age', 25)} years old
+    - Weight: {u_prof.get('weight', 70)} kg
+    - Goals: {u_prof.get('goals', 'Healthy eating')}
+    - Medical/Dietary Restrictions: {u_prof.get('restrictions', 'None')}
+    
+    INGREDIENTS CONTEXT:
+    - Available to use: {avail_ing}
+    - MUST AVOID today: {avoid_tdy}
+    
+    EXPECTED JSON FORMAT:
+    {expected_format_hint}
+    """
+    
+    # 2. Llamamos al motor blindado con el prompt construido
     return execute_groq_with_fallback(final_system_prompt, prompt, temperature=0.4, show_ui=True)
 
 def groq_generic_json(system_prompt, user_prompt, show_ui=True):
