@@ -695,25 +695,24 @@ if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 # SIDEBAR REDISEÑADA & PUNTERO MÁGICO
 # ==========================================
 with st.sidebar:
-    # 1. ESCUDO CSS DE ALTA ESPECIFICIDAD: Vence cualquier estilo filtrado del Home
+    # 1. ESCUDO CSS ABSOLUTO: Bloquea cualquier CSS de la pantalla principal
     st.markdown("""
     <style>
-    /* Aumentamos la especificidad usando :nth-child(n) para anular rotúndamente al CSS de la pantalla principal */
-    section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:nth-child(n) div.stButton > button,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:nth-child(n) div.stButton > button:hover,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:nth-child(n) div.stButton > button:active,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:nth-child(n) div.stButton > button:focus {
+    /* Resetear botones en la barra lateral */
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:hover,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:active,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:focus {
         background-image: none !important; /* Mata la imagen del stickman/varita */
         padding-top: 0 !important;
         box-shadow: none !important;
-        min-height: 0 !important;
     }
     
     /* ELIMINAR las etiquetas filtradas del Home en la barra lateral (incluso en hover) */
-    section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:nth-child(n) div.stButton > button::after,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:nth-child(n) div.stButton > button::before,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:nth-child(n) div.stButton > button:hover::after,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:nth-child(n) div.stButton > button:hover::before {
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button::after,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button::before,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:hover::after,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:hover::before {
         content: none !important;
         display: none !important;
     }
@@ -723,32 +722,39 @@ with st.sidebar:
         transform: none !important; margin: 0 !important; font-weight: normal !important;
     }
 
-    /* 2. ESCUDO Y ANIMACIÓN EXCLUSIVA PARA RECETAS FAVORITAS */
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div[data-testid="stColumn"]:nth-child(n) div.element-container:nth-child(n) div.stButton > button {
-        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease !important;
+    /* 2. ESCUDO PLANO PARA RECETAS FAVORITAS (Sin zoom, sin deformar, sin fondos filtrados) */
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button,
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover,
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:active,
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:focus {
+        transform: none !important;       /* Cero zoom */
+        box-shadow: none !important;      /* Cero sombras raras */
+        background-image: none !important;/* Cero imágenes del home */
+        background-color: #F8FAFC !important; /* Fondo gris claro clásico */
+        border: 1px solid #CBD5E1 !important;
         border-radius: 8px !important;
-        background-image: none !important;
+        min-height: 0 !important;
+        padding: 5px 10px !important;
+        color: #1E293B !important;
+        transition: background-color 0.2s ease, border-color 0.2s ease !important;
     }
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div[data-testid="stColumn"]:nth-child(n) div.element-container:nth-child(n) div.stButton > button:hover {
-        transform: scale(1.15) !important; /* Crecimiento dinámico */
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
-        background-image: none !important;
-        border-color: #10B981 !important; /* Borde verde sutil */
-        z-index: 10 !important;
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover {
+        background-color: #E2E8F0 !important; /* Un poco más oscuro al pasar el ratón */
+        border-color: #94A3B8 !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
-    # FUNCIÓN AUXILIAR: Botones Circulares Perfectos y Bocadillo de Texto
+    # FUNCIÓN AUXILIAR: Botones Circulares Perfectos con Animación de Escala y Bocadillo CSS
     def render_circle_btn(emoji, key, tooltip_text, is_selected=False):
         bg = "rgba(16, 185, 129, 0.15)" if is_selected else "transparent"
         border = "#FFD700" if is_selected else "#CBD5E1"
         
         st.markdown(f"""
         <style>
-        /* Forzar visibilidad para evitar cortes de tooltips */
+        /* Forzar visibilidad para evitar que se corten los tooltips */
         div:has(>.btn-marker-{key}),
         div:has(>.btn-marker-{key}) + div.element-container,
         div:has(>.btn-marker-{key}) + div.element-container > div.stButton {{
@@ -757,24 +763,30 @@ with st.sidebar:
         }}
         
         /* Círculos matemáticamente perfectos */
-        section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:has(.btn-marker-{key}) + div.element-container:nth-child(n) div.stButton > button {{
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button {{
             width: 42px !important; min-width: 42px !important; max-width: 42px !important;
             height: 42px !important; min-height: 42px !important; max-height: 42px !important;
             border-radius: 50% !important; padding: 0 !important; margin: 0 auto !important;
-            flex: 0 0 auto !important; background-color: {bg} !important; border: 2px solid {border} !important;
+            flex: 0 0 auto !important; /* Previene el estiramiento ovalado */
+            background-color: {bg} !important; border: 2px solid {border} !important;
             font-size: 20px !important; color: #1E293B !important;
             display: flex !important; align-items: center !important; justify-content: center !important;
             position: relative !important; overflow: visible !important; 
+            /* Transición dinámica y suave para el hover */
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s ease, background-color 0.2s ease !important;
+            transform: scale(1) !important;
         }}
         
-        /* Hover Dinámico para el Círculo */
-        section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:has(.btn-marker-{key}) + div.element-container:nth-child(n) div.stButton > button:hover {{
-            border-color: #FFD700 !important; transform: scale(1.15) !important; z-index: 9999 !important; background-image: none !important;
+        /* Hover Dinámico: Agrandar círculo, borde dorado, sin imágenes fantasma */
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover {{
+            border-color: #FFD700 !important; 
+            transform: scale(1.15) !important; /* Efecto de crecimiento estético */
+            z-index: 9999 !important;
+            background-image: none !important;
         }}
 
-        /* BOCADILLO DE TEXTO (Protegido con alta especificidad) */
-        section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:has(.btn-marker-{key}) + div.element-container:nth-child(n) div.stButton > button:hover::after {{
+        /* BOCADILLO DE TEXTO (Etiqueta Centrada Arriba - Revivimos el ::after) */
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::after {{
             content: "{tooltip_text}" !important;
             display: block !important; position: absolute !important;
             bottom: calc(100% + 10px) !important; left: 50% !important;
@@ -787,7 +799,7 @@ with st.sidebar:
             z-index: 99999 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
         }}
         /* Triángulo del Bocadillo */
-        section[data-testid="stSidebar"] div[data-testid="stColumn"]:nth-child(n) div.element-container:has(.btn-marker-{key}) + div.element-container:nth-child(n) div.stButton > button:hover::before {{
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::before {{
             content: "" !important; display: block !important; position: absolute !important;
             bottom: calc(100% + 5px) !important; left: 50% !important;
             transform: translateX(-50%) !important;
@@ -806,6 +818,7 @@ with st.sidebar:
     with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
         if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
         
+        # 10 cursores en total
         cursors =[
             ("default", "🖱️", t.get("ptr_default", "Predeterminado")),
             ("🍗", "🍗", t.get("ptr_drumstick", "Muslito")),
@@ -814,12 +827,12 @@ with st.sidebar:
             ("🍕", "🍕", t.get("ptr_pizza", "Pizza")),
             ("🪄", "🪄", t.get("ptr_wand", "Varita")),
             ("🍎", "🍎", t.get("ptr_apple", "Manzana")),
-            ("🌮", "🌮", t.get("ptr_taco", "Taco")),
-            ("🍣", "🍣", t.get("ptr_sushi", "Sushi")),
-            ("☕", "☕", t.get("ptr_coffee", "Café"))
+            ("🌮", "🌮", t.get("ptr_taco", "Taco")),    
+            ("🍣", "🍣", t.get("ptr_sushi", "Sushi")),  
+            ("☕", "☕", t.get("ptr_coffee", "Café"))   
         ]
         
-        # FILA 1
+        # FILA 1 (Iconos del 0 al 4)
         cols_ptr_1 = st.columns(5)
         for i in range(5):
             with cols_ptr_1[i]:
@@ -828,9 +841,9 @@ with st.sidebar:
                     st.session_state.cursor_val = p_val
                     st.rerun()
 
-        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True) # Espacio entre filas
 
-        # FILA 2
+        # FILA 2 (Iconos del 5 al 9)
         cols_ptr_2 = st.columns(5)
         for i in range(5, 10):
             with cols_ptr_2[i-5]:
@@ -839,7 +852,7 @@ with st.sidebar:
                     st.session_state.cursor_val = p_val
                     st.rerun()
 
-        # JS PARA CAMBIO INSTANTÁNEO DE PUNTERO
+        # JS PARA CAMBIO INSTANTÁNEO DE PUNTERO (Evita el lag del servidor)
         st.components.v1.html("""
         <script>
         const doc = window.parent.document;
@@ -869,6 +882,7 @@ with st.sidebar:
         </script>
         """, height=0, width=0)
 
+        # Respaldo Python para el Puntero (Tras el recargo de la web)
         if st.session_state.cursor_val != "default":
             st.markdown(f"""
             <style>
@@ -888,8 +902,9 @@ with st.sidebar:
 
     # 3. EXPANDER: RECETAS FAVORITAS
     with st.expander(t["favs"], expanded=False):
-        # Inyectamos marcador para blindar y animar los botones de esta sección
+        # El marcador que protege esta sección específica (estático y blindado)
         st.markdown('<div class="fav-container-marker" style="display:none;"></div>', unsafe_allow_html=True)
+        
         favs = user_profile.get("favorites",[])
         if favs:
             for idx, f in enumerate(favs):
