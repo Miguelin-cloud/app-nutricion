@@ -695,114 +695,130 @@ if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 # SIDEBAR REDISEÑADA & PUNTERO MÁGICO
 # ==========================================
 with st.sidebar:
-    # 1. ESCUDO CSS ANTI-FUGAS: Protege la barra lateral del CSS del Home
+    # 1. ESCUDO CSS ABSOLUTO: Bloquea cualquier CSS de la pantalla principal
     st.markdown("""
     <style>
-    /* Reset absoluto de botones en la sidebar para evitar fugas del Home */
-    [data-testid="stSidebar"] button {
+    /* Resetear botones en la barra lateral */
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button {
         background-image: none !important;
         padding-top: 0 !important;
-        padding-bottom: 0 !important;
-        min-height: 0 !important;
         box-shadow: none !important;
+        border-radius: 8px !important;
     }
-    [data-testid="stSidebar"] button p { 
-        transform: none !important; color: inherit !important; margin: 0 !important; font-weight: normal !important; 
+    /* ELIMINAR las etiquetas filtradas del Home en la barra lateral */
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button::after,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button::before {
+        content: none !important;
+        display: none !important;
+        background: transparent !important;
     }
-    /* Destruir pseudo-elementos filtrados desde el Home */[data-testid="stSidebar"] button::after,
-    [data-testid="stSidebar"] button::before {
-        content: none !important; display: none !important; background: none !important;
+    /* Quitar animaciones base que estiran botones */
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button p {
+        transform: none !important; margin: 0 !important; font-weight: normal !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
-    # FUNCIÓN AUXILIAR: Botones Circulares con Bocadillo CSS Reparado y Color Esmeralda
+    # FUNCIÓN AUXILIAR 1: Botones Circulares Perfectos y Bocadillo de Texto
     def render_circle_btn(emoji, key, tooltip_text, is_selected=False):
-        marker_class = f"btn-marker-{key}"
-        # 2. COLOR DE SELECCIÓN: Esmeralda suave si está seleccionado, transparente si no.
-        bg_color = "rgba(16, 185, 129, 0.15)" if is_selected else "transparent"
-        border_color = "#FFD700" if is_selected else "#CBD5E1"
+        bg = "rgba(16, 185, 129, 0.15)" if is_selected else "transparent"
+        border = "#FFD700" if is_selected else "#CBD5E1"
         
         st.markdown(f"""
         <style>
-        /* 4. REPARACIÓN ETIQUETAS: Forzar visibilidad en contenedores padres */
-        div.element-container:has(.{marker_class}),
-        div.element-container:has(.{marker_class}) + div.element-container,
-        div.element-container:has(.{marker_class}) + div.element-container > div.stButton {{
-            display: flex !important; justify-content: center !important;
+        /* Forzar visibilidad para evitar que se corten los tooltips */
+        div:has(>.btn-marker-{key}),
+        div:has(>.btn-marker-{key}) + div.element-container,
+        div:has(>.btn-marker-{key}) + div.element-container > div.stButton {{
             overflow: visible !important;
+            display: flex !important; justify-content: center !important;
         }}
-        div.element-container:has(.{marker_class}) + div.element-container button {{
-            width: 45px !important; min-width: 45px !important; max-width: 45px !important;
-            height: 45px !important; min-height: 45px !important; max-height: 45px !important;
+        
+        /* Círculos matemáticamente perfectos */
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button {{
+            width: 42px !important; min-width: 42px !important; max-width: 42px !important;
+            height: 42px !important; min-height: 42px !important; max-height: 42px !important;
             border-radius: 50% !important; padding: 0 !important; margin: 0 auto !important;
+            flex: 0 0 auto !important; /* Previene el estiramiento ovalado */
+            background-color: {bg} !important; border: 2px solid {border} !important;
+            font-size: 20px !important; color: #1E293B !important;
             display: flex !important; align-items: center !important; justify-content: center !important;
-            font-size: 20px !important; background: {bg_color} !important; border: 2px solid {border_color} !important;
-            position: relative !important; overflow: visible !important; box-shadow: none !important;
-            color: #1E293B !important; transform: none !important; transition: all 0.2s ease !important;
+            position: relative !important; overflow: visible !important; transition: border-color 0.2s ease !important;
         }}
-        div.element-container:has(.{marker_class}) + div.element-container button:hover {{
-            border-color: #FFD700 !important; transform: scale(1.15) !important; z-index: 9999 !important;
+        
+        /* Hover: Agrandar círculo y borde dorado */
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover {{
+            border-color: #FFD700 !important; transform: scale(1.1) !important; z-index: 9999 !important;
         }}
-        /* BOCADILLO DE TEXTO (Tooltip) */
-        div.element-container:has(.{marker_class}) + div.element-container button::after {{
+
+        /* BOCADILLO DE TEXTO (Etiqueta Centrada Arriba) */
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button::after {{
             content: "{tooltip_text}" !important;
-            display: block !important; /* Revive el after destruido por el escudo */
-            position: absolute !important; bottom: calc(100% + 10px) !important; left: 50% !important;
+            display: block !important; position: absolute !important;
+            bottom: calc(100% + 8px) !important; left: 50% !important;
             transform: translateX(-50%) !important;
             background: #1E293B !important; color: #FFFFFF !important;
             padding: 6px 12px !important; border-radius: 6px !important;
-            font-size: 12px !important; font-weight: 700 !important;
-            width: max-content !important; white-space: nowrap !important; /* Evita cortes */
-            opacity: 0 !important; visibility: hidden !important;
-            z-index: 99999 !important; pointer-events: none !important;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+            font-size: 11px !important; font-weight: 700 !important;
+            white-space: nowrap !important; width: max-content !important; /* Previene cortes */
+            opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
+            z-index: 99999 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
         }}
-        /* BOCADILLO DE TEXTO (Punta de flecha) */
-        div.element-container:has(.{marker_class}) + div.element-container button::before {{
-            content: '' !important; display: block !important;
-            position: absolute !important; bottom: calc(100% + 5px) !important; left: 50% !important;
+        /* Triángulo del Bocadillo */
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button::before {{
+            content: "" !important; display: block !important; position: absolute !important;
+            bottom: 100% !important; left: 50% !important;
             transform: translateX(-50%) !important;
             border-width: 5px !important; border-style: solid !important;
             border-color: #1E293B transparent transparent transparent !important;
-            opacity: 0 !important; visibility: hidden !important;
-            z-index: 99999 !important; pointer-events: none !important;
+            opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
+            z-index: 99999 !important;
         }}
-        /* Mostrar bocadillo en hover */
-        div.element-container:has(.{marker_class}) + div.element-container button:hover::after,
-        div.element-container:has(.{marker_class}) + div.element-container button:hover::before {{
+
+        /* Mostrar etiqueta al pasar el ratón */
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::after,
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::before {{
             opacity: 1 !important; visibility: visible !important;
         }}
         </style>
-        <div class="{marker_class}" style="display:none;" data-emoji="{emoji}"></div>
+        <div class="btn-marker-{key}" data-emoji="{emoji}"></div>
         """, unsafe_allow_html=True)
-        return st.button(emoji, key=key)
+        return st.button(emoji, key=key, use_container_width=False)
 
-    # FUNCIÓN AUXILIAR: Flechas Flotantes y Juntas (Sin tooltips, sin bordes)
+    # FUNCIÓN AUXILIAR 2: Flechas Flotantes (Sin fondo, sin borde, sin tooltips)
     def render_arrow_btn(emoji, key):
-        marker_class = f"btn-arrow-{key}"
         st.markdown(f"""
         <style>
-        div.element-container:has(.{marker_class}),
-        div.element-container:has(.{marker_class}) + div.element-container,
-        div.element-container:has(.{marker_class}) + div.element-container > div.stButton {{
-            display: flex !important; justify-content: center !important; overflow: visible !important;
+        div:has(>.btn-arrow-{key}),
+        div:has(>.btn-arrow-{key}) + div.element-container,
+        div:has(>.btn-arrow-{key}) + div.element-container > div.stButton {{
+            overflow: visible !important; display: flex !important; justify-content: center !important;
         }}
-        div.element-container:has(.{marker_class}) + div.element-container button {{
-            background: transparent !important; border: none !important; box-shadow: none !important;
-            font-size: 24px !important; padding: 0 !important; margin: 0 auto !important;
+        /* Botón de flecha totalmente transparente y plano */
+        section[data-testid="stSidebar"] div.element-container:has(.btn-arrow-{key}) + div.element-container div.stButton > button {{
+            width: 30px !important; height: 30px !important;
+            min-width: 30px !important; min-height: 30px !important;
+            border: none !important; background: transparent !important; background-color: transparent !important;
+            box-shadow: none !important; padding: 0 !important; margin: 0 auto !important;
+            font-size: 22px !important; flex: 0 0 auto !important;
             display: flex !important; align-items: center !important; justify-content: center !important;
-            transition: transform 0.2s ease !important; transform: none !important;
+            transition: transform 0.2s ease !important;
         }}
-        div.element-container:has(.{marker_class}) + div.element-container button:hover {{
-            transform: scale(1.2) !important; background: transparent !important;
+        section[data-testid="stSidebar"] div.element-container:has(.btn-arrow-{key}) + div.element-container div.stButton > button:hover {{
+            transform: scale(1.2) !important; border: none !important; background: transparent !important; background-color: transparent !important;
+        }}
+        /* Destruir cualquier tooltip que intente aparecer en la flecha */
+        section[data-testid="stSidebar"] div.element-container:has(.btn-arrow-{key}) + div.element-container div.stButton > button::after,
+        section[data-testid="stSidebar"] div.element-container:has(.btn-arrow-{key}) + div.element-container div.stButton > button::before {{
+            content: none !important; display: none !important;
         }}
         </style>
-        <div class="{marker_class}" style="display:none;"></div>
+        <div class="btn-arrow-{key}"></div>
         """, unsafe_allow_html=True)
-        return st.button(emoji, key=key)
+        return st.button(emoji, key=key, use_container_width=False)
+
 
     # 1. EXPANDER: PUNTERO MÁGICO
     with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
@@ -822,8 +838,8 @@ with st.sidebar:
         items_per_page = 3
         total_pages = (len(cursors) - 1) // items_per_page + 1
         
-        # 3. FLECHAS JUNTAS: Proporción abrazada[0.5, 1, 1, 1, 0.5]
-        cols_ptr = st.columns([0.5, 1, 1, 1, 0.5])
+        # PROPORCIÓN AJUSTADA: Flechas abrazando a los 3 iconos centrales
+        cols_ptr = st.columns([0.6, 1, 1, 1, 0.6])
         
         with cols_ptr[0]:
             if render_arrow_btn("⬅️", "ptr_prev"):
@@ -844,7 +860,7 @@ with st.sidebar:
                 st.session_state.ptr_page = (st.session_state.ptr_page + 1) % total_pages
                 st.rerun()
 
-        # 5. FLUIDEZ INSTANTÁNEA (JavaScript sin latencia de Servidor)
+        # JS PARA CAMBIO INSTANTÁNEO DE PUNTERO (Evita el lag del servidor)
         st.components.v1.html("""
         <script>
         const doc = window.parent.document;
@@ -874,7 +890,7 @@ with st.sidebar:
         </script>
         """, height=0, width=0)
 
-        # Respaldo Python para cuando la app recarga tras el st.rerun()
+        # Respaldo Python para el Puntero (Tras el recargo de la web)
         if st.session_state.cursor_val != "default":
             st.markdown(f"""
             <style>
