@@ -704,12 +704,10 @@ with st.sidebar:
         box-shadow: none !important;
     }
     
-    /* ELIMINAR textos fantasma filtrados del Home (Como el 'Reporte clínico') en TODA la barra lateral */
+    /* ELIMINAR textos fantasma filtrados del Home en la barra lateral */
     section[data-testid="stSidebar"] div.stButton > button::after,
     section[data-testid="stSidebar"] div.stButton > button::before {
-        content: none !important;
-        display: none !important;
-        background-image: none !important;
+        content: none !important; display: none !important; background-image: none !important;
     }
     
     /* Quitar animaciones base que estiran botones */
@@ -718,61 +716,67 @@ with st.sidebar:
     }
 
     /* ========================================================================= */
-    /* 2. PROTECCIÓN MILITAR PARA EL EXPANDER DE FAVORITOS (El 3º Expander)      */
+    /* 2. PROTECCIÓN NUCLEAR PARA LOS BOTONES DE FAVORITOS (Botones simples)     */
     /* ========================================================================= */
     
-    /* Ajuste de márgenes para que los botones se apilen compactos */
-    section[data-testid="stSidebar"] details:nth-of-type(3) div[data-testid="stColumn"]:nth-child(2) > div {
-        margin-bottom: 6px !important;
+    /* Ocultar los marcadores invisibles */
+    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) {
+        display: none !important;
     }
 
-    /* FORZAR TAMAÑO Y FORMA (Prohibido estirarse) */
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button {
-        height: 32px !important; 
-        min-height: 32px !important; 
-        max-height: 32px !important; /* <- Esto evita la píldora gigante */
-        width: 100% !important;
-        padding: 0 !important; 
-        margin: 0 !important;
-        border-radius: 6px !important;
-        transform: none !important; 
-        transition: none !important; 
-        animation: none !important;
-        display: flex !important; 
-        align-items: center !important; 
-        justify-content: center !important;
-    }
-
-    /* MATAR POR COMPLETO EL FONDO MÉDICO Y LAS ANIMACIONES DEL HOME */
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button::before,
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button::after,
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button:hover::before,
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button:hover::after {
-        content: none !important; display: none !important; background: none !important; animation: none !important;
-    }
-
-    /* CONGELAR EL EMOJI (Cero zoom) */
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button p {
-        transform: scale(1) translate3d(0,0,0) !important; 
-        animation: none !important; 
-        font-size: 15px !important;
-    }
-
-    /* BOTÓN SARTÉN (Marcado como Secondary) -> SIEMPRE BLANCO */
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"],
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"]:hover,
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="secondary"]:active {
+    /* FORZAR UN ESTILO RÚSTICO, BLANCO Y ESTÁTICO (Destruye los estilos del home) */
+    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button {
+        all: revert !important; /* Destruye TODA herencia del CSS del home */
+        appearance: none !important;
+        background: #FFFFFF !important;
         background-color: #FFFFFF !important;
         border: 1px solid #CBD5E1 !important;
-        color: #000 !important;
+        border-radius: 4px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: none !important;
+        transform: none !important;
+        animation: none !important;
+        transition: none !important;
+        cursor: pointer !important;
     }
 
-    /* BOTÓN BASURA (Marcado como Primary) -> SIEMPRE ROJO */
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"],
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"]:hover,
-    section[data-testid="stSidebar"] details:nth-of-type(3) div.stButton > button[kind="primary"]:active {
-        background-color: #FEE2E2 !important; 
-        border: 1px solid #EF4444 !important;
+    /* Evitar que cambien al pasar el ratón */
+    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button:hover,
+    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button:active {
+        background: #F8FAFC !important;
+        background-color: #F8FAFC !important;
+        border-color: #94A3B8 !important;
+        transform: none !important;
+        animation: none !important;
+        box-shadow: none !important;
+    }
+
+    /* ANIQUILAR CORAZONES, FONDOS Y TEXTOS MÉDICOS */
+    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button::before,
+    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button::after,
+    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button:hover::before,
+    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button:hover::after {
+        content: none !important; display: none !important; background: none !important; background-image: none !important; animation: none !important;
+    }
+
+    /* BLINDAR EL EMOJI */
+    body div#root section[data-testid="stSidebar"] div.element-container:has(.fav-btn-marker) + div.element-container div.stButton > button p {
+        all: unset !important;
+        display: block !important;
+        transform: none !important;
+        animation: none !important;
+        font-size: 14px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1 !important;
     }
     /* ========================================================================= */
     </style>
@@ -780,16 +784,14 @@ with st.sidebar:
 
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
-    # FUNCIÓN AUXILIAR: Botones Circulares Perfectos con Animación de Escala y Bocadillo CSS
+    # FUNCIÓN AUXILIAR: Botones Circulares
     def render_circle_btn(emoji, key, tooltip_text, is_selected=False):
         bg = "rgba(16, 185, 129, 0.15)" if is_selected else "transparent"
         border = "#FFD700" if is_selected else "#CBD5E1"
         
         st.markdown(f"""
         <style>
-        div:has(>.btn-marker-{key}),
-        div:has(>.btn-marker-{key}) + div.element-container,
-        div:has(>.btn-marker-{key}) + div.element-container > div.stButton {{
+        div:has(>.btn-marker-{key}), div:has(>.btn-marker-{key}) + div.element-container, div:has(>.btn-marker-{key}) + div.element-container > div.stButton {{
             overflow: visible !important; display: flex !important; justify-content: center !important;
         }}
         section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button {{
@@ -811,8 +813,7 @@ with st.sidebar:
             bottom: calc(100% + 10px) !important; left: 50% !important; transform: translateX(-50%) !important;
             background: #1E293B !important; color: #FFFFFF !important; padding: 6px 12px !important; border-radius: 6px !important;
             font-size: 11px !important; font-weight: 700 !important; white-space: nowrap !important; width: max-content !important; 
-            opacity: 1 !important; visibility: visible !important; pointer-events: none !important;
-            z-index: 99999 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+            opacity: 1 !important; visibility: visible !important; pointer-events: none !important; z-index: 99999 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
         }}
         section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::before {{
             content: "" !important; display: block !important; position: absolute !important;
@@ -826,30 +827,16 @@ with st.sidebar:
         return st.button(emoji, key=key, use_container_width=False)
 
 
-    # 1. EXPANDER: PUNTERO MÁGICO (Cuadrícula 2x5)
+    # 1. EXPANDER: PUNTERO MÁGICO
     with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
         if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
-        
-        cursors =[
-            ("default", "🖱️", t.get("ptr_default", "Predeterminado")),
-            ("🍗", "🍗", t.get("ptr_drumstick", "Muslito")),
-            ("🥑", "🥑", t.get("ptr_avocado", "Aguacate")),
-            ("🥘", "🥘", t.get("ptr_pan", "Sartén")),
-            ("🍕", "🍕", t.get("ptr_pizza", "Pizza")),
-            ("🪄", "🪄", t.get("ptr_wand", "Varita")),
-            ("🍎", "🍎", t.get("ptr_apple", "Manzana")),
-            ("🌮", "🌮", t.get("ptr_taco", "Taco")),    
-            ("🍣", "🍣", t.get("ptr_sushi", "Sushi")),  
-            ("☕", "☕", t.get("ptr_coffee", "Café"))   
-        ]
-        
+        cursors =[("default", "🖱️", t.get("ptr_default", "Predeterminado")), ("🍗", "🍗", t.get("ptr_drumstick", "Muslito")), ("🥑", "🥑", t.get("ptr_avocado", "Aguacate")), ("🥘", "🥘", t.get("ptr_pan", "Sartén")), ("🍕", "🍕", t.get("ptr_pizza", "Pizza")), ("🪄", "🪄", t.get("ptr_wand", "Varita")), ("🍎", "🍎", t.get("ptr_apple", "Manzana")), ("🌮", "🌮", t.get("ptr_taco", "Taco")), ("🍣", "🍣", t.get("ptr_sushi", "Sushi")), ("☕", "☕", t.get("ptr_coffee", "Café"))]
         cols_ptr_1 = st.columns(5)
         for i in range(5):
             with cols_ptr_1[i]:
                 p_val, p_emoji, p_label = cursors[i]
                 if render_circle_btn(p_emoji, f"ptr_btn_{p_val}", p_label, st.session_state.cursor_val == p_val):
-                    st.session_state.cursor_val = p_val
-                    st.rerun()
+                    st.session_state.cursor_val = p_val; st.rerun()
 
         st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
 
@@ -858,35 +845,9 @@ with st.sidebar:
             with cols_ptr_2[i-5]:
                 p_val, p_emoji, p_label = cursors[i]
                 if render_circle_btn(p_emoji, f"ptr_btn_{p_val}", p_label, st.session_state.cursor_val == p_val):
-                    st.session_state.cursor_val = p_val
-                    st.rerun()
+                    st.session_state.cursor_val = p_val; st.rerun()
 
-        st.components.v1.html("""
-        <script>
-        const doc = window.parent.document;
-        doc.addEventListener('mousedown', function(e) {
-            let btn = e.target.closest('button');
-            if(!btn) return;
-            let container = btn.closest('div[data-testid="element-container"]');
-            if(container && container.previousElementSibling) {
-                let marker = container.previousElementSibling.querySelector('[class^="btn-marker-ptr_btn_"]');
-                if(marker) {
-                    let emoji = marker.getAttribute('data-emoji');
-                    let styleId = 'dynamic-cursor-style';
-                    let oldStyle = doc.getElementById(styleId);
-                    if(oldStyle) oldStyle.remove();
-                    
-                    if(emoji && emoji !== 'default' && emoji !== '🖱️') {
-                        let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size: 24px"><text y="24">${emoji}</text></svg>`;
-                        let css = `* { cursor: url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}'), auto !important; }`;
-                        let style = doc.createElement('style');
-                        style.id = styleId; style.innerHTML = css; doc.head.appendChild(style);
-                    }
-                }
-            }
-        });
-        </script>
-        """, height=0, width=0)
+        st.components.v1.html("""<script>const doc = window.parent.document; doc.addEventListener('mousedown', function(e) { let btn = e.target.closest('button'); if(!btn) return; let container = btn.closest('div[data-testid="element-container"]'); if(container && container.previousElementSibling) { let marker = container.previousElementSibling.querySelector('[class^="btn-marker-ptr_btn_"]'); if(marker) { let emoji = marker.getAttribute('data-emoji'); let styleId = 'dynamic-cursor-style'; let oldStyle = doc.getElementById(styleId); if(oldStyle) oldStyle.remove(); if(emoji && emoji !== 'default' && emoji !== '🖱️') { let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size: 24px"><text y="24">${emoji}</text></svg>`; let css = `* { cursor: url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}'), auto !important; }`; let style = doc.createElement('style'); style.id = styleId; style.innerHTML = css; doc.head.appendChild(style); } } } }); </script>""", height=0, width=0)
 
         if st.session_state.cursor_val != "default":
             st.markdown(f"<style>* {{ cursor: url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px'><text y='24'>{st.session_state.cursor_val}</text></svg>\"), auto !important; }}</style>", unsafe_allow_html=True)
@@ -901,7 +862,7 @@ with st.sidebar:
             st.success(t["prof_updated"])
             st.rerun()
 
-    # 3. EXPANDER: RECETAS FAVORITAS (AHORA 100% BLINDADO Y CUADRADO)
+    # 3. EXPANDER: RECETAS FAVORITAS (BOTONES SIMPLES Y SEPARADOS)
     with st.expander(t["favs"], expanded=False):
         favs = user_profile.get("favorites",[])
         if favs:
@@ -911,11 +872,11 @@ with st.sidebar:
                 col_c, col_d = st.columns([4, 1])
                 
                 with col_c:
-                    # Casetilla izquierda con la receta
+                    # Casetilla izquierda con la receta adaptada a la altura de los 2 botones (32 + 11 + 32 = 75px)
                     st.markdown(f"""
                     <div style="
                         background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; 
-                        padding: 8px 12px; height: 70px; display: flex; align-items: center; 
+                        padding: 8px 12px; height: 75px; display: flex; align-items: center; 
                         box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                         <span style="font-size: 13px; font-weight: 600; color: #1E293B; line-height: 1.2; 
                                      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
@@ -925,8 +886,9 @@ with st.sidebar:
                     """, unsafe_allow_html=True)
                 
                 with col_d:
-                    # SARTÉN - Usamos type="secondary" para que el CSS la fije en blanco
-                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True, help="Cocinar esta receta", type="secondary"):
+                    # SARTÉN - Simple, sin parámetros extra
+                    st.markdown('<div class="fav-btn-marker" style="display:none;"></div>', unsafe_allow_html=True)
+                    if st.button("🍳", key=f"load_fav_{idx}", use_container_width=True):
                         if "ingredients" in f:
                             st.session_state.full_recipe = f
                             st.session_state.current_page = "mod1"
@@ -935,13 +897,17 @@ with st.sidebar:
                         else:
                             st.warning("Receta antigua. Faltan pasos.")
                             
-                    # BASURA - Usamos type="primary" para que el CSS la fije en rojo 
-                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True, help=t["btn_delete"], type="primary"):
+                    # SEPARADOR FÍSICO (Fuerza a que estén separados y no pegados)
+                    st.markdown("<div style='height: 11px;'></div>", unsafe_allow_html=True)
+                            
+                    # BASURA - Simple, sin parámetros extra
+                    st.markdown('<div class="fav-btn-marker" style="display:none;"></div>', unsafe_allow_html=True)
+                    if st.button("🗑️", key=f"del_fav_{idx}", use_container_width=True):
                         favs.pop(idx)
                         update_user_data(user_profile["username"], {"favorites": favs})
                         st.rerun()
                 
-                st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
         else: 
             st.info(t["no_favs"])
 
