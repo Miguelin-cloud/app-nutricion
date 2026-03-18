@@ -695,23 +695,28 @@ if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 # SIDEBAR REDISEÑADA & PUNTERO MÁGICO
 # ==========================================
 with st.sidebar:
-    # 1. ESCUDO CSS ABSOLUTO: Bloquea cualquier CSS de la pantalla principal
+    # 1. ESCUDO CSS ABSOLUTO: Bloquea el CSS del Home en estado normal Y en hover
     st.markdown("""
     <style>
-    /* Resetear botones en la barra lateral */
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button {
-        background-image: none !important;
+    /* Resetear botones en la barra lateral (Estados Normal, Hover, Active, Focus) */
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:hover,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:active,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:focus {
+        background-image: none !important; /* Mata la imagen del stickman/varita */
         padding-top: 0 !important;
         box-shadow: none !important;
-        border-radius: 8px !important;
     }
-    /* ELIMINAR las etiquetas filtradas del Home en la barra lateral */
+    
+    /* ELIMINAR las etiquetas filtradas del Home en la barra lateral (incluso en hover) */
     section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button::after,
-    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button::before {
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button::before,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:hover::after,
+    section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button:hover::before {
         content: none !important;
         display: none !important;
-        background: transparent !important;
     }
+    
     /* Quitar animaciones base que estiran botones */
     section[data-testid="stSidebar"] div[data-testid="stColumn"] div.stButton > button p {
         transform: none !important; margin: 0 !important; font-weight: normal !important;
@@ -721,7 +726,7 @@ with st.sidebar:
 
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
-    # FUNCIÓN AUXILIAR 1: Botones Circulares Perfectos y Bocadillo de Texto
+    # FUNCIÓN AUXILIAR: Botones Circulares Perfectos con Animación de Escala y Bocadillo CSS
     def render_circle_btn(emoji, key, tooltip_text, is_selected=False):
         bg = "rgba(16, 185, 129, 0.15)" if is_selected else "transparent"
         border = "#FFD700" if is_selected else "#CBD5E1"
@@ -745,86 +750,54 @@ with st.sidebar:
             background-color: {bg} !important; border: 2px solid {border} !important;
             font-size: 20px !important; color: #1E293B !important;
             display: flex !important; align-items: center !important; justify-content: center !important;
-            position: relative !important; overflow: visible !important; transition: border-color 0.2s ease !important;
+            position: relative !important; overflow: visible !important; 
+            /* Transición dinámica y suave para el hover */
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s ease, background-color 0.2s ease !important;
+            transform: scale(1) !important;
         }}
         
-        /* Hover: Agrandar círculo y borde dorado */
+        /* Hover Dinámico: Agrandar círculo, borde dorado, sin imágenes fantasma */
         section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover {{
-            border-color: #FFD700 !important; transform: scale(1.1) !important; z-index: 9999 !important;
+            border-color: #FFD700 !important; 
+            transform: scale(1.15) !important; /* Efecto de crecimiento estético */
+            z-index: 9999 !important;
+            background-image: none !important;
         }}
 
-        /* BOCADILLO DE TEXTO (Etiqueta Centrada Arriba) */
-        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button::after {{
+        /* BOCADILLO DE TEXTO (Etiqueta Centrada Arriba - Revivimos el ::after) */
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::after {{
             content: "{tooltip_text}" !important;
             display: block !important; position: absolute !important;
-            bottom: calc(100% + 8px) !important; left: 50% !important;
+            bottom: calc(100% + 10px) !important; left: 50% !important;
             transform: translateX(-50%) !important;
             background: #1E293B !important; color: #FFFFFF !important;
             padding: 6px 12px !important; border-radius: 6px !important;
             font-size: 11px !important; font-weight: 700 !important;
-            white-space: nowrap !important; width: max-content !important; /* Previene cortes */
-            opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
-            z-index: 99999 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+            white-space: nowrap !important; width: max-content !important; 
+            opacity: 1 !important; visibility: visible !important; pointer-events: none !important;
+            z-index: 99999 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
         }}
         /* Triángulo del Bocadillo */
-        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button::before {{
+        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::before {{
             content: "" !important; display: block !important; position: absolute !important;
-            bottom: 100% !important; left: 50% !important;
+            bottom: calc(100% + 5px) !important; left: 50% !important;
             transform: translateX(-50%) !important;
             border-width: 5px !important; border-style: solid !important;
             border-color: #1E293B transparent transparent transparent !important;
-            opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
+            opacity: 1 !important; visibility: visible !important; pointer-events: none !important;
             z-index: 99999 !important;
-        }}
-
-        /* Mostrar etiqueta al pasar el ratón */
-        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::after,
-        section[data-testid="stSidebar"] div.element-container:has(.btn-marker-{key}) + div.element-container div.stButton > button:hover::before {{
-            opacity: 1 !important; visibility: visible !important;
         }}
         </style>
         <div class="btn-marker-{key}" data-emoji="{emoji}"></div>
         """, unsafe_allow_html=True)
         return st.button(emoji, key=key, use_container_width=False)
 
-    # FUNCIÓN AUXILIAR 2: Flechas Flotantes (Sin fondo, sin borde, sin tooltips)
-    def render_arrow_btn(emoji, key):
-        st.markdown(f"""
-        <style>
-        div:has(>.btn-arrow-{key}),
-        div:has(>.btn-arrow-{key}) + div.element-container,
-        div:has(>.btn-arrow-{key}) + div.element-container > div.stButton {{
-            overflow: visible !important; display: flex !important; justify-content: center !important;
-        }}
-        /* Botón de flecha totalmente transparente y plano */
-        section[data-testid="stSidebar"] div.element-container:has(.btn-arrow-{key}) + div.element-container div.stButton > button {{
-            width: 30px !important; height: 30px !important;
-            min-width: 30px !important; min-height: 30px !important;
-            border: none !important; background: transparent !important; background-color: transparent !important;
-            box-shadow: none !important; padding: 0 !important; margin: 0 auto !important;
-            font-size: 22px !important; flex: 0 0 auto !important;
-            display: flex !important; align-items: center !important; justify-content: center !important;
-            transition: transform 0.2s ease !important;
-        }}
-        section[data-testid="stSidebar"] div.element-container:has(.btn-arrow-{key}) + div.element-container div.stButton > button:hover {{
-            transform: scale(1.2) !important; border: none !important; background: transparent !important; background-color: transparent !important;
-        }}
-        /* Destruir cualquier tooltip que intente aparecer en la flecha */
-        section[data-testid="stSidebar"] div.element-container:has(.btn-arrow-{key}) + div.element-container div.stButton > button::after,
-        section[data-testid="stSidebar"] div.element-container:has(.btn-arrow-{key}) + div.element-container div.stButton > button::before {{
-            content: none !important; display: none !important;
-        }}
-        </style>
-        <div class="btn-arrow-{key}"></div>
-        """, unsafe_allow_html=True)
-        return st.button(emoji, key=key, use_container_width=False)
 
-
-    # 1. EXPANDER: PUNTERO MÁGICO
+    # 1. EXPANDER: PUNTERO MÁGICO (Cuadrícula 2x5)
     with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
         if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
-        if "ptr_page" not in st.session_state: st.session_state.ptr_page = 0
         
+        # 10 cursores en total
         cursors =[
             ("default", "🖱️", t.get("ptr_default", "Predeterminado")),
             ("🍗", "🍗", t.get("ptr_drumstick", "Muslito")),
@@ -832,33 +805,31 @@ with st.sidebar:
             ("🥘", "🥘", t.get("ptr_pan", "Sartén")),
             ("🍕", "🍕", t.get("ptr_pizza", "Pizza")),
             ("🪄", "🪄", t.get("ptr_wand", "Varita")),
-            ("🍎", "🍎", t.get("ptr_apple", "Manzana"))
+            ("🍎", "🍎", t.get("ptr_apple", "Manzana")),
+            ("🌮", "🌮", t.get("ptr_taco", "Taco")),    # Nuevo
+            ("🍣", "🍣", t.get("ptr_sushi", "Sushi")),  # Nuevo
+            ("☕", "☕", t.get("ptr_coffee", "Café"))   # Nuevo
         ]
         
-        items_per_page = 3
-        total_pages = (len(cursors) - 1) // items_per_page + 1
-        
-        # PROPORCIÓN AJUSTADA: Flechas abrazando a los 3 iconos centrales
-        cols_ptr = st.columns([0.6, 1, 1, 1, 0.6])
-        
-        with cols_ptr[0]:
-            if render_arrow_btn("⬅️", "ptr_prev"):
-                st.session_state.ptr_page = (st.session_state.ptr_page - 1) % total_pages
-                st.rerun()
-                
-        start_idx = st.session_state.ptr_page * items_per_page
-        current_ptrs = cursors[start_idx : start_idx + items_per_page]
-        
-        for i, (p_val, p_emoji, p_label) in enumerate(current_ptrs):
-            with cols_ptr[i + 1]:
+        # FILA 1 (Iconos del 0 al 4)
+        cols_ptr_1 = st.columns(5)
+        for i in range(5):
+            with cols_ptr_1[i]:
+                p_val, p_emoji, p_label = cursors[i]
                 if render_circle_btn(p_emoji, f"ptr_btn_{p_val}", p_label, st.session_state.cursor_val == p_val):
                     st.session_state.cursor_val = p_val
                     st.rerun()
-                    
-        with cols_ptr[4]:
-            if render_arrow_btn("➡️", "ptr_next"):
-                st.session_state.ptr_page = (st.session_state.ptr_page + 1) % total_pages
-                st.rerun()
+
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True) # Espacio entre filas
+
+        # FILA 2 (Iconos del 5 al 9)
+        cols_ptr_2 = st.columns(5)
+        for i in range(5, 10):
+            with cols_ptr_2[i-5]:
+                p_val, p_emoji, p_label = cursors[i]
+                if render_circle_btn(p_emoji, f"ptr_btn_{p_val}", p_label, st.session_state.cursor_val == p_val):
+                    st.session_state.cursor_val = p_val
+                    st.rerun()
 
         # JS PARA CAMBIO INSTANTÁNEO DE PUNTERO (Evita el lag del servidor)
         st.components.v1.html("""
