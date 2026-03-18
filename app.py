@@ -768,33 +768,33 @@ if not st.session_state.get('current_username'):
     """, unsafe_allow_html=True)
     
     # ==========================================
-    # 2. AVISOS SUPERIORES (Banners)
+    # 2. AVISOS SUPERIORES (Banners dinámicos y traducidos)
     # ==========================================
     st.markdown("<div style='height: 2vh;'></div>", unsafe_allow_html=True)
     col_aviso1, col_aviso2 = st.columns(2, gap="large")
     
-    # VENTANA 1: Fase Beta (Morada)
+    # VENTANA 1: Fase Beta (Morado Pastel para lectura perfecta)
     with col_aviso1:
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #A855F7 0%, #7E22CE 100%); border-radius: 14px; padding: 18px; border: 1px solid #C084FC; box-shadow: 0 10px 25px rgba(126, 34, 206, 0.2); height: 100%;">
-            <h4 style="margin-top: 0; color: #FFFFFF; font-size: 1.05rem; font-weight: 800; margin-bottom: 8px;">🚀 App en Fase Beta</h4>
-            <p style="color: #E9D5FF; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px;">Próximas actualizaciones:</p>
-            <ul style="color: #F3E8FF; font-size: 0.85rem; padding-left: 18px; margin-bottom: 0; line-height: 1.4;">
-                <li style="margin-bottom: 5px;"><b>Ranking Social:</b> Compara tu progreso (ej: <i>"Comes mejor que el 84% de los usuarios"</i>).</li>
-                <li style="margin-bottom: 5px;"><b>Gráficos de Estudio:</b> Analíticas y estadísticas avanzadas de tu evolución.</li>
-                <li><b>IA Mejorada:</b> Razonamiento aún más detallado con estudio profundo de macronutrientes.</li>
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #F3E8FF 0%, #D8B4FE 100%); border-radius: 14px; padding: 18px; border: 1px solid #C084FC; box-shadow: 0 10px 25px rgba(168, 85, 247, 0.15); height: 100%;">
+            <h4 style="margin-top: 0; color: #4C1D95; font-size: 1.05rem; font-weight: 800; margin-bottom: 8px;">🚀 {t.get('beta_title', 'App en Fase Beta')}</h4>
+            <p style="color: #581C87; font-size: 0.9rem; font-weight: 700; margin-bottom: 8px;">{t.get('beta_subtitle', 'Próximas actualizaciones:')}</p>
+            <ul style="color: #6B21A8; font-size: 0.85rem; padding-left: 18px; margin-bottom: 0; line-height: 1.4; font-weight: 500;">
+                <li style="margin-bottom: 5px;"><b>{t.get('beta_feat1_title', 'Ranking Social:')}</b> {t.get('beta_feat1_desc', 'Compara tu progreso (ej: <i>"Comes mejor que el 84% de los usuarios"</i>).')}</li>
+                <li style="margin-bottom: 5px;"><b>{t.get('beta_feat2_title', 'Gráficos de Estudio:')}</b> {t.get('beta_feat2_desc', 'Analíticas y estadísticas avanzadas de tu evolución.')}</li>
+                <li><b>{t.get('beta_feat3_title', 'IA Mejorada:')}</b> {t.get('beta_feat3_desc', 'Razonamiento aún más detallado con estudio profundo de macronutrientes.')}</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
         
     # VENTANA 2: Novedades (Dorada)
     with col_aviso2:
-        st.markdown("""
+        st.markdown(f"""
         <div style="background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); border-radius: 14px; padding: 18px; border: 1px solid #FCD34D; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.2); height: 100%; display: flex; flex-direction: column; justify-content: center;">
-            <h4 style="margin-top: 0; color: #78350F; font-size: 1.05rem; font-weight: 900; margin-bottom: 8px; text-transform: uppercase;">✨ Novedades</h4>
+            <h4 style="margin-top: 0; color: #78350F; font-size: 1.05rem; font-weight: 900; margin-bottom: 8px; text-transform: uppercase;">✨ {t.get('news_title', 'Novedades')}</h4>
             <p style="color: #92400E; font-size: 0.95rem; font-weight: 600; line-height: 1.5; margin-bottom: 0;">
-                ¡Nuestra app ya está disponible para descargar en <b>Android</b> e <b>iOS</b>! <br><br>
-                <span style="background: rgba(255,255,255,0.4); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; color: #78350F;">(Fase Beta)</span>
+                {t.get('news_desc', '¡Nuestra app ya está disponible para descargar en <b>Android</b> e <b>iOS</b>!')} <br><br>
+                <span style="background: rgba(255,255,255,0.4); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; color: #78350F;">({t.get('news_badge', 'Fase Beta')})</span>
             </p>
         </div>
         """, unsafe_allow_html=True)
