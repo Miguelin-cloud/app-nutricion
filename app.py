@@ -695,101 +695,116 @@ if "app_alerts" not in st.session_state: st.session_state.app_alerts =[]
 # SIDEBAR REDISEÑADA & PUNTERO MÁGICO
 # ==========================================
 with st.sidebar:
-    # ESCUDO CSS: Evita que las tarjetas gigantes del Home afecten a la barra lateral
-    # Y elimina TODAS las animaciones globales de la barra lateral
+    # 1. ESCUDO CSS ANTI-FUGAS: Protege la barra lateral del CSS del Home
     st.markdown("""
     <style>
+    /* Reset absoluto de botones en la sidebar para evitar fugas del Home */
     [data-testid="stSidebar"] button {
-        min-height: 0px !important;
-        padding-top: 5px !important;
-        padding-bottom: 5px !important;
         background-image: none !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        min-height: 0 !important;
         box-shadow: none !important;
     }
     [data-testid="stSidebar"] button p { 
-        transform: none !important; 
-        color: inherit !important; 
-        margin: 0 !important; 
-        font-weight: normal !important; 
+        transform: none !important; color: inherit !important; margin: 0 !important; font-weight: normal !important; 
     }
-    /* Eliminada la animación global de hover para la sidebar */
+    /* Destruir pseudo-elementos filtrados desde el Home */[data-testid="stSidebar"] button::after,
+    [data-testid="stSidebar"] button::before {
+        content: none !important; display: none !important; background: none !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown(f"<h2 style='text-align:center;'>👨‍🍳 Chef {user_profile['name']}</h2>", unsafe_allow_html=True)
 
-    # FUNCIÓN AUXILIAR: Botones Circulares con Bocadillo CSS (Sin relleno y círculos perfectos)
+    # FUNCIÓN AUXILIAR: Botones Circulares con Bocadillo CSS Reparado y Color Esmeralda
     def render_circle_btn(emoji, key, tooltip_text, is_selected=False):
         marker_class = f"btn-marker-{key}"
-        # Si está seleccionado el borde es Dorado, sino gris claro. Fondo SIEMPRE transparente.
+        # 2. COLOR DE SELECCIÓN: Esmeralda suave si está seleccionado, transparente si no.
+        bg_color = "rgba(16, 185, 129, 0.15)" if is_selected else "transparent"
         border_color = "#FFD700" if is_selected else "#CBD5E1"
         
         st.markdown(f"""
         <style>
-        /* Desactiva la deformación de Streamlit forzando medidas exactas y márgenes centrados */
+        /* 4. REPARACIÓN ETIQUETAS: Forzar visibilidad en contenedores padres */
+        div.element-container:has(.{marker_class}),
+        div.element-container:has(.{marker_class}) + div.element-container,
         div.element-container:has(.{marker_class}) + div.element-container > div.stButton {{
             display: flex !important; justify-content: center !important;
+            overflow: visible !important;
         }}
         div.element-container:has(.{marker_class}) + div.element-container button {{
-            width: 40px !important; min-width: 40px !important; max-width: 40px !important;
-            height: 40px !important; min-height: 40px !important; max-height: 40px !important;
+            width: 45px !important; min-width: 45px !important; max-width: 45px !important;
+            height: 45px !important; min-height: 45px !important; max-height: 45px !important;
             border-radius: 50% !important; padding: 0 !important; margin: 0 auto !important;
             display: flex !important; align-items: center !important; justify-content: center !important;
-            font-size: 20px !important;
-            background: transparent !important; background-color: transparent !important; /* Sin Relleno */
-            border: 2px solid {border_color} !important;
+            font-size: 20px !important; background: {bg_color} !important; border: 2px solid {border_color} !important;
             position: relative !important; overflow: visible !important; box-shadow: none !important;
-            color: #1E293B !important;
-            transform: none !important; transition: border-color 0.2s ease !important; /* Solo animación de color */
+            color: #1E293B !important; transform: none !important; transition: all 0.2s ease !important;
         }}
-        
-        /* Hover: Solo cambia el borde a Dorado, sin alterar tamaño ni fondo */
         div.element-container:has(.{marker_class}) + div.element-container button:hover {{
-            border-color: #FFD700 !important;
-            background: transparent !important; background-color: transparent !important;
-            transform: none !important;
+            border-color: #FFD700 !important; transform: scale(1.15) !important; z-index: 9999 !important;
         }}
-
-        /* BOCADILLO DE TEXTO (Cuerpo centrado arriba) */
+        /* BOCADILLO DE TEXTO (Tooltip) */
         div.element-container:has(.{marker_class}) + div.element-container button::after {{
-            content: "{tooltip_text}";
-            position: absolute !important;
-            bottom: calc(100% + 8px) !important; /* Posicionado encima del botón */
-            left: 50% !important;
-            transform: translateX(-50%) !important; /* Centrado perfecto */
+            content: "{tooltip_text}" !important;
+            display: block !important; /* Revive el after destruido por el escudo */
+            position: absolute !important; bottom: calc(100% + 10px) !important; left: 50% !important;
+            transform: translateX(-50%) !important;
             background: #1E293B !important; color: #FFFFFF !important;
-            padding: 5px 10px !important; border-radius: 6px !important;
-            font-size: 11px !important; font-weight: 700 !important;
-            white-space: nowrap !important;
+            padding: 6px 12px !important; border-radius: 6px !important;
+            font-size: 12px !important; font-weight: 700 !important;
+            width: max-content !important; white-space: nowrap !important; /* Evita cortes */
             opacity: 0 !important; visibility: hidden !important;
             z-index: 99999 !important; pointer-events: none !important;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
         }}
-        
-        /* BOCADILLO DE TEXTO (Punta de flecha apuntando al botón) */
+        /* BOCADILLO DE TEXTO (Punta de flecha) */
         div.element-container:has(.{marker_class}) + div.element-container button::before {{
-            content: '' !important;
-            position: absolute !important;
-            bottom: 100% !important; /* Justo debajo del cuerpo del tooltip */
-            left: 50% !important;
-            transform: translateX(-50%) !important; /* Centrado perfecto */
+            content: '' !important; display: block !important;
+            position: absolute !important; bottom: calc(100% + 5px) !important; left: 50% !important;
+            transform: translateX(-50%) !important;
             border-width: 5px !important; border-style: solid !important;
-            border-color: #1E293B transparent transparent transparent !important; /* Triángulo apuntando abajo */
+            border-color: #1E293B transparent transparent transparent !important;
             opacity: 0 !important; visibility: hidden !important;
             z-index: 99999 !important; pointer-events: none !important;
         }}
-
-        /* Mostrar el bocadillo completo en hover */
+        /* Mostrar bocadillo en hover */
         div.element-container:has(.{marker_class}) + div.element-container button:hover::after,
         div.element-container:has(.{marker_class}) + div.element-container button:hover::before {{
             opacity: 1 !important; visibility: visible !important;
+        }}
+        </style>
+        <div class="{marker_class}" style="display:none;" data-emoji="{emoji}"></div>
+        """, unsafe_allow_html=True)
+        return st.button(emoji, key=key)
+
+    # FUNCIÓN AUXILIAR: Flechas Flotantes y Juntas (Sin tooltips, sin bordes)
+    def render_arrow_btn(emoji, key):
+        marker_class = f"btn-arrow-{key}"
+        st.markdown(f"""
+        <style>
+        div.element-container:has(.{marker_class}),
+        div.element-container:has(.{marker_class}) + div.element-container,
+        div.element-container:has(.{marker_class}) + div.element-container > div.stButton {{
+            display: flex !important; justify-content: center !important; overflow: visible !important;
+        }}
+        div.element-container:has(.{marker_class}) + div.element-container button {{
+            background: transparent !important; border: none !important; box-shadow: none !important;
+            font-size: 24px !important; padding: 0 !important; margin: 0 auto !important;
+            display: flex !important; align-items: center !important; justify-content: center !important;
+            transition: transform 0.2s ease !important; transform: none !important;
+        }}
+        div.element-container:has(.{marker_class}) + div.element-container button:hover {{
+            transform: scale(1.2) !important; background: transparent !important;
         }}
         </style>
         <div class="{marker_class}" style="display:none;"></div>
         """, unsafe_allow_html=True)
         return st.button(emoji, key=key)
 
-    # 1. EXPANDER: PUNTERO MÁGICO (CARRUSEL)
+    # 1. EXPANDER: PUNTERO MÁGICO
     with st.expander("🪄 " + t.get("magic_pointer", "Puntero Mágico"), expanded=False):
         if "cursor_val" not in st.session_state: st.session_state.cursor_val = "default"
         if "ptr_page" not in st.session_state: st.session_state.ptr_page = 0
@@ -807,15 +822,14 @@ with st.sidebar:
         items_per_page = 3
         total_pages = (len(cursors) - 1) // items_per_page + 1
         
-        cols_ptr = st.columns([1, 1, 1, 1, 1])
+        # 3. FLECHAS JUNTAS: Proporción abrazada[0.5, 1, 1, 1, 0.5]
+        cols_ptr = st.columns([0.5, 1, 1, 1, 0.5])
         
-        # Botón Izquierdo (Carrusel)
         with cols_ptr[0]:
-            if render_circle_btn("⬅️", "ptr_prev", "Anterior"):
+            if render_arrow_btn("⬅️", "ptr_prev"):
                 st.session_state.ptr_page = (st.session_state.ptr_page - 1) % total_pages
                 st.rerun()
                 
-        # Emojis Centrales
         start_idx = st.session_state.ptr_page * items_per_page
         current_ptrs = cursors[start_idx : start_idx + items_per_page]
         
@@ -825,13 +839,42 @@ with st.sidebar:
                     st.session_state.cursor_val = p_val
                     st.rerun()
                     
-        # Botón Derecho (Carrusel)
         with cols_ptr[4]:
-            if render_circle_btn("➡️", "ptr_next", "Siguiente"):
+            if render_arrow_btn("➡️", "ptr_next"):
                 st.session_state.ptr_page = (st.session_state.ptr_page + 1) % total_pages
                 st.rerun()
 
-        # Aplicar el CSS global del puntero si no es el por defecto
+        # 5. FLUIDEZ INSTANTÁNEA (JavaScript sin latencia de Servidor)
+        st.components.v1.html("""
+        <script>
+        const doc = window.parent.document;
+        doc.addEventListener('mousedown', function(e) {
+            let btn = e.target.closest('button');
+            if(!btn) return;
+            let container = btn.closest('div[data-testid="element-container"]');
+            if(container && container.previousElementSibling) {
+                let marker = container.previousElementSibling.querySelector('[class^="btn-marker-ptr_btn_"]');
+                if(marker) {
+                    let emoji = marker.getAttribute('data-emoji');
+                    let styleId = 'dynamic-cursor-style';
+                    let oldStyle = doc.getElementById(styleId);
+                    if(oldStyle) oldStyle.remove();
+                    
+                    if(emoji && emoji !== 'default' && emoji !== '🖱️') {
+                        let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size: 24px"><text y="24">${emoji}</text></svg>`;
+                        let css = `* { cursor: url('data:image/svg+xml;utf8,${encodeURIComponent(svg)}'), auto !important; }`;
+                        let style = doc.createElement('style');
+                        style.id = styleId;
+                        style.innerHTML = css;
+                        doc.head.appendChild(style);
+                    }
+                }
+            }
+        });
+        </script>
+        """, height=0, width=0)
+
+        # Respaldo Python para cuando la app recarga tras el st.rerun()
         if st.session_state.cursor_val != "default":
             st.markdown(f"""
             <style>
@@ -882,7 +925,6 @@ with st.sidebar:
         trend_emojis =["🍰", "🥨", "🥪", "🥣", "🥤"]
         if "trend_idx" not in st.session_state: st.session_state.trend_idx = 0
         
-        # Generar los botones circulares usando la función auxiliar CSS
         cols_trend = st.columns(5)
         for i, (key, emoji) in enumerate(zip(trend_keys, trend_emojis)):
             with cols_trend[i]:
@@ -892,11 +934,9 @@ with st.sidebar:
                     st.session_state.trend_idx = i
                     st.rerun()
                     
-        # Mostrar el título de la categoría seleccionada
         current_key = trend_keys[st.session_state.trend_idx]
         st.markdown(f"<div style='text-align:center; font-weight:800; color:#10B981; font-size:14px; margin:10px 0;'>{t.get(current_key, current_key)}</div>", unsafe_allow_html=True)
                 
-        # Cargar noticias
         news_items = fetch_daily_healthy_recipes(lang_code, current_key)
         if news_items:
             for news in news_items:
@@ -917,7 +957,7 @@ with st.sidebar:
             fetch_daily_healthy_recipes.clear()
             st.rerun()
 
-    # 5. EXPANDER: ALERTAS Y NOTIFICACIONES (Sistema de Respaldo IA)
+    # 5. EXPANDER: ALERTAS Y NOTIFICACIONES
     with st.expander("🔔 Alertas del Sistema", expanded=False):
         if not st.session_state.app_alerts:
             st.info("No hay alertas recientes. ¡Todos los sistemas funcionan perfectamente!")
