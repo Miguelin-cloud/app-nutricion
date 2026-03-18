@@ -722,26 +722,63 @@ with st.sidebar:
         transform: none !important; margin: 0 !important; font-weight: normal !important;
     }
 
-    /* 2. ESCUDO PLANO PARA RECETAS FAVORITAS (Sin zoom, sin deformar, sin fondos filtrados) */
+    /* ========================================================================= */
+    /* 2. ESCUDO PLANO PARA RECETAS FAVORITAS (100% Estático y Blindado)         */
+    /* ========================================================================= */
+    
+    /* Estado Normal, Activo y Focus */
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button,
-    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover,
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:active,
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:focus {
-        transform: none !important;       /* Cero zoom */
-        box-shadow: none !important;      /* Cero sombras raras */
-        background-image: none !important;/* Cero imágenes del home */
+        transform: none !important;
+        scale: 1 !important;
+        box-shadow: none !important;
+        background-image: none !important;
         background-color: #F8FAFC !important; /* Fondo gris claro clásico */
         border: 1px solid #CBD5E1 !important;
         border-radius: 8px !important;
         min-height: 0 !important;
         padding: 5px 10px !important;
         color: #1E293B !important;
+        animation: none !important;
         transition: background-color 0.2s ease, border-color 0.2s ease !important;
     }
+    
+    /* Estado Hover (Sin crecer, solo oscurece fondo/borde) */
     section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover {
-        background-color: #E2E8F0 !important; /* Un poco más oscuro al pasar el ratón */
+        transform: none !important;
+        scale: 1 !important;
+        box-shadow: none !important;
+        background-image: none !important;
+        background-color: #E2E8F0 !important;
         border-color: #94A3B8 !important;
+        color: #1E293B !important;
+        animation: none !important;
     }
+
+    /* Congelar el contenido interno (el Emoji) para evitar que haga zoom */
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button p,
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover p {
+        transform: none !important;
+        scale: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        animation: none !important;
+    }
+
+    /* Aniquilar cualquier pseudo-elemento residual que traiga las sombras, fondos o bocadillos */
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button::before,
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button::after,
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover::before,
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"]:has(.fav-container-marker) div.stButton > button:hover::after {
+        content: none !important;
+        display: none !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        animation: none !important;
+    }
+    /* ========================================================================= */
+
     </style>
     """, unsafe_allow_html=True)
 
