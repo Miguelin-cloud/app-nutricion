@@ -510,7 +510,19 @@ TRANSLATIONS = {
         "alerts_title": "🔔 System Alerts", "alerts_none": "No recent alerts. All systems operational!", "alerts_clear": "🧹 Clear history",
         "btn_delete": "🗑️ Delete", "btn_edit": "✏️ Edit", "btn_save": "💾 Save",
         "manage_meals": "⚙️ Manage Daily Meals", "no_meals": "No meals logged for this day.", "manage_date": "Select date to edit",
-        "ph_user": "e.g., Magic Chef 24 ✨", "ph_pin": "e.g., 1234", "ph_name": "e.g., Laura Smith", "ph_goals": "e.g., Eat healthier, gain muscle...", "ph_rest": "e.g., Gluten-free, kiwi allergy..."
+        "ph_user": "e.g., Magic Chef 24 ✨", "ph_pin": "e.g., 1234", "ph_name": "e.g., Laura Smith", "ph_goals": "e.g., Eat healthier, gain muscle...", "ph_rest": "e.g., Gluten-free, kiwi allergy...",
+        
+        "beta_title": "App in Beta Phase",
+        "beta_subtitle": "Upcoming updates:",
+        "beta_feat1_title": "Social Ranking:",
+        "beta_feat1_desc": "Compare your progress (e.g.: <i>\"You eat better than 84% of users\"</i>).",
+        "beta_feat2_title": "Study Charts:",
+        "beta_feat2_desc": "Advanced analytics and statistics of your evolution.",
+        "beta_feat3_title": "Improved AI:",
+        "beta_feat3_desc": "Even more detailed reasoning with deep study of macronutrients.",
+        "news_title": "News",
+        "news_desc": "Our app is now available to download on <b>Android</b> and <b>iOS</b>!",
+        "news_badge": "Beta Phase"
     },
     "🇫🇷 Français": {
         "lang_code": "French", "title": "Bonjour {name} !", "subtitle": "Votre écosystème nutritionnel.",
