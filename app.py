@@ -884,22 +884,65 @@ with st.sidebar:
     with st.expander(t["favs"], expanded=False):
         
         # CSS INFALIBLE: 
-        # 1. Ocultamos los verdaderos botones de Streamlit (se quedan en el DOM pero no ocupan espacio)
-        # 2. Le damos los estilos limpios a nuestros botones HTML Puros.
         st.markdown("""
         <style>
+        /* Ocultamos los botones nativos de Streamlit de forma segura para que el clic de JS funcione */
         div[class*="st-key-real_load_"], div[class*="st-key-real_del_"] {
             position: absolute !important;
             opacity: 0 !important;
-            height: 0px !important;
-            width: 0px !important;
+            height: 1px !important;
+            width: 1px !important;
             overflow: hidden !important;
-            pointer-events: none !important;
+            z-index: -9999 !important;
             margin: 0 !important;
             padding: 0 !important;
         }
-        .pure-btn-sarten:hover { background: #F1F5F9 !important; border-color: #94A3B8 !important; transform: scale(1.05); }
-        .pure-btn-basura:hover { background: #FECACA !important; border-color: #DC2626 !important; transform: scale(1.05); }
+        
+        /* Botón Sartén: Blanco por defecto, gris claro al hover */
+        .pure-btn-sarten {
+            background: #FFFFFF !important; 
+            border: 1px solid #CBD5E1 !important;
+            border-radius: 6px !important; 
+            height: 32px !important; 
+            width: 42px !important; 
+            cursor: pointer !important; 
+            display: flex !important; 
+            align-items: center !important; 
+            justify-content: center !important; 
+            font-size: 15px !important; 
+            transition: all 0.2s !important; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important; 
+            padding:0 !important; 
+            margin:0 !important;
+        }
+        .pure-btn-sarten:hover { 
+            background: #F8FAFC !important; 
+            border-color: #94A3B8 !important; 
+            transform: scale(1.05) !important; 
+        }
+        
+        /* Botón Basura: Blanco por defecto, rojo al hover */
+        .pure-btn-basura {
+            background: #FFFFFF !important; 
+            border: 1px solid #CBD5E1 !important;
+            border-radius: 6px !important; 
+            height: 32px !important; 
+            width: 42px !important; 
+            cursor: pointer !important; 
+            display: flex !important; 
+            align-items: center !important; 
+            justify-content: center !important; 
+            font-size: 15px !important; 
+            transition: all 0.2s !important; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important; 
+            padding:0 !important; 
+            margin:0 !important;
+        }
+        .pure-btn-basura:hover { 
+            background: #FEE2E2 !important; 
+            border-color: #EF4444 !important; 
+            transform: scale(1.05) !important; 
+        }
         </style>
         """, unsafe_allow_html=True)
 
@@ -924,7 +967,10 @@ with st.sidebar:
                     st.rerun()
                 
                 # --- 2. LA UI DE LA RECETA EN HTML PURO (Inmune a los stColumn) ---
-                # Usamos Javascript en los onclick para "pulsar" los botones de Streamlit de arriba.
+                # Javascript robusto que pulsa en el botón oculto correcto de Streamlit
+                js_click_load = f"var b = document.querySelector('.st-key-real_load_{idx} button'); if(b) b.click();"
+                js_click_del = f"var b = document.querySelector('.st-key-real_del_{idx} button'); if(b) b.click();"
+                
                 st.markdown(f"""
                 <div style="display: flex; justify-content: space-between; align-items: center; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                     <div style="flex-grow: 1; margin-right: 15px;">
@@ -933,12 +979,10 @@ with st.sidebar:
                         </span>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;">
-                        <button class="pure-btn-sarten" onclick="document.querySelector('.st-key-real_load_{idx} button').click()" 
-                                style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; height: 32px; width: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding:0; margin:0;">
+                        <button class="pure-btn-sarten" onclick="{js_click_load}" title="Cocinar Receta">
                             🍳
                         </button>
-                        <button class="pure-btn-basura" onclick="document.querySelector('.st-key-real_del_{idx} button').click()" 
-                                style="background: #FEE2E2; border: 1px solid #EF4444; border-radius: 6px; height: 32px; width: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding:0; margin:0;">
+                        <button class="pure-btn-basura" onclick="{js_click_del}" title="Eliminar de Favoritos">
                             🗑️
                         </button>
                     </div>
