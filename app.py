@@ -780,13 +780,48 @@ if not st.session_state.get('current_username'):
     col_left, col_right = st.columns([1.1, 1], gap="large")
     
     # Mitad Izquierda: Branding y NUEVA Animación Vectorial
+    # Mitad Izquierda: Branding, Animación y Novedades
     with col_left:
         st.markdown("<div style='height: 5vh;'></div>", unsafe_allow_html=True)
         st.markdown(f"<h1 style='font-size: 4.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 0px; background: -webkit-linear-gradient(45deg, #10B981, #3B82F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{t['auth_app_name']}</h1>", unsafe_allow_html=True)
         st.markdown(f"<p style='font-size: 1.5rem; color: #475569; font-weight: 500; margin-top: 10px;'>{t['auth_subtitle']}</p>", unsafe_allow_html=True)
         
-        # AQUÍ RENDERIZAMOS LA ANIMACIÓN CREADA EN HTML/CSS 
+        # AQUÍ RENDERIZAMOS LA ANIMACIÓN DEL CHEF
         st.markdown(svg_animado, unsafe_allow_html=True)
+
+        # ==========================================
+        # NUEVAS MINI-VENTANAS (Fase Beta y Novedades)
+        # ==========================================
+        st.markdown("<br>", unsafe_allow_html=True) # Pequeño espacio
+        
+        # Sub-columnas para poner las cajitas una al lado de la otra
+        info_col1, info_col2 = st.columns(2)
+        
+        # VENTANA 1: Fase Beta y Próximas Actualizaciones (Estilo Glassmorphism)
+        with info_col1:
+            st.markdown("""
+            <div style="background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 16px; padding: 18px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.04); height: 100%;">
+                <h4 style="margin-top: 0; color: #3B82F6; font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">🚀 App en Fase Beta</h4>
+                <p style="color: #64748B; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">Próximas actualizaciones:</p>
+                <ul style="color: #475569; font-size: 0.8rem; padding-left: 18px; margin-bottom: 0; line-height: 1.4;">
+                    <li style="margin-bottom: 6px;"><b>Ranking Social:</b> Compara tu progreso (ej: <i>"Comes mejor que el 84% de los usuarios"</i>).</li>
+                    <li style="margin-bottom: 6px;"><b>Gráficos de Estudio:</b> Analíticas y estadísticas avanzadas de tu evolución.</li>
+                    <li><b>IA Mejorada:</b> Razonamiento aún más detallado con estudio profundo de macronutrientes.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # VENTANA 2: Novedades (Estilo Dorado Brillante)
+        with info_col2:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); border-radius: 16px; padding: 18px; border: 1px solid #FCD34D; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15); height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                <h4 style="margin-top: 0; color: #78350F; font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase;">✨ Novedades</h4>
+                <p style="color: #92400E; font-size: 0.95rem; font-weight: 600; line-height: 1.4; margin-bottom: 0;">
+                    ¡Nuestra app ya está disponible para descargar en <b>Android</b> e <b>iOS</b>! <br><br>
+                    <span style="background: rgba(255,255,255,0.3); padding: 4px 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;">(Fase Beta)</span>
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
     # Mitad Derecha: Formulario Glassmorphism
     with col_right:
